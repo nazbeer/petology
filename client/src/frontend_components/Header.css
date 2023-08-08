@@ -1,0 +1,159 @@
+/* Header.css */
+.header1 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  background-color: #98bda6;
+}
+.bg-pet{
+  background-color: #98bda6 !important;
+}
+.bg-petology{
+  background-color: #718B87;
+}
+.logo img {
+  height: 50px;
+  /* Adjust logo size as needed */
+}
+.veh-100{
+  min-height: 80vh;
+}
+.card{
+  width: auto;
+  display: flex;
+  background-color: #ffffffa3 !important;
+  justify-content: center;
+}
+.card-body{
+  padding-right:40px;
+}
+.bg-vet {
+  background-image: url('./01.jpg') !important;
+  background-size: cover !important;
+  background-position: center bottom !important;
+  background-repeat: no-repeat !important;
+}
+.bg-grooming {
+  background-image: url('./05.jpg') !important;
+  background-size: cover !important;
+  background-position: center bottom !important;
+  background-repeat: no-repeat !important;
+}
+
+.bg-mobilevet {
+  background-image: url('./04.jpg') !important;
+  background-size: cover !important;
+  background-position: center bottom !important;
+  background-repeat: no-repeat !important;
+}
+
+.bg-mobilegrooming {
+  background-image: url('./03.jpg') !important;
+  background-size: cover !important;
+  background-position: center bottom !important;
+  background-repeat: no-repeat !important;
+}
+
+.menu {
+  /* display: flex;
+  justify-content: right;
+  align-items: center; */
+  margin-bottom:0px;
+}
+
+.menu ul {
+  list-style: none;
+  display: flex;
+  margin-bottom:7px;
+}
+
+.menu li {
+  margin-right: 1rem;
+  color:#fff;
+  margin-bottom:0px;
+}
+
+.mobile-menu-icon {
+  display: none;
+  cursor: pointer;
+}
+
+.bar {
+  width: 30px;
+  height: 5px;
+  background-color: #333;
+  margin: 6px 0;
+  transition: 0.4s;
+}
+
+.mobile-menu-icon.active .bar:nth-child(1) {
+  transform: rotate(-45deg) translate(-6px, 6px);
+}
+
+.mobile-menu-icon.active .bar:nth-child(2) {
+  opacity: 0;
+}
+
+.mobile-menu-icon.active .bar:nth-child(3) {
+  transform: rotate(45deg) translate(-6px, -6px);
+}
+/* 
+@media (max-width: 768px) {
+  .menu {
+    display: none;
+  }
+
+  .mobile-menu-icon {
+    display: block;
+  }
+
+  .menu.active {
+    display: block;
+  }
+} */
+
+
+.mobile-menu {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  position: absolute;
+  top: 80px;
+  right: 20px;
+  background-color: #f2f2f2;
+  border: 1px solid #ccc;
+  padding: 10px;
+}
+
+.mobile-menu a {
+  display: block;
+  margin-bottom: 10px;
+}
+
+.mobile-menu-icon {
+  display: none;
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .menu {
+    display: block;
+  }
+  .sidebar{
+    width:auto !important;
+  }
+  .menu-item{
+    justify-content: center !important;
+  }
+  .mobile-menu-icon {
+    display: block;
+  }
+  .logo img {
+    height: 37px;
+}
+}
+
+.canvasjs-chart-credit{
+  display: none !important;
+}
