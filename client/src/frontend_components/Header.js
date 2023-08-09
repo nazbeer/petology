@@ -51,14 +51,15 @@ const Header = () => {
         <img src={logo} alt="Logo" width="auto" />
         </a>
       </div>
-      <nav className={`menu ${showMobileMenu ? 'mobile-menu' : 'menu'}`}>
+      <nav className={`menu ${showMobileMenu ? 'mobile-menu' : 'desktop-menu'}`}>
         <ul>
-          <a href="/veterinary" className='text-decoration-none'><li >Veterinary Clinic</li></a>
-          <a href="/grooming" className='text-decoration-none'><li>Grooming Shop</li></a>
-          <a href="/mobilevet" className='text-decoration-none'><li>Mobile Veterinary</li></a>
-          <a href="/mobilegrooming" className='text-decoration-none'><li>Mobile Grooming</li></a>
-          <a href="/login" className='text-decoration-none'><li><button className='btn btn-success btn-sm'>Login</button></li></a>
+          <a href="/veterinary" className='text-decoration-none custom-menu'><li >Veterinary Clinic</li></a>
+          <a href="/grooming" className='text-decoration-none custom-menu'><li>Grooming Shop</li></a>
+          <a href="/mobilevet" className='text-decoration-none custom-menu'><li>Mobile Veterinary</li></a>
+          <a href="/mobilegrooming" className='text-decoration-none custom-menu'><li>Mobile Grooming</li></a>
+         <div className='custom-signup'> <a href="/login" className='text-decoration-none'><li><button className='btn btn-success btn-sm'>Login</button></li></a>
           <a href="/register" className='text-decoration-none'><li><button className='btn btn-success btn-sm'>Register</button></li></a>
+          </div>
         </ul>
       </nav>
       <div  className="mobile-menu-icon" onClick={toggleMobileMenu}>

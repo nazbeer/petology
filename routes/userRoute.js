@@ -8,6 +8,7 @@ const authMiddleware = require("../middlewares/authMiddleware");
 const Appointment = require("../models/appointmentModel");
 const moment = require("moment");
 const Pet = require("../models/petModel");
+
 router.post("/register", async (req, res) => {
   try {
     const userExists = await User.findOne({ email: req.body.email });

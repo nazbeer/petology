@@ -25,6 +25,19 @@ router.get("/get-all-approved-doctors", authMiddleware, async (req, res) => {
   }
 });
 
+
+router.post('/set-break-time', async (req, res) => {
+  try {
+    const { duration } = req.body;
+    
+    // For demonstration purposes, we'll just return a success message
+    res.json({ success: true, message: `Break time set to ${duration} minutes.` });
+  } catch (error) {
+    console.error('Error setting break time:', error);
+    res.status(500).json({ success: false, message: 'Error setting break time.' });
+  }
+});
+
 // router.get("/get-all-appointments", authMiddleware, async (req, res) => {
 //   try {
 //     const appointments = await Appointment.find({});

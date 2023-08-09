@@ -82,7 +82,7 @@
     background-color: #98bda6;
 }
 .menu{
-   
+    
 }
 
 .menu-item{
@@ -147,11 +147,20 @@
     display: none;
 } */
 @media screen and (max-width: 768px){
-    .logoimg{
-        width: 50% !important;
+    .logo img{
+        width: 41px !important;
     }
-    .menu{
-        padding: 0 5px;
+    .desktop-menu {
+        /* padding: 7px;
+        margin-bottom: 0px !important;
+        background-color: #ccc;
+        color: #000;
+         */
+         display: none;
+    }
+    .menu ul {
+     display: block !important;
+
     }
     .sidebar{
         width:auto;

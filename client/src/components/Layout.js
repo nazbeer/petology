@@ -26,11 +26,11 @@ function Layout({ children }) {
     //   path: "/apply-doctor",
     //   icon: "ri-hospital-line",
     // }
-    {
-      name:"Add Pets",
-      path:"/user/addpet",
-      icon:'ri-bear-smile-line'
-    },
+    // {
+    //   name:"Add Pets",
+    //   path:"/user/addpet",
+    //   icon:'ri-bear-smile-line'
+    // },
     {
       name:"Pets",
       path:"/user/pets",
@@ -141,7 +141,7 @@ function Layout({ children }) {
                     isActive && "active-menu-item"
                   }`}
                 >
-                  <i className={menu.icon}></i>
+                  <Link to={menu.path}><i className={menu.icon}></i></Link>
                   {!collapsed && <Link to={menu.path}>{menu.name}</Link>}
                 </div>
               );

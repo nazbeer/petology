@@ -29,10 +29,12 @@ import AddPrescription from "./pages/Doctor/AddPrescription";
 import UserHome from './pages/UserHome';
 import DoctorHome from './pages/DoctorHome';
 import AdminHome from './pages/AdminHome';
+import BreakTime from "./pages/Admin/BreakTime";
 function App() {
   const { loading } = useSelector((state) => state.alerts);
   return (
     <BrowserRouter>
+   
       {loading && (
         <div className="spinner-parent">
           <div className="spinner-border" role="status"></div>
@@ -48,6 +50,7 @@ function App() {
             </PublicRoute>
           }
         />
+
         <Route
           path="/register"
           element={
@@ -167,6 +170,14 @@ function App() {
           element={
             <ProtectedRoute>
               <AppointmentList />
+            </ProtectedRoute>
+          }
+        />
+         <Route
+          path="/admin/breaktime"
+          element={
+            <ProtectedRoute>
+              <BreakTime />
             </ProtectedRoute>
           }
         />
