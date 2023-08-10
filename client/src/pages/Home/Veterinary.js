@@ -8,11 +8,12 @@ import Footer from '../../frontend_components/Footer';
 const Veterinary = () => {
   const [doctorList, setDoctorList] = useState([]);
   useEffect(() =>{
-    axios.get('/api/user/get-all-approved-doctors',{
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem("token")}`,
-    },})
-    .then((response) => setDoctorList(response.data))
+    axios.get('http://localhost:5000/api/open/get-all-approved-doctors',{
+    // headers: {
+    //   Authorization: `Bearer ${localStorage.getItem("token")}`,
+    // },
+  })
+    .then((response) => setDoctorList(response.data.data))
     .catch((error) => console.error(error));
   },[]);
   const [service, setService] = useState({
@@ -73,20 +74,20 @@ const Veterinary = () => {
     formData.append('mobile', service.mobile);
 
     try {
-      const response = await axios.post('/create-new-appointment', formData, {
-        headers: { 'Content-Type': 'multipart/form-data',
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
+      const response = await axios.post('/api/open/book-appointment', formData, {
+        // headers: { 'Content-Type': 'multipart/form-data',
+        // Authorization: `Bearer ${localStorage.getItem("token")}`,
+        // },
       });
 
-      console.log('service saved successfully:', response.data);
+      console.log('New Appointment booked successfully:', response.data);
       if (response.data.success) {
         toast.success(response.data.message);
         //navigate('/appointments');
       }
       // Do something with the response, like showing a success message
     } catch (error) {
-      toast.error("Error in adding New service.");
+      toast.error("Error in adding new appointment.");
       //dispatch(hideLoading());
     }
   };
@@ -126,7 +127,7 @@ const Veterinary = () => {
             {doctorList &&
              doctorList.map((data, key) => {
               return(
-                <option key ={data.key}  value= {data}>{`${data}`}</option>
+                <option key ={data.key}  value= {data.firstName}>{data.firstName}</option>
                 );
   
              })

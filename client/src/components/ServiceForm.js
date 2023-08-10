@@ -7,10 +7,7 @@ const ServiceForm = () => {
   const [service, setService] = useState({
     name: '',
     subservice:'',
-    //price: '',
-    // dimension: '',
-    // breed: '',
-    // image: null,
+
   });
 
   const handleChange = (e) => {
@@ -28,13 +25,13 @@ const ServiceForm = () => {
     formData.append('subservice', service.subservice);
 
     try {
-      const response = await axios.post('/api/service/create-new-service', formData, {
+      const response = await axios.post('/api/admin/create-new-service', formData, {
         headers: { 'Content-Type': 'multipart/form-data',
         Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
 
-      console.log('service saved successfully:', response.data);
+      console.log('Service saved successfully:', response.data.data);
       if (response.data.success) {
         toast.success(response.data.message);
         //navigate('/appointments');

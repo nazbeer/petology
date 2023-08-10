@@ -3,8 +3,7 @@ const router = express.Router();
 const Service = require("../models/serviceModel");
 const authMiddleware =require("../middlewares/authMiddleware");
 //const multer = require('multer');
-
-router.get("/get-all-service", authMiddleware, async (req, res) => {
+router.get("/get-all-services", authMiddleware, async (req, res) => {
     try{
         const service = await Service.find({});
         res.status(200).send({
@@ -29,6 +28,7 @@ router.post('/create-new-service', authMiddleware, async (req, res) => {
    // const image = req.file ? req.file.path : ''; // Store the image path
 
     const newService = new Service({name, subservice });
+    console.log(newService);
     await newService.save();
 
     res.json(newService);

@@ -3,20 +3,23 @@ const app = express();
 require("dotenv").config();
 const dbConfig = require("./config/dbConfig");
 app.use(express.json());
+const cors = require('cors');
 const userRoute = require("./routes/userRoute");
 const adminRoute = require("./routes/adminRoute");
 const doctorRoute = require("./routes/doctorsRoute");
 const petRoute = require("./routes/petRoute");
 const serviceRoute = require("./routes/serviceRoute");
 const bookingRoute = require("./routes/bookingRoute");
+const openRoute = require("./routes/openRoute");
 const path = require("path");
-
+app.use(cors());
 app.use("/api/user", userRoute);
 app.use("/api/admin", adminRoute);
 app.use("/api/doctor", doctorRoute);
 app.use("/api/pet", petRoute);
 app.use("/api/service", serviceRoute);
-app.use("api/booking", bookingRoute);
+app.use("/api/booking", bookingRoute);
+app.use("/api/open", openRoute);
 
 if (process.env.NODE_ENV === "production") {
   app.use("/", express.static("client/build"));

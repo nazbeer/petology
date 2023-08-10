@@ -184,3 +184,7 @@
 .canvasjs-chart-credit{
   display: none !important;
 }
+
+.modal-dialog {
+  max-width: 80%;
+}

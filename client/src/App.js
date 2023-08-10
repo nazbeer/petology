@@ -30,6 +30,7 @@ import UserHome from './pages/UserHome';
 import DoctorHome from './pages/DoctorHome';
 import AdminHome from './pages/AdminHome';
 import BreakTime from "./pages/Admin/BreakTime";
+import ServiceList from "./pages/Admin/ServiceList";
 function App() {
   const { loading } = useSelector((state) => state.alerts);
   return (
@@ -132,10 +133,18 @@ function App() {
           }
           />
            <Route
-          path="/admin/addservice"
+          path="/admin/addservices"
           element={
             <ProtectedRoute>
               <AddService/>
+            </ProtectedRoute>
+          }
+          />
+          <Route 
+          path="/admin/servicelist"
+          element={
+            <ProtectedRoute>
+              <ServiceList/>
             </ProtectedRoute>
           }
           />

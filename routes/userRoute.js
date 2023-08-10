@@ -216,7 +216,27 @@ router.post("/delete-all-notifications", authMiddleware, async (req, res) => {
     });
   }
 });
+router.post('/assign-doctor-to-appointment', authMiddleware, async (req, res) => {
+  try {
+    const { appointmentId, doctorId } = req.body;
 
+    // Find the appointment by ID and update the doctorId
+    const updatedAppointment = await Appointment.findByIdAndUpdate(
+      appointmentId,
+      { doctorId },
+      { new: true } // Return the updated appointment
+    );
+
+    if (!updatedAppointment) {
+      return res.status(404).json({ success: false, message: 'Appointment not found' });
+    }
+
+    res.status(200).json({ success: true, message: 'Doctor assigned successfully', data: updatedAppointment });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'An error occurred while assigning the doctor' });
+  }
+});
 router.get("/get-all-approved-doctors", authMiddleware, async (req, res) => {
   try {
     const doctors = await Doctor.find({ status: "approved" });
@@ -277,7 +297,9 @@ router.post("/check-booking-avilability", authMiddleware, async (req, res) => {
       date,
       time: { $gte: fromTime, $lte: toTime },
     });
+    console.log(appointments);
     if (appointments.length > 0) {
+      
       return res.status(200).send({
         message: "Appointments not available",
         success: false,
@@ -318,6 +340,7 @@ router.get("/get-appointments-by-user-id", authMiddleware, async (req, res) => {
 router.get("/get-all-appointments", authMiddleware, async (req, res)=>{
   try{
     const appointmentList = await Appointment.find({});
+    console.log(appointmentList);
     res.status(200).send({
       message: "Appointment List fetched successfully",
       success: true,

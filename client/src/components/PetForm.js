@@ -7,7 +7,7 @@ const PetForm = () => {
   const [pet, setPet] = useState({
     pet: '',
     size: '',
-    dimension: '',
+    //dimension: '',
     breed: '',
     image: null,
   });
@@ -33,7 +33,7 @@ const PetForm = () => {
     const formData = new FormData();
     formData.append('pet', pet.pet);
     formData.append('size', pet.size);
-    formData.append('dimension', pet.dimension);
+   // formData.append('dimension', pet.dimension);
     formData.append('breed', pet.breed);
     formData.append('image', pet.image);
 
@@ -85,7 +85,7 @@ const PetForm = () => {
             required
           />
         </div>
-        <div className='mb-2'>
+        {/* <div className='mb-2'>
           <label htmlFor="dimension">Dimension (1.5x2 Ft):</label>
           <input className="form-control" 
             type="text"
@@ -95,7 +95,7 @@ const PetForm = () => {
             onChange={handleChange}
             required
           />
-        </div>
+        </div> */}
         <div className='mb-2'>
           <label htmlFor="breed">Breed:</label>
           <input className="form-control" 

@@ -104,11 +104,11 @@ function Layout({ children }) {
       path:"/admin/breaktime",
       icon: 'ri-time-line',
     },
-    {
-      name:"Add Service",
-      path:"/admin/addservice",
-      icon:'ri-bear-smile-line'
-    },
+    // {
+    //   name:"Add Service",
+    //   path:"/admin/addservice",
+    //   icon:'ri-bear-smile-line'
+    // },
     {
       name:"Services List",
       path:"/admin/servicelist",
