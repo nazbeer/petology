@@ -17,23 +17,20 @@ const Veterinary = () => {
     .catch((error) => console.error(error));
   },[]);
   const [service, setService] = useState({
+    module:'Veterinary',
     doctor:'',
-    service: '',
-    pet:'',
-    size: '',
-    dimension: '',
+    // service: '',
+    // pet:'',
+    // size: '',
+    //dimension: '',
     breed: '',
-   // image: null,
     date:'',
     time:'',
-    building:'',
-    flat:'',
-    landmark:'',
     firstname:'',
     lastname:'',
     email:'',
     mobile:'',
-
+    password:''
 
   });
 
@@ -43,6 +40,7 @@ const Veterinary = () => {
       ...prevState,
       [name]: value,
     }));
+
   };
 
   // const handleImageChange = (e) => {
@@ -53,45 +51,59 @@ const Veterinary = () => {
   //   }));
   // };
 
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   const formData = new FormData();
+  //   formData.append('doctor', service.doctor);
+  //   // formData.append('service', service.service);
+  //   // formData.append('pet', service.pet);
+  //   // formData.append('size', service.size);
+  //  // formData.append('dimension', service.dimension);
+  //   formData.append('breed', service.breed);
+  //   //formData.append('image', service.image);
+  //   formData.append('date', service.date);
+  //   formData.append('time', service.time);
+  //   // formData.append('building',service.building);
+  //   // formData.append('flat', service.flat);
+  //   // formData.append('landmark', service.landmark);
+  //   formData.append('firstname', service.firstname);
+  //   formData.append('lastname', service.lastname);
+  //   formData.append('email', service.email);
+  //   formData.append('mobile', service.mobile);
+
+  //   try {
+  //     const response = await axios.post('/api/open/book-appointment', formData, {
+  //       // headers: { 'Content-Type': 'multipart/form-data',
+  //       // Authorization: `Bearer ${localStorage.getItem("token")}`,
+  //       // },
+  //     });
+
+  //    // console.log('New Appointment booked successfully:', response.data.data);
+  //     if (response.data.success) {
+  //       toast.success(response.data.message);
+  //       //navigate('/appointments');
+  //     }
+  //     // Do something with the response, like showing a success message
+  //   } catch (error) {
+  //     toast.error("Error in adding new appointment.");
+  //     //dispatch(hideLoading());
+  //   }
+  // };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const formData = new FormData();
-    formData.append('doctor', service.doctor);
-    formData.append('service', service.service);
-    formData.append('pet', service.pet);
-    formData.append('size', service.size);
-    formData.append('dimension', service.dimension);
-    formData.append('breed', service.breed);
-    //formData.append('image', service.image);
-    formData.append('date', service.date);
-    formData.append('time', service.time);
-    formData.append('building',service.building);
-    formData.append('flat', service.flat);
-    formData.append('landmark', service.landmark);
-    formData.append('firstname', service.firstname);
-    formData.append('lastname', service.lastname);
-    formData.append('email', service.email);
-    formData.append('mobile', service.mobile);
 
     try {
-      const response = await axios.post('/api/open/book-appointment', formData, {
-        // headers: { 'Content-Type': 'multipart/form-data',
-        // Authorization: `Bearer ${localStorage.getItem("token")}`,
-        // },
-      });
+      const response = await axios.post('/api/open/book-appointment', service);
 
-      console.log('New Appointment booked successfully:', response.data);
       if (response.data.success) {
         toast.success(response.data.message);
-        //navigate('/appointments');
+        // Do something else, like navigating to another page
       }
-      // Do something with the response, like showing a success message
     } catch (error) {
-      toast.error("Error in adding new appointment.");
-      //dispatch(hideLoading());
+      toast.error("Error in booking appointment.");
     }
   };
-
   return (
     <main className='bg-vet'>
     <Header/>
@@ -110,9 +122,11 @@ const Veterinary = () => {
         <div className='mb-2'>
           <label htmlFor="service">Choose Service: </label>
           <select className='form-control' id='service' name='service' onChange={handleChange}>
-            <option defaultValue="">Select Service...</option>
-            <option value={service.service}>Hair Cut</option>
-            <option value={service.service}>Bath</option>    
+            <option >Select Service...</option>
+            <option value={service.service}>Micro Chipping</option>
+            <option value={service.service}>Vaccination</option>    
+
+            <option value={service.service}>Consultation</option>    
 
           </select>
          
@@ -120,14 +134,17 @@ const Veterinary = () => {
           </div>
  
           </div>
-          <div className='mb-2'>
+          
+          <div className='row'>
+    <div className='col-md-6'>
+    <div className='mb-2'>
           <label htmlFor="doctor">Choose Doctor: </label>
           <select className='form-control' id='doctor' name='doctor' onChange={handleChange}>
-            <option defaultValue="">Select Doctor...</option>
+            <option >Select Doctor...</option>
             {doctorList &&
              doctorList.map((data, key) => {
               return(
-                <option key ={data.key}  value= {data.firstName}>{data.firstName}</option>
+                <option key ={data.key}  value= {data.firstName}>Dr. {data.firstName}</option>
                 );
   
              })
@@ -139,9 +156,6 @@ const Veterinary = () => {
           </select>
          
         </div>
-          <div className='row'>
-    <div className='col-md-6'>
-
         
         <div className='mb-2'>
           <label htmlFor="size">Choose Pet: </label>
@@ -164,7 +178,7 @@ const Veterinary = () => {
             <option value={service.size}>L (Large)</option>   
           </select>
         </div>
-        <div className='mb-2'>
+        {/* <div className='mb-2'>
           <label htmlFor="dimension">Dimension (1.5x2 Ft):</label>
           <input className="form-control" 
             type="text"
@@ -174,7 +188,7 @@ const Veterinary = () => {
             onChange={handleChange}
             required
           />
-        </div>
+        </div> */}
         <div className='mb-2'>
           <label htmlFor="breed">Breed:</label>
           <input className="form-control" 

@@ -37,11 +37,79 @@ function Layout({ children }) {
       icon:'ri-bear-smile-line'
     },
   ];
-  const nurseMenu = [
+  const receptionMenu = [
     {
       name: "Home",
-      path: "/home",
+      path: "/reception",
       icon: "ri-home-line",
+    },
+    {
+      name: "Appointments",
+      path: "/reception/appointmentlist",
+      icon: "ri-user-star-line",
+    },
+    {
+      name: "Users",
+      path: "/reception/userslist",
+      icon: "ri-user-line",
+    },
+    {
+      name: "Doctors",
+      path: "/reception/doctorslist",
+      icon: "ri-user-star-line",
+    },
+    {
+      name:"Pets",
+      path:"/reception/petlist",
+      icon:'ri-bear-smile-line'
+    },
+    // {
+    //   name:"Add Pets",
+    //   path:"/admin/addpet",
+    //   icon:'ri-bear-smile-line'
+    // },
+    {
+      name:"Break Time",
+      path:"/reception/breaktime",
+      icon: 'ri-time-line',
+    },
+    // {
+    //   name:"Add Service",
+    //   path:"/admin/addservice",
+    //   icon:'ri-bear-smile-line'
+    // },
+    {
+      name:"Services List",
+      path:"/reception/servicelist",
+      icon:'ri-booklet-fill',
+    },
+    {
+      name: "Profile",
+      path: `/reception/profile/${user?._id}`,
+      icon: "ri-user-line",
+    },
+
+  ];
+  const groomerMenu = [
+    {
+      name: "Home",
+      path: "/groomer",
+      icon: "ri-home-line",
+    },
+    {
+      name: "Appointments",
+      path: "/groomer/appointments",
+      icon: "ri-file-list-line",
+    },
+    // {
+    //   name: "Add Prescription",
+    //   path: "/doctor/addprescription",
+    //   icon: "ri-file-list-line",
+    // },
+    {
+      name: "Profile",
+      path: `/groomer/profile/${user?._id}`,
+      icon: "ri-user-line",
     },
 
   ];
@@ -67,7 +135,7 @@ function Layout({ children }) {
       icon: "ri-user-line",
     },
   ];
-
+  
   const adminMenu = [
     {
       name: "Home",
@@ -121,8 +189,8 @@ function Layout({ children }) {
     },
   ];
 
-  const menuToBeRendered = user?.isAdmin ? adminMenu : user?.isDoctor ? doctorMenu :  user?.isUser ? userMenu : user?.isNurse ? nurseMenu : userMenu;
-  const role = user?.isAdmin ? "Admin" : user?.isDoctor ? "Doctor" : user?.isUser ? "User" : user?.isNurse ? "Nurse" :"User";
+  const menuToBeRendered = user?.isAdmin ? adminMenu : user?.isDoctor ? doctorMenu :  user?.isUser ? userMenu : user?.isNurse ? receptionMenu : user?.isGroomer ? groomerMenu : userMenu;
+  const role = user?.isAdmin ? "Admin" : user?.isDoctor ? "Doctor" : user?.isUser ? "User" : user?.isNurse ? "Reception" :  user?.isGroomer ? "Groomer" :"User";
   return (
     <div className="main">
       <div className="d-flex layout">

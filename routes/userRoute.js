@@ -128,6 +128,22 @@ router.post("/apply-doctor-account", authMiddleware, async (req, res) => {
     });
   }
 });
+router.get('/profile/:userId', authMiddleware, async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const receptionist = await User.findById(userId);
+
+    if (!receptionist) {
+      return res.status(404).json({ success: false, message: 'Receptionist not found' });
+    }
+
+    res.status(200).json({ success: true, data: receptionist });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'An error occurred while fetching the receptionist profile' });
+  }
+});
 router.get('/doctorcount', async (req, res) => {
   try {
     const count = await Doctor.countDocuments();

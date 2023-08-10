@@ -31,6 +31,10 @@ import DoctorHome from './pages/DoctorHome';
 import AdminHome from './pages/AdminHome';
 import BreakTime from "./pages/Admin/BreakTime";
 import ServiceList from "./pages/Admin/ServiceList";
+import GroomerAppointments from "./pages/Groomer/GroomerAppointments";
+import GroomerHome from "./pages/GroomerHome";
+import ReceptionHome from "./pages/ReceptionHome";
+import RecProfile from "./pages/Reception/Profile";
 function App() {
   const { loading } = useSelector((state) => state.alerts);
   return (
@@ -199,6 +203,97 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route
+        path="/reception/profile/:userId"
+        element={
+          <ProtectedRoute>
+            <RecProfile/>
+          </ProtectedRoute>
+        }
+        />
+         <Route
+          path="/reception"
+          element={
+            <ProtectedRoute>
+                <ReceptionHome/>
+            </ProtectedRoute>
+          }
+        />
+      <Route
+          path="/reception/petlist"
+          element={
+            <ProtectedRoute>
+              <Petlist/>
+            </ProtectedRoute>
+          }
+          />
+           <Route
+          path="/reception/addservices"
+          element={
+            <ProtectedRoute>
+              <AddService/>
+            </ProtectedRoute>
+          }
+          />
+          <Route 
+          path="/reception/servicelist"
+          element={
+            <ProtectedRoute>
+              <ServiceList/>
+            </ProtectedRoute>
+          }
+          />
+          <Route
+          path="/reception/addpet"
+          element={
+            <ProtectedRoute>
+              <AddPet/>
+            </ProtectedRoute>
+          }
+          />
+            
+        <Route
+          path="/reception/userslist"
+          element={
+            <ProtectedRoute>
+              <Userslist />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/reception/doctorslist"
+          element={
+            <ProtectedRoute>
+              <DoctorsList />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/reception/appointmentlist"
+          element={
+            <ProtectedRoute>
+              <AppointmentList />
+            </ProtectedRoute>
+          }
+        />
+         <Route
+          path="/reception/breaktime"
+          element={
+            <ProtectedRoute>
+              <BreakTime />
+            </ProtectedRoute>
+          }
+        />
+      
+        <Route
+          path="/doctor/profile/:userId"
+          element={
+            <ProtectedRoute>
+              <Profile/>
+            </ProtectedRoute>
+          }
+        />
 
         <Route
           path="/book-appointment/:doctorId"
@@ -216,7 +311,23 @@ function App() {
             </ProtectedRoute>
           }
         />
-
+        <Route
+          path="/groomer"
+          element={
+            <ProtectedRoute>
+              <GroomerHome/>
+            </ProtectedRoute>
+          
+          }
+          />
+        <Route
+          path="/groomer/appointments"
+          element={
+            <ProtectedRoute>
+              <GroomerAppointments />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/doctor/appointments"
           element={
