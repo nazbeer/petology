@@ -44,6 +44,13 @@ function Userslist() {
       dataIndex: "mobile",
     },
     {
+      title:"Type",
+      dataIndex:'type',render:(text, record)=>{
+        // <select><option>{data.isNurse}</option></select>
+      }
+    },
+
+    {
       title: "Created At",
       dataIndex: "createdAt",
       render: (record , text) => moment(record.createdAt).format("DD-MM-YYYY"),

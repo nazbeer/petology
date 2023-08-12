@@ -7,7 +7,10 @@ const openappointmentSchema = new mongoose.Schema(
     },
     doctorId: {
       type: String,
-    //  required: true,
+   //  required: true,
+    },
+    doctors:{
+        type:String
     },
     userId: {
       type: mongoose.Schema.Types.ObjectId,

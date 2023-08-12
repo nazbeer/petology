@@ -22,19 +22,5 @@ router.get("/get-all-services", authMiddleware, async (req, res) => {
 
 //const upload = multer({ dest: 'uploads/' });
 
-router.post('/create-new-service', authMiddleware, async (req, res) => {
-  try {
-    const { name, subservice} = req.body;
-   // const image = req.file ? req.file.path : ''; // Store the image path
 
-    const newService = new Service({name, subservice });
-    console.log(newService);
-    await newService.save();
-
-    res.json(newService);
-  } catch (error) {
-    console.error('Error saving Service:', error);
-    res.status(500).json({ error: 'Server error' });
-  }
-});
 module.exports = router;

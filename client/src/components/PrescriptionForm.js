@@ -23,17 +23,15 @@ const PrescriptionForm = () => {
   };
 
   useEffect(() => {
-    // Fetch appointments based on selected pet ID
     const fetchAppointments = async () => {
       try {
-        const response = await axios.get(`/api/user/${selectedUser}/pet/${selectedPet}/appointments`, {
+        const response = await axios.get(`/api/doctor/user/${selectedUser}/pet/${selectedPet}/appointments`, {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
           },
         });
         if (response.data.success) {
           setAppointments(response.data.data);
-          console.log(response.data.data);
         }
       } catch (error) {
         console.error(error);
@@ -216,18 +214,20 @@ const PrescriptionForm = () => {
     </div>
     <div className='col-md-3'>
    
-          {/* {appointments.length > 0 && ( */}
+          {appointments.length > 0 && (
         <div className='card'>
           <div className='card-body'>
-            <h4>Appointments for Selected Pet</h4>
-            <ul>
-              {appointments.map((appointment) => (
-                <li key={appointment._id}>{appointment.date} adfasdf</li>
-              ))}
-            </ul>
+          <h6>Appointments for Selected Pet</h6>
+            <div>
+              <span>{appointments.date}</span>
+              {/* {appointments.map((appointment) => (
+                <span key={appointment._id}>Appointment Date: {appointment.date}</span>
+               
+              ))} */}
+            </div>
           </div>
         </div>
-      {/* )} */}
+      )} 
          
     </div>
     </div>

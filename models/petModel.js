@@ -8,7 +8,7 @@ const petSchema = new mongoose.Schema(
    },
    dimension:{
     type: String,
-    required:true, 
+   // required:true, 
    },
    size:{
     type:String,

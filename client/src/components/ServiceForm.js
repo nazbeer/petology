@@ -1,18 +1,18 @@
-// src/components/serviceForm.js
+// src/components/ServiceForm.js
 import React, { useState } from 'react';
 import axios from 'axios';
 import { toast } from "react-hot-toast";
 
 const ServiceForm = () => {
-  const [service, setService] = useState({
+  const [service, setPet] = useState({
     name: '',
-    subservice:'',
-
+    subservice: '',
+    
   });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setService((prevState) => ({
+    setPet((prevState) => ({
       ...prevState,
       [name]: value,
     }));
@@ -23,6 +23,7 @@ const ServiceForm = () => {
     const formData = new FormData();
     formData.append('name', service.name);
     formData.append('subservice', service.subservice);
+  
 
     try {
       const response = await axios.post('/api/admin/create-new-service', formData, {
@@ -32,13 +33,13 @@ const ServiceForm = () => {
       });
 
       console.log('Service saved successfully:', response.data.data);
-      if (response.data.success) {
+      if (response.data.data.success) {
         toast.success(response.data.message);
         //navigate('/appointments');
       }
       // Do something with the response, like showing a success message
     } catch (error) {
-      toast.error("Error in adding New service.");
+      toast.error("Error in adding New Service.");
       //dispatch(hideLoading());
     }
   };
@@ -51,7 +52,7 @@ const ServiceForm = () => {
         <div className='card-body mb-3'>
     
         <div className='mb-2'>
-          <label htmlFor="name">Service:</label>
+          <label htmlFor="pet">Service: </label>
           <input className="form-control" 
             type="text"
             id="name"
@@ -61,9 +62,8 @@ const ServiceForm = () => {
             required
           />
         </div>
-        
         <div className='mb-2'>
-          <label htmlFor="subservice">Sub-Service:</label>
+          <label htmlFor="size">Subservice:</label>
           <input className="form-control" 
             type="text"
             id="subservice"
@@ -73,7 +73,6 @@ const ServiceForm = () => {
             required
           />
         </div>
-      
         </div>
         <div className='card-footer mt-2'>
         <button type="submit" className='btn btn-success btn-sm'>Submit</button>

@@ -3,16 +3,16 @@ const router = express.Router();
 
 const User = require("../models/userModel");
 const Doctor = require("../models/doctorModel");
-const Appointment = require('../models/openAppointmentModel');
+const OpenAppointment = require('../models/openAppointmentModel');
 const Pet = require("../models/petModel");
 const Service = require('../models/serviceModel');
 router.get('/get-all-appointments', async (req, res) => {
     try {
-      const appointmentList = await Appointment.find({})
+      const appointmentList = await OpenAppointment.find({})
         .populate('doctors', 'name') // Assuming 'doctor' field is a reference to User model
-        .populate('petlists', 'name') // Assuming 'pet' field is a reference to Pet model
+        //.populate('petlists', 'name') // Assuming 'pet' field is a reference to Pet model
         .exec();
-      console.log(appointmentList);
+    //  console.log(appointmentList);
       res.status(200).send({
         message: 'Appointment List fetched successfully',
         success: true,
@@ -80,9 +80,9 @@ router.get("/get-all-approved-doctors", async (req, res) => {
         const appointmentData = req.body;
     
         // Create a new appointment
-        const newAppointment = new Appointment(appointmentData);
+        const newAppointment = new OpenAppointment(appointmentData);
         const savedAppointment = await newAppointment.save();
-            console.log('appointment', newAppointment);
+          //  console.log('appointment', newAppointment);
         // Update the user's appointment array
         await User.findByIdAndUpdate(
             appointmentData.userId,

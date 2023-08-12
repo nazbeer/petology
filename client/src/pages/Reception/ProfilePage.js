@@ -5,7 +5,10 @@ const ProfilePage = ({ userId }) => {
   const [receptionist, setReceptionist] = useState(null);
 
   useEffect(() => {
-    axios.get(`/reception/profile/${userId}`)
+    axios.get(`/reception/profile/${userId}`,{
+    headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },})
       .then(response => {
         if (response.data.success) {
           setReceptionist(response.data.data);

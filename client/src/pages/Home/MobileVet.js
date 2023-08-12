@@ -20,9 +20,7 @@ const MobileVet = () => {
     service: '',
     pet:'',
     size: '',
-    dimension: '',
     breed: '',
-   // image: null,
     date:'',
     time:'',
     building:'',
@@ -59,7 +57,7 @@ const MobileVet = () => {
     formData.append('service', service.service);
     formData.append('pet', service.pet);
     formData.append('size', service.size);
-    formData.append('dimension', service.dimension);
+ 
     formData.append('breed', service.breed);
     //formData.append('image', service.image);
     formData.append('date', service.date);
@@ -103,10 +101,10 @@ const MobileVet = () => {
             <h3>Book Appointment for Mobile Veterinary</h3>
         </div>
         <div className='card-body mb-3  ' >
-    <div className='row'>      
-    <div className='col-md-12'>
-            
-        <div className='mb-2'>
+   
+          <div className='row'>
+    <div className='col-md-6'>
+    <div className='mb-2'>
           <label htmlFor="service">Choose Service: </label>
           <select className='form-control' id='service' name='service' onChange={handleChange}>
             <option defaultValue="">Select Service...</option>
@@ -116,13 +114,7 @@ const MobileVet = () => {
           </select>
          
         </div>
-          </div>
- 
-          </div>
-         
-          <div className='row'>
-    <div className='col-md-6'>
-    <div className='mb-2'>
+    {/* <div className='mb-2'>
           <label htmlFor="doctor">Choose Doctor: </label>
           <select className='form-control' id='doctor' name='doctor' onChange={handleChange}>
             <option defaultValue="">Select Doctor...</option>
@@ -133,14 +125,11 @@ const MobileVet = () => {
                 );
   
              })
-              }
-
-            {/* <option value={service.doctor}>Hair Cut</option>
-            <option value={service.doctor}>Bath</option>     */}
+            }
 
           </select>
          
-        </div>
+        </div> */}
         
         <div className='mb-2'>
           <label htmlFor="size">Choose Pet: </label>
@@ -163,17 +152,7 @@ const MobileVet = () => {
             <option value={service.size}>L (Large)</option>   
           </select>
         </div>
-        <div className='mb-2'>
-          <label htmlFor="dimension">Dimension (1.5x2 Ft):</label>
-          <input className="form-control" 
-            type="text"
-            id="dimension"
-            name="dimension"
-            value={service.dimension}
-            onChange={handleChange}
-            required
-          />
-        </div>
+
         <div className='mb-2'>
           <label htmlFor="breed">Breed:</label>
           <input className="form-control" 

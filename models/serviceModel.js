@@ -3,18 +3,19 @@ const mongoose = require("mongoose");
 const serviceSchema = new mongoose.Schema(
   {
    name:{
-    type :String ,
+    type :Object ,
     required: true,
+   
    },
    subservice:{
-    type: String,
+    type: Object,
     required:true, 
    },
-  
+   
     status:{
         type : String,
         required :false,
-    
+      default:'pending',
     }
     
   },

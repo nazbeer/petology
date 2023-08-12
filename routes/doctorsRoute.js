@@ -135,25 +135,44 @@ router.get('/user/:userId/pets', authMiddleware, async (req, res) => {
 // Route for fetching all appointments for a specific user's pet
 
 // Route for fetching all appointments for a specific user's pet
-router.get('/user/:userId/pet/:petId/appointments', authMiddleware, async (req, res) => {
-  try {
-    const { userId, petId } = req.params;
-    const { isUser } = req.query;
+// router.get('/user/:userId/pet/:petId/appointments', authMiddleware, async (req, res) => {
+//   try {
+//     const { userId, petId } = req.params;
+//     const { isUser } = req.query;
 
-    if (isUser === 'true') {
-      // If isUser is true, fetch the user along with the appointments
-      const user = await User.findById(userId);
-      const appointments = await Appointment.find({ userId, petId });
+//     if (isUser === 'true') {
+//       // If isUser is true, fetch the user along with the appointments
+//       const user = await User.findById(userId);
+//       const appointments = await Appointment.find({ userId, petId });
      
-      res.json({ success: true, data: { user, appointments } });
-    } else {
-      // If isUser is false or not provided, only fetch the appointments
-      const appointments = await Appointment.find({ userId, petId });
-      res.json({ success: true, data: appointments });
-    }
+//       res.json({ success: true, data: { user, appointments } });
+//     } else {
+//       // If isUser is false or not provided, only fetch the appointments
+//       const appointments = await Appointment.find({ userId, petId });
+//       res.json({ success: true, data: appointments });
+//     }
+//   } catch (error) {
+//     console.error('Error fetching appointments:', error);
+//     res.status(500).json({ success: false, message: 'Server error' });
+//   }
+// });
+
+router.get('/user/:userId/pet/:petId/appointments', authMiddleware, async (req, res) => {
+  const { userId, petId } = req.params;
+
+  try {
+    const appointments = await Appointment.find({ userId, petId });
+    console.log(appointments);
+    res.status(200).json({
+      success: true,
+      data: appointments,
+    });
   } catch (error) {
-    console.error('Error fetching appointments:', error);
-    res.status(500).json({ success: false, message: 'Server error' });
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: 'An error occurred while fetching appointments.',
+    });
   }
 });
 

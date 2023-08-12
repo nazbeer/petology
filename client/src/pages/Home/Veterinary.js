@@ -19,6 +19,7 @@ const Veterinary = () => {
   const [service, setService] = useState({
     module:'Veterinary',
     doctor:'',
+   // doctorId:'',
     // service: '',
     // pet:'',
     // size: '',
@@ -43,52 +44,6 @@ const Veterinary = () => {
 
   };
 
-  // const handleImageChange = (e) => {
-  //   const file = e.target.files[0];
-  //   setService((prevState) => ({
-  //     ...prevState,
-  //     image: file,
-  //   }));
-  // };
-
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-  //   const formData = new FormData();
-  //   formData.append('doctor', service.doctor);
-  //   // formData.append('service', service.service);
-  //   // formData.append('pet', service.pet);
-  //   // formData.append('size', service.size);
-  //  // formData.append('dimension', service.dimension);
-  //   formData.append('breed', service.breed);
-  //   //formData.append('image', service.image);
-  //   formData.append('date', service.date);
-  //   formData.append('time', service.time);
-  //   // formData.append('building',service.building);
-  //   // formData.append('flat', service.flat);
-  //   // formData.append('landmark', service.landmark);
-  //   formData.append('firstname', service.firstname);
-  //   formData.append('lastname', service.lastname);
-  //   formData.append('email', service.email);
-  //   formData.append('mobile', service.mobile);
-
-  //   try {
-  //     const response = await axios.post('/api/open/book-appointment', formData, {
-  //       // headers: { 'Content-Type': 'multipart/form-data',
-  //       // Authorization: `Bearer ${localStorage.getItem("token")}`,
-  //       // },
-  //     });
-
-  //    // console.log('New Appointment booked successfully:', response.data.data);
-  //     if (response.data.success) {
-  //       toast.success(response.data.message);
-  //       //navigate('/appointments');
-  //     }
-  //     // Do something with the response, like showing a success message
-  //   } catch (error) {
-  //     toast.error("Error in adding new appointment.");
-  //     //dispatch(hideLoading());
-  //   }
-  // };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -144,7 +99,7 @@ const Veterinary = () => {
             {doctorList &&
              doctorList.map((data, key) => {
               return(
-                <option key ={data.key}  value= {data.firstName}>Dr. {data.firstName}</option>
+                <option key ={data.key}  value= {data._id}>Dr. {data.firstName}</option>
                 );
   
              })

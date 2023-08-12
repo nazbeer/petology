@@ -308,7 +308,7 @@ function Appointmentlist() {
                 className="btn btn-danger btn-sm text-capitalize"
                 onClick={() => changeAppointmentStatus(record, "blocked")}
               >
-                Block
+                Cancel
               </button>
             )}
             <button

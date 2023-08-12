@@ -35,6 +35,18 @@ import GroomerAppointments from "./pages/Groomer/GroomerAppointments";
 import GroomerHome from "./pages/GroomerHome";
 import ReceptionHome from "./pages/ReceptionHome";
 import RecProfile from "./pages/Reception/Profile";
+import RecPetlist from './pages/Reception/PetList';
+import RecServiceList from './pages/Reception/ServiceList';
+import RecAddService from './pages/Reception/AddService';
+import RecAddPet from './pages/Reception/AddPet';
+import RecUserslist from './pages/Reception/Userslist';
+import RecDoctorsList from './pages/Reception/DoctorsList';
+//import RecGroomersList from './pages/Reception/GroomersList';
+import RecAppointmentList from './pages/Reception/AppointmentList';
+import RecBreakTime from './pages/Reception/BreakTime';
+
+
+
 function App() {
   const { loading } = useSelector((state) => state.alerts);
   return (
@@ -223,7 +235,7 @@ function App() {
           path="/reception/petlist"
           element={
             <ProtectedRoute>
-              <Petlist/>
+              <RecPetlist/>
             </ProtectedRoute>
           }
           />
@@ -231,7 +243,7 @@ function App() {
           path="/reception/addservices"
           element={
             <ProtectedRoute>
-              <AddService/>
+              <RecAddService/>
             </ProtectedRoute>
           }
           />
@@ -239,7 +251,7 @@ function App() {
           path="/reception/servicelist"
           element={
             <ProtectedRoute>
-              <ServiceList/>
+              <RecServiceList/>
             </ProtectedRoute>
           }
           />
@@ -247,7 +259,7 @@ function App() {
           path="/reception/addpet"
           element={
             <ProtectedRoute>
-              <AddPet/>
+              <RecAddPet/>
             </ProtectedRoute>
           }
           />
@@ -256,7 +268,7 @@ function App() {
           path="/reception/userslist"
           element={
             <ProtectedRoute>
-              <Userslist />
+              <RecUserslist />
             </ProtectedRoute>
           }
         />
@@ -265,7 +277,7 @@ function App() {
           path="/reception/doctorslist"
           element={
             <ProtectedRoute>
-              <DoctorsList />
+              <RecDoctorsList />
             </ProtectedRoute>
           }
         />
@@ -273,7 +285,7 @@ function App() {
           path="/reception/appointmentlist"
           element={
             <ProtectedRoute>
-              <AppointmentList />
+              <RecAppointmentList />
             </ProtectedRoute>
           }
         />
@@ -281,7 +293,7 @@ function App() {
           path="/reception/breaktime"
           element={
             <ProtectedRoute>
-              <BreakTime />
+              <RecBreakTime />
             </ProtectedRoute>
           }
         />

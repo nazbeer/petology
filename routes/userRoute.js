@@ -374,10 +374,7 @@ router.get("/get-all-appointments", authMiddleware, async (req, res)=>{
 })
 
 
-router.get(
-  "/get-pets-by-userid",
-  authMiddleware,
-  async (req, res) => {
+router.get("/get-pets-by-userid", authMiddleware, async (req, res) => {
     try {
       const user = await User.findOne({ userId: req.body.userId });
       const pets = await Pet.findOne({ userId: user._id });
@@ -430,6 +427,24 @@ router.get("/get-all-users", authMiddleware, async(req, res)=>{
       message:"Failed to fetch user's details.",
       success:false,
       error,
+    });
+  }
+});
+router.get('/api/user/:userId/pet/:petId/appointments', authMiddleware, async (req, res) => {
+  const { userId, petId } = req.params;
+
+  try {
+    const appointments = await Appointment.find({ userId, petId });
+    console.log(appointments);
+    res.status(200).json({
+      success: true,
+      data: appointments,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: 'An error occurred while fetching appointments.',
     });
   }
 });
