@@ -20,15 +20,15 @@ function DoctorForm({ onFinish, initivalValues }) {
     <Form
       layout="vertical"
       onFinish={onFinish}
-      initialValues={{
-        ...initivalValues,
-        ...(initivalValues && {
-          timings: [
-            moment(initivalValues?.timings[0], "HH:mm"),
-            moment(initivalValues?.timings[1], "HH:mm"),
-          ],
-        }),
-      }}
+      // initialValues={{
+      //   ...initivalValues,
+      //   ...(initivalValues && {
+      //     timings: [
+      //       moment(initivalValues?.timings[0], "HH:mm"),
+      //       moment(initivalValues?.timings[1], "HH:mm"),
+      //     ],
+      //   }),
+      // }}
     >
       <h1 className="card-title mt-3">Personal Information</h1>
       <Row gutter={20}>
@@ -108,10 +108,10 @@ function DoctorForm({ onFinish, initivalValues }) {
         </Col>
         <Col span={8} xs={24} sm={24} lg={8}>
           <Form.Item
-            required
+          
             label="Consultation Fee"
             name="feePerCunsultation"
-            rules={[{ required: true }]}
+        
           >
             <Input placeholder="Consultation Fee" type="number" disabled />
           </Form.Item>
@@ -136,7 +136,7 @@ function DoctorForm({ onFinish, initivalValues }) {
             <TimePicker.RangePicker format="HH:mm" />
           </Form.Item> */}
             <Form.Item required label="Shift" name="shift" rules={[{ required: true }]}>
-          <Select defaultValue="day" onChange={handleShiftChange} >
+          <Select onChange={handleShiftChange} >
             <Option value="day">Day Shift</Option>
             <Option value="night">Night Shift</Option>
           </Select>

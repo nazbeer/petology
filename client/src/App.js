@@ -20,7 +20,7 @@ import Appointments from "./pages/Appointments";
 import DoctorAppointments from "./pages/Doctor/DoctorAppointments";
 import Petlist from "./pages/Admin/PetList";
 import AddPet from "./pages/Admin/AddPet";
-import AddService from "./pages/Admin/AddService";
+
 import Grooming from './pages/Home/Grooming';
 import MobileGrooming from "./pages/Home/MobileGrooming";
 import Veterinary from "./pages/Home/Veterinary";
@@ -44,7 +44,7 @@ import RecDoctorsList from './pages/Reception/DoctorsList';
 //import RecGroomersList from './pages/Reception/GroomersList';
 import RecAppointmentList from './pages/Reception/AppointmentList';
 import RecBreakTime from './pages/Reception/BreakTime';
-
+import AddService from "./pages/Admin/AddService";
 
 
 function App() {

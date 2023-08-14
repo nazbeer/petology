@@ -19,11 +19,7 @@ const Veterinary = () => {
   const [service, setService] = useState({
     module:'Veterinary',
     doctor:'',
-   // doctorId:'',
-    // service: '',
-    // pet:'',
-    // size: '',
-    //dimension: '',
+    doctorId:'',
     breed: '',
     date:'',
     time:'',
@@ -94,12 +90,13 @@ const Veterinary = () => {
     <div className='col-md-6'>
     <div className='mb-2'>
           <label htmlFor="doctor">Choose Doctor: </label>
-          <select className='form-control' id='doctor' name='doctor' onChange={handleChange}>
+          <select className='form-control' id='doctor' name='doctorId' onChange={handleChange}>
             <option >Select Doctor...</option>
             {doctorList &&
              doctorList.map((data, key) => {
               return(
                 <option key ={data.key}  value= {data._id}>Dr. {data.firstName}</option>
+               
                 );
   
              })
@@ -109,7 +106,13 @@ const Veterinary = () => {
             <option value={service.doctor}>Bath</option>     */}
             <option value="Any">Any Doctor</option>
           </select>
-         
+          {/* {doctorList &&
+             doctorList.map((data, key) => { 
+              return(<input type='hidden' value={data._id} name='doctorId'/>
+              );
+  
+            })
+             } */}
         </div>
         
         <div className='mb-2'>

@@ -1,7 +1,10 @@
 const express = require("express");
 const app = express();
 require("dotenv").config();
+const bodyParser = require('body-parser');
 const dbConfig = require("./config/dbConfig");
+
+
 app.use(express.json());
 const cors = require('cors');
 const userRoute = require("./routes/userRoute");
@@ -12,7 +15,7 @@ const serviceRoute = require("./routes/serviceRoute");
 const bookingRoute = require("./routes/bookingRoute");
 const openRoute = require("./routes/openRoute");
 const receptionRoute = require("./routes/receptionRoute");
-
+app.use(bodyParser.json());
 const path = require("path");
 app.use(cors());
 app.use("/api/user", userRoute);
@@ -23,7 +26,7 @@ app.use("/api/service", serviceRoute);
 app.use("/api/booking", bookingRoute);
 app.use("/api/open", openRoute);
 app.use("/api/reception", receptionRoute);
-
+app.enable('trust proxy');
 if (process.env.NODE_ENV === "production") {
   app.use("/", express.static("client/build"));
 

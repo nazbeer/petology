@@ -448,5 +448,4 @@ router.get('/api/user/:userId/pet/:petId/appointments', authMiddleware, async (r
     });
   }
 });
-
 module.exports = router;
