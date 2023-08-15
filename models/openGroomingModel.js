@@ -1,17 +1,11 @@
 const mongoose = require("mongoose");
-const openappointmentSchema = new mongoose.Schema(
+const opengroomingSchema = new mongoose.Schema(
   {
     userId: {
       type: String,
     //  required: true,
     },
-    doctorId: {
-      type: String,
-   //  required: true,
-    },
-    doctors:{
-        type:String
-    },
+    
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User', // Reference to the User model
@@ -21,10 +15,10 @@ const openappointmentSchema = new mongoose.Schema(
       type :String,
       enum:['Veterinary', 'Grooming', 'Mobile Veterinary', 'Mobile Grooiming']
     },
-    doctor: {
-      type: String,
-      required: true,
-    },
+    // doctor: {
+    //   type: String,
+    //   required: true,
+    // },
     service: {
       type: String,
       required: true,
@@ -34,10 +28,6 @@ const openappointmentSchema = new mongoose.Schema(
 
     },
     
-    doctorInfo: {
-      type: Object,
-      required: false,
-    },
     userInfo: {
       type: Object,
       required: false,
@@ -81,5 +71,5 @@ const openappointmentSchema = new mongoose.Schema(
   }
 );
 
-const openappointmentModel = mongoose.model("openappointments", openappointmentSchema);
-module.exports = openappointmentModel;
+const opengroomingModel = mongoose.model("opengrooming", opengroomingSchema);
+module.exports = opengroomingModel;
