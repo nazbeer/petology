@@ -11,14 +11,9 @@ const Grooming = () => {
     service:'',
     pet:'',
     size: '',
-   // dimension: '',
     breed: '',
-   // image: null,
     date:'',
     time:'',
-    // building:'',
-    // flat:'',
-    // landmark:'',
     firstname:'',
     lastname:'',
     email:'',
@@ -47,7 +42,7 @@ const Grooming = () => {
     // formData.append('mobile', service.mobile);
 
     try {
-      const response = await axios.post('/grooming-appointment', service);
+      const response = await axios.post('/api/open/grooming-appointment', service);
 
       //console.log('service saved successfully:', response.data);
       if (response.data.success) {
@@ -56,7 +51,7 @@ const Grooming = () => {
       }
       // Do something with the response, like showing a success message
     } catch (error) {
-      toast.error("Error in adding New service.");
+      toast.error("Error in adding New Appointment.");
       //dispatch(hideLoading());
     }
   };
