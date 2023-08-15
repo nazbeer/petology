@@ -27,6 +27,27 @@ router.get('/profile/:userId', authMiddleware, async (req, res) => {
     }
   });
 
+  router.post("/change-doctor-break-time", async (req, res) => {
+    const { doctorId, userId, breakTime } = req.body;
+  
+    try {
+      const doctor = await Doctor.findById(doctorId);
+  
+      if (!doctor) {
+        return res.status(404).json({ success: false, message: "Doctor not found" });
+      }
+  
+      // Assuming 'breakTime' is a field in the Doctor schema
+      doctor.breakTime = breakTime;
+      await doctor.save();
+  
+      return res.status(200).json({ success: true, message: "Break time updated successfully" });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+  
   
 router.get("/get-all-services", authMiddleware, async (req, res) => {
   try{
