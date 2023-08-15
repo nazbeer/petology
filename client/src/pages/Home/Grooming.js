@@ -29,17 +29,7 @@ const Grooming = () => {
   };
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // const formData = new FormData();
-    // formData.append('service', service.service);
-    // formData.append('pet', service.pet);
-    // formData.append('size', service.size);
-    // formData.append('breed', service.breed);
-    // formData.append('date', service.date);
-    // formData.append('time', service.time);
-    // formData.append('firstname', service.firstname);
-    // formData.append('lastname', service.lastname);
-    // formData.append('email', service.email);
-    // formData.append('mobile', service.mobile);
+
 
     try {
       const response = await axios.post('/api/open/grooming-appointment', service);
@@ -77,8 +67,8 @@ const Grooming = () => {
                         <label htmlFor="service">Choose Service: </label>
                         <select className='form-control' id='service' name='service' onChange={handleChange}>
                           <option defaultValue="">Select Service...</option>
-                          <option value={service.service}>Hair Cut</option>
-                          <option value={service.service}>Bath</option>    
+                          <option value="Hair Cut">Hair Cut</option>
+                          <option value="Bath & Blow Dry">Bath & Blow Dry</option>    
 
                         </select>
                       
@@ -87,10 +77,10 @@ const Grooming = () => {
                         <label htmlFor="size">Choose Pet: </label>
                         <select className='form-control' id='pet' name='pet' onChange={handleChange}>
                           <option defaultValue="">Select Pet...</option>
-                          <option value={service.pet}>Dog</option>
-                          <option value={service.pet}>Cat</option>    
-                          <option value={service.pet}>Bird</option>    
-                          <option value={service.pet}>Other</option>    
+                          <option value="Dog">Dog</option>
+                          <option value="Cat">Cat</option>    
+                          <option value="Bird">Bird</option>    
+                          <option value="Other">Other</option>    
 
                         </select>
                     
@@ -99,9 +89,9 @@ const Grooming = () => {
                         <label htmlFor="size">Choose Size: </label>
                         <select className='form-control' id='size' name='size' onChange={handleChange}>
                           <option defaultValue="">Select size...</option>
-                          <option value={service.size}>S (Small)</option>
-                          <option value={service.size}>M (Medium)</option>    
-                          <option value={service.size}>L (Large)</option>   
+                          <option value="S">S (Small)</option>
+                          <option value="M">M (Medium)</option>    
+                          <option value="L">L (Large)</option>   
                         </select>
                       </div>
                      

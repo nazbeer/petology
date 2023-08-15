@@ -8,10 +8,7 @@ import Footer from '../../frontend_components/Footer';
 const MobileVet = () => {
   const [doctorList, setDoctorList] = useState([]);
   useEffect(() =>{
-    axios.get('/api/user/get-all-approved-doctors',{
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem("token")}`,
-    },})
+    axios.get('/api/user/get-all-approved-doctors')
     .then((response) => setDoctorList(response.data))
     .catch((error) => console.error(error));
   },[]);

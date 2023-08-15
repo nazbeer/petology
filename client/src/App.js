@@ -45,6 +45,7 @@ import RecDoctorsList from './pages/Reception/DoctorsList';
 import RecAppointmentList from './pages/Reception/AppointmentList';
 import RecBreakTime from './pages/Reception/BreakTime';
 import AddService from "./pages/Admin/AddService";
+import GroomingList from "./pages/Admin/GroomingList";
 
 
 function App() {
@@ -195,6 +196,14 @@ function App() {
           element={
             <ProtectedRoute>
               <AppointmentList />
+            </ProtectedRoute>
+          }
+        />
+           <Route
+          path="/admin/groominglist"
+          element={
+            <ProtectedRoute>
+              <GroomingList />
             </ProtectedRoute>
           }
         />

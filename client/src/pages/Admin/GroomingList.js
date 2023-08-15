@@ -6,9 +6,9 @@ import axios from "axios";
 import { Table } from "antd";
 import { Button, Modal } from "react-bootstrap";
 import moment from "moment";
-import {toast} from 'react-hot-toast';
 import { Link } from 'react-router-dom';
-function Appointmentlist(doctorId) {
+import {toast} from 'react-hot-toast';
+function GroomingList(doctorId) {
   const [appointments, setAppointments] = useState([]);
   const [openappointments, setOpenAppointments] = useState([]);
   const [doctors, setDoctors] = useState([]);
@@ -173,12 +173,12 @@ function Appointmentlist(doctorId) {
  
   const getOpenAppointmentsData = async () => {
     try {
-      const response = await axios.get("/api/admin/get-all-open-appointments", {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
+      const response = await axios.get("/api/open/get-all-grooming-appointments", {
+        // headers: {
+        //   Authorization: `Bearer ${localStorage.getItem("token")}`,
+        // },
       });
-
+      console.log(response.data.data);
       if (response.data.success) {
         setOpenAppointments(response.data.data);
       }
@@ -251,7 +251,7 @@ function Appointmentlist(doctorId) {
       title:"Parent Name",
       dataIndex:"parentName",
       render :(text, record)=>(
-        <span>{record.firstname} {record.lastname}</span>
+        <span className="text-capitalize">{record.firstname} {record.lastname}</span>
       ),
      
     },
@@ -290,9 +290,9 @@ function Appointmentlist(doctorId) {
     {
       title:'Status',
       dataIndex:"status",
-      render:(text, record)=>(
-        <span className="text-capitalize">{record.status}</span>
-      )
+        render:(text, record) => (
+            <span className="text-capitalize">{record.status}</span>
+        )
     },
     {
       title: "Actions",
@@ -313,7 +313,7 @@ function Appointmentlist(doctorId) {
               className="btn btn-danger btn-sm text-capitalize"
               onClick={() => changeOpenAppointmentStatus(record, "blocked")}
             >
-              Cancelled
+              Cancel
             </button>
           )}
           <button
@@ -435,13 +435,13 @@ function Appointmentlist(doctorId) {
   return (
     <Layout>
       <div className="col-md-12">
-        <div className="row d-fixed d-lg-flex justify-content-between align-items-center">
+      <div className="row d-fixed d-lg-flex justify-content-between align-items-center">
         <div className="col-md-6  d-lg-flex gap-3 justify-content-right align-items-center">
       <h6 className="page-header mb-0">Appointments List</h6>
       </div>
       <div className="col-md-6 d-lg-flex gap-3 justify-content-end align-items-center">
-       <Link to="/admin/appointmentlist"><button className="btn btn-success btn-sm" type="button">Veterinary</button></Link>
-        <Link to="/admin/groominglist"><button className="btn btn-warning btn-sm" type="button">Grooming</button></Link>
+       <Link to="/admin/appointmentlist"><button className="btn btn-warning btn-sm" type="button">Veterinary</button></Link>
+        <Link to="/admin/groominglist"><button className="btn btn-success btn-sm" type="button">Grooming</button></Link>
         <button className="btn btn-warning btn-sm" type="button">Mobile Vet</button>
         <button className="btn btn-warning btn-sm" type="button">Mobile Grooming</button>
       </div>
@@ -482,6 +482,11 @@ function Appointmentlist(doctorId) {
             </div> 
            </div>
           
+          
+               
+            
+
+           
           </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={handleCloseModal}>
@@ -502,4 +507,4 @@ function Appointmentlist(doctorId) {
   );
 }
 
-export default Appointmentlist;
+export default GroomingList;
