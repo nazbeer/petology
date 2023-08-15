@@ -414,7 +414,8 @@ router.get("/get-all-pet", authMiddleware, async(req, res) => {
 })
 router.get("/get-all-users", authMiddleware, async(req, res)=>{
   try{
-    const users = await User.find({status:req.body.status});
+    const users = await User.find();
+    //const users = await User.find({status:req.body.status});
     res.status(200).send({
       message: "Users list fetched succcessfully",
       success :true,
