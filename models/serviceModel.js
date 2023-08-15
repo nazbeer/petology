@@ -4,15 +4,17 @@ const serviceSchema = new mongoose.Schema({
     name: {
         type: String,
         //  default:"Veterinary"
-        unique: true,
+        // unique: true,
+       required:true
     },
     subservice: {
         type: String,
         //  default:"Consultation"
-        unique: true,
+        required:true
+       // unique: true,
     }
 } );
 
-const serviceModel = mongoose.model("packs", serviceSchema);
+const serviceModel = mongoose.model("timewaster", serviceSchema);
 
 module.exports = serviceModel;

@@ -17,7 +17,28 @@ function Appointmentlist(doctorId) {
   const [pets, setPets] = useState([]);
 
   const dispatch = useDispatch();
-  
+  const changeOpenAppointmentStatus = async (record, status) =>{
+    try{
+      dispatch(showLoading());
+      const response = await axios.post(`/api/admin/change-open-appointment-status/${record._id}`,
+      {
+        status: status,
+      },
+      {
+        headers:{
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+      dispatch(hideLoading());
+      if(response.data.success){
+        toast.success(response.data.message);
+        getOpenAppointmentsData();
+      }
+    } catch (error){
+      toast.error("Error changing appointment status");
+      dispatch(hideLoading());
+    }
+  };
   const changeAppointmentStatus = async (record, status) => {
     try {
       dispatch(showLoading());
@@ -190,12 +211,17 @@ function Appointmentlist(doctorId) {
     getDoctorsData();
     getAppointmentsData();
     changeAppointmentStatus();
+    changeOpenAppointmentStatus();
     getPetsData();
     getOpenAppointmentsData();
   }, []);
   const opencolumns = [
     {
-        title:"Service Requested",
+      title:"Service",
+      dataIndex:"module",
+    },
+    {
+        title:"Services Requested",
         dataIndex: "service",
     },
     {
@@ -274,7 +300,7 @@ function Appointmentlist(doctorId) {
             <button
               type="button"
               className="btn btn-warning btn-sm text-capitalize"
-              onClick={() => changeAppointmentStatus(record, "approved")}
+              onClick={() => changeOpenAppointmentStatus(record, "approved")}
             >
               Approve
             </button>
@@ -282,9 +308,9 @@ function Appointmentlist(doctorId) {
             <button
               type="button"
               className="btn btn-danger btn-sm text-capitalize"
-              onClick={() => changeAppointmentStatus(record, "blocked")}
+              onClick={() => changeOpenAppointmentStatus(record, "blocked")}
             >
-              Cancel
+              Cancelled
             </button>
           )}
           <button
@@ -386,7 +412,7 @@ function Appointmentlist(doctorId) {
                 className="btn btn-danger btn-sm text-capitalize"
                 onClick={() => changeAppointmentStatus(record, "blocked")}
               >
-                Cancel
+                Cancelled
               </button>
             )}
             <button

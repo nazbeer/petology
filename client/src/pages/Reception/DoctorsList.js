@@ -4,25 +4,53 @@ import Layout from "../../components/Layout";
 import { showLoading, hideLoading } from "../../redux/alertsSlice";
 import {toast} from 'react-hot-toast'
 import axios from "axios";
-import { Table } from "antd";
+import { Table, Modal } from "antd";
 import moment from "moment";
 
 function DoctorsList() {
   const [doctors, setDoctors] = useState([]);
+  const [selectedDoctor, setSelectedDoctor] = useState(null);
   const dispatch = useDispatch();
   const getDoctorsData = async () => {
     try {
       dispatch(showLoading());
-      const resposne = await axios.get("/api/admin/get-all-approved-doctors", {
+      const response = await axios.get("/api/admin/get-all-approved-doctors", {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
       dispatch(hideLoading());
-      if (resposne.data.success) {
-        setDoctors(resposne.data.data);
+      if (response.data.success) {
+        setDoctors(response.data.data);
       }
     } catch (error) {
+      dispatch(hideLoading());
+    }
+  };
+  const changeDoctorBreakTime = async (breakTime) => {
+    try {
+      dispatch(showLoading());
+      const response = await axios.post(
+        "/api/admin/change-doctor-break-time",
+        {
+          doctorId: selectedDoctor._id,
+          userId: selectedDoctor.userId,
+          breakTime: breakTime,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      dispatch(hideLoading());
+      if (response.data.success) {
+        toast.success(response.data.message);
+        closeModal();
+        getDoctorsData();
+      }
+    } catch (error) {
+      toast.error("Error changing doctor's break time");
       dispatch(hideLoading());
     }
   };
@@ -49,8 +77,18 @@ function DoctorsList() {
       dispatch(hideLoading());
     }
   };
+  const openModal = (doctor) => {
+    setSelectedDoctor(doctor);
+  };
+
+  // Function to close the break time modal
+  const closeModal = () => {
+    setSelectedDoctor(null);
+  };
+
   useEffect(() => {
     getDoctorsData();
+    changeDoctorBreakTime();
   }, []);
   const columns = [
     {
@@ -89,17 +127,7 @@ function DoctorsList() {
         );
       }
     },
-    // {
-    //   title:"Surgery Fees",
-    //   dataIndex: "surgeryfees",
-    //   render: ( number, record) => {
-    //     return (
-    //       <p className="font-weight-600 text-success">
-    //         {record.surgeryfees} AED
-    //       </p>
-    //     );
-    //   }
-    // },
+
     {
       title: "Created At",
       dataIndex: "createdAt",
@@ -116,7 +144,7 @@ function DoctorsList() {
       title: "Actions",
       dataIndex: "actions",
       render: (text, record) => (
-        <div className="d-flex justify-content-center align-items-center">
+        <div className="d-flex justify-content-center align-items-center gap-2">
           {(record.status === "pending" || record.status === "Pending")  && (
             <button type="button"
               className="btn btn-warning btn-sm text-capitalize"
@@ -141,6 +169,13 @@ function DoctorsList() {
               approve
             </button>
           )}
+           <button
+            type="button"
+            className="btn btn-warning btn-sm text-capitalize"
+            onClick={() => openModal(record)}
+          >
+            Change Break Time
+          </button>
         </div>
       ),
     },

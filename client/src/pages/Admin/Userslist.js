@@ -43,6 +43,8 @@ function Userslist() {
       title: "Phone Number",
       dataIndex: "mobile",
     },
+    {title:"Status",
+  dataIndex:"status"},
     {
       title: "Created At",
       dataIndex: "createdAt",

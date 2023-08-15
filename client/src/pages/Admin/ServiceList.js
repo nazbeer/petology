@@ -14,7 +14,7 @@ function ServiceList() {
   const getServicesData = async () => {
     try {
       dispatch(showLoading());
-      const response = await axios.get("/api/admin/get-all-services", {
+      const response = await axios.get("/api/service/get-all-services", {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
@@ -53,22 +53,22 @@ function ServiceList() {
     {
       title:"Service",
       dataIndex:"name",
-      render:(text, record)=>(
-          <span className="d-flex justify-content-center">
-              {/* <img src={base64ToDataUrl(record.image)} width="64px" height="64px" className="petimg img-responsive"/> */}
-              {record.name}
-          </span>
-      )
+      // render:(text, record)=>(
+      //     <span className="d-flex justify-content-center">
+      //         {/* <img src={base64ToDataUrl(record.image)} width="64px" height="64px" className="petimg img-responsive"/> */}
+      //         {record.name}
+      //     </span>
+      // )
   }, 
  
     {
         title:"Sub Service",
         dataIndex:"subservice",
-        render:(text, record)=>(
-            <span>
-                {record.subservice}
-            </span>
-        )
+        // render:(text, record)=>(
+        //     <span>
+        //         {record.subservice}
+        //     </span>
+        // )
     }, 
     
   

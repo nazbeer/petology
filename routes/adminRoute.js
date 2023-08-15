@@ -7,26 +7,27 @@ const Pet = require("../models/petModel");
 const serviceModel = require('../models/serviceModel');
 const OpenAppointment = require("../models/openAppointmentModel");
 const authMiddleware = require("../middlewares/authMiddleware");
+const breaktimeModel = require("../models/breaktimeModel");
 //const { default: Appointments } = require("../client/src/pages/Appointments");
 //const { default: Appointments } = require("../client/src/pages/Appointments");
 
-router.get("/get-all-services", authMiddleware, async (req, res) => {
-  try{
-      const service = await Service.find({});
-    //  console.log(service);
-      res.status(200).send({
-          success:true,
-          message:"All services fetched successfully.",
-          data: service,
-      });
-  } catch(error){
-      res.status(500).send({
-          success:false,
-          message:"Unable to fetch the service List details",
-          error,
-      });
-  }
-});
+// router.get("/get-all-services", authMiddleware, async (req, res) => {
+//   try{
+//       const service = await serviceModel.find({});
+//     //  console.log(service);
+//       res.status(200).send({
+//           success:true,
+//           message:"All services fetched successfully.",
+//           data: service,
+//       });
+//   } catch(error){
+//       res.status(500).send({
+//           success:false,
+//           message:"Unable to fetch the service List details",
+//           error,
+//       });
+//   }
+// });
 
 
 router.get("/get-all-approved-doctors", authMiddleware, async (req, res) => {
@@ -76,64 +77,11 @@ router.post('/assign-doctor-to-appointment', authMiddleware, async (req, res) =>
   }
 });
 
-// router.post('/create-new-service', authMiddleware, async (req, res) => {
-//   const { name, subservice } = req.body;
-
-//   try {
-//     const service = await Service.create({ name, subservice });
-//     await service.save();
-//     res
-//           .status(200)
-//           .send({ message: "New Service Created successfully", success: true });
-//   } catch (error) {
-//     res.status(400).json({ error: 'Bad Request' });
-//   }
-// });
-
-// router.post('/create-new-service', authMiddleware, async (req, res) => {
-//   try {
-//     const name = req.body.name;
-//     const subservice = req.body.subservice;
-
-//     const newService = new Service(name, subservice);
-//     await newService.save();
-
-//    // res.json(newService);
-//    res
-//       .status(200)
-//       .send({ message: "New Service Created successfully", success: true });
-//   } catch (error) {
-//     console.error('Error Saving Service:', error);
-//     res.status(500).json({ error: 'Server error' });
-//   }
-// });
-// router.get('/get-all-open-appointments', async (req, res) => {
-//   try {
-//     const appointmentList = await OpenAppointment.find({})
-//       .populate('doctors', 'name') // Assuming 'doctor' field is a reference to User model
-//       //.populate('petlists', 'name') // Assuming 'pet' field is a reference to Pet model
-//       .exec();
-//   //  console.log(appointmentList);
-//     res.status(200).send({
-//       message: 'Appointment List fetched successfully',
-//       success: true,
-//       data: appointmentList,
-//     });
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).send({
-//       message: 'Error fetching All Appointments',
-//       success: false,
-//       error,
-//     });
-//   }
-// });
-
-
-router.get('/doctordetails/:doctorId', authMiddleware, async (req, res) => {
+router.get('/doctordetails/:doctorId', async (req, res) => {
+//  console.log(doctorInfo);
   const { doctorId } = req.params;
   try {
-    const doctor = await Doctor.findById(doctorId);
+    const doctor = await Doctor.findById(doctorId._id);
     res.status(200).json({
       success: true,
       data: doctor,
@@ -190,34 +138,20 @@ router.get('/get-all-appointments', authMiddleware, async (req, res) => {
 
 
 router.post('/set-break-time', async (req, res) => {
-  try {
-    const { duration } = req.body;
-    
-    // For demonstration purposes, we'll just return a success message
-    res.json({ success: true, message: `Break time set to ${duration} minutes.` });
-  } catch (error) {
-    console.error('Error setting break time:', error);
-    res.status(500).json({ success: false, message: 'Error setting break time.' });
-  }
+ 
+  const breaktime ={duration:req.body.duration};
+  const newBreaktime = new breaktimeModel(breaktime);
+  await newBreaktime.save().then((resss)=>{
+      console.log(resss);
+      return   res.status(200).json({ success: true, message: 'Break Time added successfully'});
+  }).catch((errr)=>{
+      console.log(errr);
+      return  res.status(500).json({ success: false, message: 'An error occurred while adding Break Time' });
+  });
+  return;
+ 
 });
 
-// router.get("/get-all-appointments", authMiddleware, async (req, res) => {
-//   try {
-//     const appointments = await Appointment.find({});
-//     res.send(200).send({
-//       message: 'All appointments fetched',
-//       success: true,
-//       data :appointments,
-//     });
-//   } catch (error) {
-//     console.log(error);
-//     res.status(500).send({
-//       message: "Error fetching Appointments",
-//       success: false,
-//       error,
-//     });
-//   }
-// });
 router.get('/count-records', authMiddleware, async (req, res) => {
   try {
     //const db = client.db(petology);
@@ -308,50 +242,29 @@ router.post('/change-appointment-status/:id', authMiddleware, async (req, res) =
   }
 });
 
-router.post('/create-service', async (req, res) => {
-  // console.log(req.body);
-  // return;
 
-//     const serviceData ={sname:req.body.sname, subserivce:req.body.subserivce};
-
-  
-//       const newService = new serviceModel(serviceData);
-//       await newService.save();
-//       res.send(newService);
-// //        await newService.save().then((res)=>{
-// //         //console.log(res);
-        
-// //     res.send(response);
-// //          res.status(200).json({ success: true, message: 'Service added successfully', data: response });
-// //       }).catch((err)=>{
-
-// // console.log(err);
-// //       });
-//       return;
+router.post('/change-open-appointment-status/:id', async (req, res) => {
   try {
-    const serviceData ={sname:req.body.sname, subserivce:req.body.subserivce};
-    console.log(serviceData);
-    // Create a new appointment
-    const newService = new serviceModel(serviceData);
-  
-    const response = await newService.save();
+    const { id } = req.params;
+    const { status } = req.body;
 
-      //  console.log('appointment', newAppointment);
-    // Update the user's appointment array
-    // await User.findByIdAndUpdate(
-    //     appointmentData.userId,
-    //     { $addToSet: { appointments: savedAppointment._id } },
-    //     { new: true }
-    // );
+    const updatedAppointment = await OpenAppointment.findByIdAndUpdate(
+      id,
+      { status }, // Update the status field
+      { new: true } // Return the updated appointment
+    );
 
-   // res.send(response);
-    res.status(200).json({ success: true, message: 'Service added successfully', data: response });
-    console.log(res);
-    } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: 'An error occurred while adding service' });
+    if (!updatedAppointment) {
+      return res.status(404).json({ success: false, message: 'Appointment not found' });
     }
+
+    res.status(200).json({ success: true, message: 'Appointment status changed successfully', data: updatedAppointment });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'An error occurred while changing appointment status' });
+  }
 });
+
 
 
 module.exports = router;

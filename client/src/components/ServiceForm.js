@@ -95,23 +95,21 @@ const ServiceForm = () => {
   });
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    // const { name, value } = e.target;
     setPackage((prevState) => ({
       ...prevState,
-      [name]: value,
+      [e.target.name]: e.target.value,
     }));
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    const formData = new FormData();
-    formData.append("name", pack.name);
-    formData.append("subservice", pack.subservice);
-
+  
     try {
-      const response = await axios.post("/api/admin/create-service", formData);
-
-      console.log("Service saved successfully:", response.data);
+      const response = await axios.post('/api/service/create-service', pack
+        
+    );
+    // console.log(pack);
+    //   console.log("Service saved successfully:", response.data);
       if (response.data.success) {
         toast.success(response.data.message);
         //navigate('/appointments');
@@ -122,7 +120,6 @@ const ServiceForm = () => {
       //dispatch(hideLoading());
     }
   };
-
   return (
     <>
       <form>
@@ -155,7 +152,7 @@ const ServiceForm = () => {
           </div>
           <div className="card-footer mt-2">
             <button
-              type="submit"
+              type="button"
               className="btn btn-success btn-sm"
               onClick={handleSubmit}
             >

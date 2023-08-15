@@ -9,9 +9,9 @@ const BreakTime = () => {
 
     const handleSubmit = async (e) => {
       e.preventDefault();
-      
+      console.log(duration);
       try {
-        const response = await axios.post('/api/set-break-time', { duration });
+        const response = await axios.post('/api/admin/set-break-time',  duration );
         
         if (response.data.success) {
           toast.success(response.data.message);

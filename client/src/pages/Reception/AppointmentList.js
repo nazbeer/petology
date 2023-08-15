@@ -7,78 +7,42 @@ import { Table } from "antd";
 import { Button, Modal } from "react-bootstrap";
 import moment from "moment";
 import {toast} from 'react-hot-toast';
-function Appointmentlist() {
+function Appointmentlist(doctorId) {
   const [appointments, setAppointments] = useState([]);
+  const [openappointments, setOpenAppointments] = useState([]);
   const [doctors, setDoctors] = useState([]);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [selectedDoctor, setSelectedDoctor] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [pets, setPets] = useState([]);
 
-  // const [appointments, setAppointments] = useState([]);
-  // const [doctors, setDoctors] = useState([]); // Assuming you fetch the list of doctors
-  // const [selectedAppointment, setSelectedAppointment] = useState(null);
-  // const [selectedDoctor, setSelectedDoctor] = useState(null);
-  // const [showModal, setShowModal] = useState(false);
-
-  // const handleShowModal = (record) => {
-  //   setSelectedAppointment(record);
-  //   setShowModal(true);
-  //   if (!selectedDoctor) {
-  //     toast.error("Please select a doctor.");
-  //     return;
-  //   }
-  // };
-
-  // const handleCloseModal = () => {
-  //   setShowModal(false);
-  //   setSelectedAppointment(null);
-  //   setSelectedDoctor(null);
-  // };
-
-  // const handleDoctorSelect = (event) => {
-  //   setSelectedDoctor(event.target.value);
-  // };
-
   const dispatch = useDispatch();
-  // const getDoctorsData = async () => {
-  //   try {
-  //     dispatch(showLoading());
-  //     const response = await axios.get("/api/admin/get-all-approved-doctors", {
-  //       headers: {
-  //         Authorization: `Bearer ${localStorage.getItem("token")}`,
-  //       },
-  //     });
-  //     console.log(response.data.data);
-  //     dispatch(hideLoading());
-  //     if (response.data.success) {
-        
-  //       setDoctors(response.data.data);
-  //     }
-  //   } catch (error) {
-  //     dispatch(hideLoading());
-  //   }
-  // };
-  // const getAppointmentsData = async () => {
-  //   try {
-  //     dispatch(showLoading());
-  //     const response = await axios.get("/api/user/get-all-appointments", {
-  //       headers: {
-  //         Authorization: `Bearer ${localStorage.getItem("token")}`,
-  //       },
-  //     });
-  //     dispatch(hideLoading());
-  //     if (response.data.success) {
-  //       setAppointments(response.data.data);
-  //     }
-  //   } catch (error) {
-  //     dispatch(hideLoading());
-  //   }
-  // };
-
+  const changeOpenAppointmentStatus = async (record, status) =>{
+    try{
+      dispatch(showLoading());
+      const response = await axios.post(`/api/admin/change-open-appointment-status/${record._id}`,
+      {
+        status: status,
+      },
+      {
+        headers:{
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+      dispatch(hideLoading());
+      if(response.data.success){
+        toast.success(response.data.message);
+        getOpenAppointmentsData();
+      }
+    } catch (error){
+      toast.error("Error changing appointment status");
+      dispatch(hideLoading());
+    }
+  };
   const changeAppointmentStatus = async (record, status) => {
     try {
       dispatch(showLoading());
+
       const response = await axios.post(
         `/api/admin/change-appointment-status/${record._id}`, // Include the appointment ID in the URL
         {
@@ -100,41 +64,6 @@ function Appointmentlist() {
       dispatch(hideLoading());
     }
   };
-  // const assignDoctorToAppointment = async () => {
-    
-
-  //   try {
-  //     dispatch(showLoading());
-  //     const response = await axios.post(
-  //       "/api/admin/assign-doctor-to-appointment",
-  //       {
-  //         appointmentId: selectedAppointment._id,
-  //         doctorId: selectedDoctor,
-  //       },
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer ${localStorage.getItem("token")}`,
-  //         },
-  //       }
-  //     );
-  //     dispatch(hideLoading());
-  //     if (response.data.success) {
-  //       toast.success(response.data.message);
-  //       getAppointmentsData();
-  //       handleCloseModal();
-  //     }
-  //   } catch (error) {
-  //     toast.error("Error assigning doctor to appointment");
-  //     dispatch(hideLoading());
-  //   }
-  // };
-  
-  // useEffect(() => {
-  //   getAppointmentsData();
-  //   getDoctorsData();
-  //   assignDoctorToAppointment();
-  // }, []);
-
   
   const handleShowModal = (record) => {
     setSelectedAppointment(record);
@@ -168,7 +97,7 @@ function Appointmentlist() {
   };
   const getPetsData = async () => {
     try {
-      const response = await axios.get("/api/admin/get-all-pets", {
+      const response = await axios.get("/api/pet/get-all-pets", {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
@@ -223,19 +152,185 @@ function Appointmentlist() {
       console.error(error);
     }
   };
+  const [doctorDetails, setDoctorDetails] = useState(null);
+
+  // useEffect(() => {
+  //   const fetchDoctorDetails = async (record) => {
+  //     try {
+  //       const response = await axios.get(`/api/admin/doctordetails/${record._id}`);
+  //       console.log(response);
+  //       if (response.data.success) {
+  //         setDoctorDetails(response.data.data);
+  //       }
+  //     } catch (error) {
+  //       console.error(error);
+  //     }
+  //   };
+
+  //   fetchDoctorDetails();
+  // }, [doctorId]);
+ 
+  const getOpenAppointmentsData = async () => {
+    try {
+      const response = await axios.get("/api/admin/get-all-open-appointments", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+
+      if (response.data.success) {
+        setOpenAppointments(response.data.data);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  
+  useEffect(() => {
+    // Fetch doctor details based on selected appointment
+    const fetchDoctorDetails = async () => {
+      try {
+        if (selectedAppointment && selectedAppointment.doctorInfo) {
+          const response = await axios.get(
+            `/api/admin/doctordetails/${selectedAppointment.doctorInfo._id}`
+          );
+          console.log(response);
+          if (response.data.success) {
+            setDoctorDetails(response.data.data);
+          }
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchDoctorDetails();
+  }, [selectedAppointment]);
 
   useEffect(() => {
     getDoctorsData();
     getAppointmentsData();
     changeAppointmentStatus();
+    changeOpenAppointmentStatus();
     getPetsData();
+    getOpenAppointmentsData();
   }, []);
-
-  const columns = [
+  const opencolumns = [
     {
-        title: "Id",
-        dataIndex: "_id",
+      title:"Service",
+      dataIndex:"module",
     },
+    {
+        title:"Services Requested",
+        dataIndex: "service",
+    },
+    {
+      title:'Pet',
+      dataIndex : 'pet',
+    },
+    {
+      title :"Appointment Date",
+      dataIndex  :'date',
+      render:(text, record)=>(
+        <span>
+          {moment(record.date).format('LL')}
+        </span>
+      )
+    },
+    {
+      title:"Appointment Time",
+      dataIndex:"time",
+      render:(text, record)=> (
+        <span>
+          {record.time}
+        </span>
+      )
+    },
+    {
+      title:"Parent Name",
+      dataIndex:"parentName",
+      render :(text, record)=>(
+        <span>{record.firstname} {record.lastname}</span>
+      ),
+     
+    },
+    {
+      title:'Mobile',
+      dataIndex:'mobile',
+      render:(text,record)=>(
+        <span>{record.mobile}</span>
+      )
+    },
+    {
+      title:'Email Address',
+      dataIndex: 'email',
+      render:(text, record)=>(
+        <span>{record.email}</span>
+      )
+    },
+    {
+      title: 'Doctor Details',
+      dataIndex: 'doctorDetails',
+      render: () => {
+        if (!doctorDetails) {
+          return null;
+        }
+        return (
+          <div>
+            <p>
+              Doctor Name: {doctorDetails.firstName} {doctorDetails.lastName}
+            </p>
+            <p>Specialization: {doctorDetails.specialization}</p>
+            {/* Add other doctor details as needed */}
+          </div>
+        );
+      },
+    },
+    {
+      title:'Status',
+      dataIndex:"status",
+
+    },
+    {
+      title: "Actions",
+      dataIndex: "actions",
+      render: (text, record) => (
+        <div className="d-flex justify-content-evenly align-items-center gap-3">
+          {record.status === "pending" || record.status === "Pending" || record.status === "blocked" ? (
+            <button
+              type="button"
+              className="btn btn-warning btn-sm text-capitalize"
+              onClick={() => changeOpenAppointmentStatus(record, "approved")}
+            >
+              Approve
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="btn btn-danger btn-sm text-capitalize"
+              onClick={() => changeOpenAppointmentStatus(record, "blocked")}
+            >
+              Cancelled
+            </button>
+          )}
+          <button
+            type="button"
+            className="btn btn-success btn-sm text-capitalize ml-2"
+            onClick={() => handleShowModal(record)}
+          >
+            View & Assign Doctor
+          </button>
+        </div>
+      ),
+    },
+    
+
+  ]
+  const usercolumns = [
+    // {
+    //     title: "Id",
+    //     dataIndex: "_id",
+    // },
     {
       title: "Parent Name",
       dataIndex: "parentname",
@@ -254,6 +349,15 @@ function Appointmentlist() {
         </span>
       ),
     },
+    // {
+    //   title:'Pet',
+    //   dataIndex:'pet',
+    //   render:(text, record)=>(
+    //     <span>
+    //       {record.petInfo.name}
+    //     </span>
+    //   )
+    // },
     {
       title: "Specialization",
       dataIndex: "specialization",
@@ -308,7 +412,7 @@ function Appointmentlist() {
                 className="btn btn-danger btn-sm text-capitalize"
                 onClick={() => changeAppointmentStatus(record, "blocked")}
               >
-                Cancel
+                Cancelled
               </button>
             )}
             <button
@@ -327,9 +431,10 @@ function Appointmentlist() {
 
   return (
     <Layout>
-      <h4 className="page-header">Appointments List</h4>
+      <div className="col-md-12">
+      <h6 className="page-header">Appointments List</h6>
       <hr />
-      <Table columns={columns} dataSource={appointments}/>
+      <Table columns={usercolumns} dataSource={appointments}/>
       <div>
       <Modal show={showModal} onHide={handleCloseModal} size="lg">
       <Modal.Header closeButton>
@@ -344,7 +449,7 @@ function Appointmentlist() {
             <div className="col-md-12 ">
            <div className="d-lg-flex justify-content-between align-items-center gap-4 mb-3" >
             <label className="text-left">Parent Name: </label> 
-            <span className="text-right">{selectedAppointment && selectedAppointment.userInfo.name}</span>
+            <span className="text-right">{selectedAppointment && selectedAppointment.userInfo.firstName}</span>
             </div> 
             <div className="d-lg-flex justify-content-between align-items-center gap-4 mb-3" >
             <label className="text-left">Assign Doctor: </label> 
@@ -379,6 +484,11 @@ function Appointmentlist() {
           </Button>
         </Modal.Footer>
       </Modal>
+      </div>
+      </div>
+      <div className="col-md-12">
+        <h6>Open Appointment Lists</h6>
+        <Table columns={opencolumns} dataSource={openappointments}/>
       </div>
     </Layout>
   );
