@@ -105,7 +105,11 @@ const ServiceForm = () => {
   const handleSubmit = async (e) => {
   
     try {
-      const response = await axios.post('/api/service/create-service', pack
+      const response = await axios.post('/api/service/create-service', pack , {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        }, 
+      }
         
     );
     // console.log(pack);

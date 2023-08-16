@@ -9,7 +9,7 @@ const openappointmentSchema = new mongoose.Schema(
       type: String,
    //  required: true,
     },
-    doctors:{
+    doctor:{
         type:String
     },
     userId: {
@@ -21,10 +21,7 @@ const openappointmentSchema = new mongoose.Schema(
       type :String,
       enum:['Veterinary', 'Grooming', 'Mobile Veterinary', 'Mobile Grooiming']
     },
-    doctor: {
-      type: String,
-      required: true,
-    },
+   
     service: {
       type: String,
       required: true,

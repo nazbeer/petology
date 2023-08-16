@@ -98,7 +98,7 @@ router.get('/doctordetails/:doctorId', async (req, res) => {
 router.get('/get-all-open-appointments', async (req, res) => {
   try {
     const appointmentList = await OpenAppointment.find({})
-      .populate('doctors', 'name specialization') // Assuming 'doctor' field is a reference to User model
+      .populate('doctor', 'name specialization') // Assuming 'doctor' field is a reference to User model
       .exec();
     res.status(200).send({
       message: 'Appointment List fetched successfully',

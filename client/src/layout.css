@@ -94,6 +94,7 @@
     border-bottom: 1px solid #d9d9d9;
     /* margin-bottom:5px;
     margin-top:5px; */
+  
 
 }
 
@@ -147,9 +148,17 @@
     display: none;
 } */
 @media screen and (max-width: 768px){
+    .content {
+        width: 84%;
+        height: 100%;
+    }
+    .role{
+        display: none;
+    }
     .logo img{
         width: 41px !important;
     }
+    
     .desktop-menu {
         /* padding: 7px;
         margin-bottom: 0px !important;
@@ -168,4 +177,14 @@
     .header-action-icon{
         display: block;
     }
+    .menu-item{
+        width: 45px;
+    }
+}
+
+.ant-modal-header{
+    border-radius: 5px 5px 0px 0px;
+}
+.ant-modal-content{
+    border-radius: 5px;
 }

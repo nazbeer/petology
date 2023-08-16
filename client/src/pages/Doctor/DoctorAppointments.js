@@ -14,7 +14,7 @@ function DoctorAppointments() {
     try {
       dispatch(showLoading());
       const response = await axios.get(
-        "/api/doctor/get-appointments-by-doctor-id",
+        "http://127.0.0.1:5000/api/doctor/get-appointments-by-doctor-id",
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,

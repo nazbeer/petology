@@ -5,7 +5,7 @@ const serviceSchema = new mongoose.Schema({
         type: String,
         //  default:"Veterinary"
         // unique: true,
-       required:true
+        required:true
     },
     subservice: {
         type: String,
@@ -15,6 +15,6 @@ const serviceSchema = new mongoose.Schema({
     }
 } );
 
-const serviceModel = mongoose.model("timewaster", serviceSchema);
+const serviceModel = mongoose.model("timewasters", serviceSchema);
 
 module.exports = serviceModel;

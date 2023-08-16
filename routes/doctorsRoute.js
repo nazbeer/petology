@@ -61,7 +61,7 @@ router.get(
     try {
       const doctor = await Doctor.findOne({ userId: req.body.userId });
       const appointments = await Appointment.find({ doctorId: doctor._id });
-      console.log(doctor);
+      // console.log(doctor);
       console.log(appointments);
       res.status(200).send({
         message: "Appointments fetched successfully",
@@ -124,7 +124,7 @@ router.get('/doctorcount', async (req, res) => {
 router.get('/user/:userId/pets', authMiddleware, async (req, res) => {
   try {
     const { userId } = req.params;
-    const pets = await Pet.find({ userId });
+    const pets = await PetList.find({ userId });
     res.json({ success: true, data: pets });
   } catch (error) {
     console.error('Error fetching pets:', error);

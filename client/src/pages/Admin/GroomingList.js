@@ -36,7 +36,7 @@ function GroomingList(doctorId) {
         getOpenAppointmentsData();
       }
     } catch (error){
-      toast.error("Error changing appointment status");
+      //toast.error("Error changing appointment status");
       dispatch(hideLoading());
     }
   };
@@ -61,7 +61,7 @@ function GroomingList(doctorId) {
         getAppointmentsData();
       }
     } catch (error) {
-      toast.error("Error changing appointment status");
+     // toast.error("Error changing appointment status");
       dispatch(hideLoading());
     }
   };
@@ -269,24 +269,24 @@ function GroomingList(doctorId) {
         <span>{record.email}</span>
       )
     },
-    {
-      title: 'Doctor Details',
-      dataIndex: 'doctorDetails',
-      render: () => {
-        if (!doctorDetails) {
-          return null;
-        }
-        return (
-          <div>
-            <p>
-              Doctor Name: {doctorDetails.firstName} {doctorDetails.lastName}
-            </p>
-            <p>Specialization: {doctorDetails.specialization}</p>
-            {/* Add other doctor details as needed */}
-          </div>
-        );
-      },
-    },
+    // {
+    //   title: 'Doctor Details',
+    //   dataIndex: 'doctorDetails',
+    //   render: () => {
+    //     if (!doctorDetails) {
+    //       return null;
+    //     }
+    //     return (
+    //       <div>
+    //         <p>
+    //           Doctor Name: {doctorDetails.firstName} {doctorDetails.lastName}
+    //         </p>
+    //         <p>Specialization: {doctorDetails.specialization}</p>
+    //         {/* Add other doctor details as needed */}
+    //       </div>
+    //     );
+    //   },
+    // },
     {
       title:'Status',
       dataIndex:"status",

@@ -171,8 +171,10 @@
     width:auto !important;
   }
   .menu-item{
-    justify-content: center !important;
+    
+    justify-content: left !important;
   }
+ 
   .mobile-menu-icon {
     display: block;
   }

@@ -18,7 +18,7 @@ const Veterinary = () => {
   },[]);
   const [service, setService] = useState({
     module:'Veterinary',
-    doctor:'',
+   // doctor:'',
     doctorId:'',
     breed: '',
     date:'',
@@ -27,7 +27,7 @@ const Veterinary = () => {
     lastname:'',
     email:'',
     mobile:'',
-    password:''
+   // password:''
 
   });
 

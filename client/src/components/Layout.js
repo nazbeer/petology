@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import "../layout.css";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { Badge } from "antd";
+import { Badge, Tooltip } from "antd";
 import logo from "../images/logo-petology.png";
 function Layout({ children }) {
   const [collapsed, setCollapsed] = useState(false);
@@ -209,8 +209,16 @@ function Layout({ children }) {
                     isActive && "active-menu-item"
                   }`}
                 >
-                  <Link to={menu.path}><i className={menu.icon}></i></Link>
-                  {!collapsed && <Link to={menu.path}>{menu.name}</Link>}
+                <Tooltip title={menu.name}>
+                  <Link to={menu.path}>
+                    <i className={menu.icon}></i>
+                  </Link>
+                </Tooltip>
+                {!collapsed && (
+                  <Tooltip title={menu.name}>
+                    <Link to={menu.path}>{menu.name}</Link>
+                  </Tooltip>
+                )}
                 </div>
               );
             })}

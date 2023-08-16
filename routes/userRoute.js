@@ -469,9 +469,11 @@ router.put("/edit-user/:id", async (req, res) => {
     const user = await User.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
     });
+
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
+
     res.json({ success: true, data: user });
   } catch (error) {
     console.error("Error editing user:", error);
@@ -484,7 +486,7 @@ router.delete("/delete-user/:id", async (req, res) => {
 
   try {
     const user = await User.findByIdAndDelete(req.params.id);
-    console.log(user);
+   // console.log(user);
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
