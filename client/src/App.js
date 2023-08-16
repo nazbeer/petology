@@ -10,6 +10,7 @@ import { useSelector } from "react-redux";
 import ProtectedRoute from "./components/ProtectedRoute";
 import PublicRoute from "./components/PublicRoute";
 import ApplyDoctor from "./pages/ApplyDoctor";
+import AdminApplyDoctor from "./pages/Admin/ApplyDoctor";
 import Notifications from "./pages/Notifications";
 import Userslist from "./pages/Admin/Userslist";
 import DoctorsList from "./pages/Admin/DoctorsList";
@@ -182,7 +183,15 @@ function App() {
             </ProtectedRoute>
           }
         />
-
+        <Route
+          
+          path="/admin/apply-doctor"
+          element={
+            <ProtectedRoute>
+              <AdminApplyDoctor />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/admin/doctorslist"
           element={
