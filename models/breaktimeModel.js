@@ -2,6 +2,9 @@ const mongoose = require("mongoose");
 
 const breaktimeSchema = new mongoose.Schema(
   {
+    doctorId:{
+      type:String
+    },
    duration:{
     type :String ,
    // required: true,

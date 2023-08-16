@@ -101,6 +101,7 @@ router.post("/get-user-info-by-id", authMiddleware, async (req, res) => {
 router.post("/apply-doctor-account", authMiddleware, async (req, res) => {
   try {
     const newdoctor = new Doctor({ ...req.body, status: "pending" });
+    console.log(newdoctor);
     await newdoctor.save();
     const adminUser = await User.findOne({ isAdmin: true });
 
@@ -447,6 +448,50 @@ router.get('/api/user/:userId/pet/:petId/appointments', authMiddleware, async (r
       success: false,
       message: 'An error occurred while fetching appointments.',
     });
+  }
+});
+router.get("/view-user/:id", async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    res.json({ success: true, data: user });
+  } catch (error) {
+    console.error("Error fetching user:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// Edit user by ID
+router.put("/edit-user/:id", async (req, res) => {
+  try {
+    const user = await User.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+    });
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    res.json({ success: true, data: user });
+  } catch (error) {
+    console.error("Error editing user:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// Delete user by ID
+router.delete("/delete-user/:id", async (req, res) => {
+
+  try {
+    const user = await User.findByIdAndDelete(req.params.id);
+    console.log(user);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    res.json({ success: true, message: "User deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting user:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 module.exports = router;

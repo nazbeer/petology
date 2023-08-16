@@ -139,7 +139,7 @@ router.get('/get-all-appointments', authMiddleware, async (req, res) => {
 
 router.post('/set-break-time', async (req, res) => {
  
-  const breaktime ={duration:req.body.duration};
+  const breaktime ={doctorId:req.body.doctorId, duration:req.body.duration};
   const newBreaktime = new breaktimeModel(breaktime);
   await newBreaktime.save().then((resss)=>{
       console.log(resss);
@@ -151,7 +151,46 @@ router.post('/set-break-time', async (req, res) => {
   return;
  
 });
+router.get("/get-all-breaktimes", async (req, res) => {
+  try {
+    const breaktimes = await breaktimeModel.find();
+    const breaktimesWithDoctors = await Promise.all(
+      breaktimes.map(async (breaktime) => {
+        const doctor = await Doctor.findById(breaktime.doctorId);
+       // console.log(doctor);
+        return {
+          _id: breaktime._id,
+          doctorId: breaktime.doctorId,
+          duration: breaktime.duration,
+          // doctorName: doctor ? doctor.firstName: "Unknown Doctor",
+          doctorName: (doctor.firstName + " " + doctor.lastName),
+        };
+      })
+    );
+    console.log(breaktimesWithDoctors);
+    res.json(breaktimesWithDoctors);
+  } catch (error) {
+    console.error("Error fetching break times:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
 
+router.delete("/delete-breaktime/:id", async (req, res) => {
+  try {
+    const breaktime = await breaktimeModel.findById(req.params.id);
+
+    if (!breaktime) {
+      return res.status(404).json({ error: "Break time not found" });
+    }
+
+    await breaktime.remove();
+
+    res.json({ success: true, message: "Break time record deleted" });
+  } catch (error) {
+    console.error("Error deleting break time record:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
 router.get('/count-records', authMiddleware, async (req, res) => {
   try {
     //const db = client.db(petology);
@@ -267,4 +306,35 @@ router.post('/change-open-appointment-status/:id', async (req, res) => {
 
 
 
+router.post("/apply-doctor-account", authMiddleware, async (req, res) => {
+  try {
+    const newdoctor = new Doctor({ ...req.body, status: "pending" });
+    //console.log(newdoctor);
+    await newdoctor.save();
+    const adminUser = await User.findOne({ isAdmin: true });
+
+    const unseenNotifications = adminUser.unseenNotifications;
+    unseenNotifications.push({
+      type: "new-doctor-request",
+      message: `${newdoctor.firstName} ${newdoctor.lastName} has applied for a doctor account`,
+      data: {
+        doctorId: newdoctor._id,
+        name: newdoctor.firstName + " " + newdoctor.lastName,
+      },
+      onClickPath: "/admin/doctorslist",
+    });
+    await User.findByIdAndUpdate(adminUser._id, { unseenNotifications });
+    res.status(200).send({
+      success: true,
+      message: "Doctor account applied successfully",
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      message: "Error applying doctor account",
+      success: false,
+      error,
+    });
+  }
+});
 module.exports = router;
