@@ -45,8 +45,9 @@ import RecDoctorsList from './pages/Reception/DoctorsList';
 //import RecGroomersList from './pages/Reception/GroomersList';
 import RecAppointmentList from './pages/Reception/AppointmentList';
 import RecBreakTime from './pages/Reception/BreakTime';
-import AddService from "./pages/Admin/AddService";
+//import AddService from "./pages/Admin/AddService";
 import GroomingList from "./pages/Admin/GroomingList";
+import AddPack from "./pages/Admin/AddPack";
 
 
 function App() {
@@ -154,7 +155,7 @@ function App() {
           path="/admin/addservices"
           element={
             <ProtectedRoute>
-              <AddService/>
+              <AddPack/>
             </ProtectedRoute>
           }
           />

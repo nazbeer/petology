@@ -8,6 +8,7 @@ const serviceModel = require('../models/serviceModel');
 const OpenAppointment = require("../models/openAppointmentModel");
 const authMiddleware = require("../middlewares/authMiddleware");
 const breaktimeModel = require("../models/breaktimeModel");
+const packModel = require("../models/packModel");
 //const { default: Appointments } = require("../client/src/pages/Appointments");
 //const { default: Appointments } = require("../client/src/pages/Appointments");
 
@@ -135,7 +136,103 @@ router.get('/get-all-appointments', authMiddleware, async (req, res) => {
     });
   }
 });
+///old code
 
+// router.get('/get-all-packs', async (req, res) => {
+//   try {
+//     const services = await packModel.find();
+//     return res.status(200).json({ success: true, data: services });
+//   } catch (error) {
+//     console.error(error);
+//     return res.status(500).json({ success: false, message: "An error occurred while fetching services." });
+//   }
+// });
+
+// router.post('/create-new-pack', async(req, res) => {
+//   const { name, subservices } = req.body;
+  
+//   const newPack = new packModel({
+//     name,
+//     subservices,
+//   });
+
+//   try {
+//     await newPack.save();
+//     return res.status(200).json({ success: true, message: "New Service Added successfully" });
+//   } catch (error) {
+//     if (error.code === 11000) { // Duplicate key error
+//       return res.status(400).json({ success: false, message: "Service with the same name and sub-service already exists." });
+//     }
+//     console.error(error);
+//     return res.status(500).json({ success: false, message: "An error occurred while adding new Service." });
+//   }
+// });
+
+/// newcode
+// ...other imports
+
+router.post("/create-service", authMiddleware,  async (req, res) => {
+  const { serviceType, serviceName, subServiceName } = req.body;
+
+  try {
+    const service = await packModel.create({
+      serviceType: serviceType,
+      name: serviceName,
+      subService: subServiceName,
+    });
+    await service.save();
+    res.status(201).json({ success: true, message: "Service added successfully" });
+  } catch (error) {
+    if (error.code === 11000) {
+      res.status(400).json({ success: false, message: "Service name already exists" });
+    } else {
+      res.status(500).json({ success: false, message: "An error occurred" });
+    }
+  }
+});
+
+// ...rest of the code
+
+
+router.get("/subservices", authMiddleware, async (req, res) => {
+  try {
+//    const subServices = await packModel.find({}, { _id: 0, subService: 1 });
+const subServices = await packModel.find({});
+    res.status(200).json({ success: true, data: subServices });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "An error occurred" });
+  }
+});
+
+router.put("/edit-subservice/:id", async (req, res) => {
+  try {
+    const updatedSubService = await packModel.findByIdAndUpdate(
+      req.params.id,
+      {
+        subService: req.body.subService,
+        serviceType: req.body.serviceType,
+        name: req.body.serviceName,
+        status: req.body.status,
+      },
+      { new: true }
+    );
+
+    res.status(200).json({ success: true, data: updatedSubService });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Error updating sub-service" });
+  }
+});
+
+// Delete sub-service
+router.delete("/delete-subservice/:id", async (req, res) => {
+  try {
+    await packModel.findByIdAndDelete(req.params.id);
+
+    res.status(200).json({ success: true, message: "Sub-service deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Error deleting sub-service" });
+  }
+});
 
 router.post('/set-break-time', async (req, res) => {
  
@@ -337,4 +434,89 @@ router.post("/apply-doctor-account", authMiddleware, async (req, res) => {
     });
   }
 });
+
+router.post("/book-appointment", authMiddleware, async (req, res) => {
+  try {
+    req.body.status = "pending";
+    req.body.date = moment(req.body.date, "DD-MM-YYYY").toISOString();
+    req.body.time = moment(req.body.time, "HH:mm").toISOString();
+    const newAppointment = new Appointment(req.body);
+    await newAppointment.save();
+    //pushing notification to doctor based on his userid
+    const user = await User.findOne({ _id: req.body.doctorInfo.userId });
+    user.unseenNotifications.push({
+      type: "new-appointment-request",
+      message: `A new appointment request has been made by ${req.body.userInfo.name}`,
+      onClickPath: "/doctor/appointments",
+    });
+    await user.save();
+    res.status(200).send({
+      message: "Appointment booked successfully",
+      success: true,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      message: "Error booking appointment",
+      success: false,
+      error,
+    });
+  }
+});
+
+router.post("/check-booking-avilability", authMiddleware, async (req, res) => {
+  try {
+    const date = moment(req.body.date, "DD-MM-YYYY").toISOString();
+    const fromTime = moment(req.body.time, "HH:mm")
+      .subtract(1, "hours")
+      .toISOString();
+    const toTime = moment(req.body.time, "HH:mm").add(1, "hours").toISOString();
+    const doctorId = req.body.doctorId;
+    const appointments = await Appointment.find({
+      doctorId,
+      date,
+      time: { $gte: fromTime, $lte: toTime },
+    });
+    console.log(appointments);
+    if (appointments.length > 0) {
+      
+      return res.status(200).send({
+        message: "Appointments not available",
+        success: false,
+      });
+    } else {
+      return res.status(200).send({
+        message: "Appointments available",
+        success: true,
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      message: "Error booking appointment",
+      success: false,
+      error,
+    });
+  }
+});
+
+
+router.get("/get-appointments-by-user-id", authMiddleware, async (req, res) => {
+  try {
+    const appointments = await Appointment.find({ userId: req.body.userId });
+    res.status(200).send({
+      message: "Appointments fetched successfully",
+      success: true,
+      data: appointments,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      message: "Error fetching appointments",
+      success: false,
+      error,
+    });
+  }
+});
+
 module.exports = router;

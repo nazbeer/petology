@@ -12,12 +12,8 @@ const MobileGrooming = () => {
     size: '',
     dimension: '',
     breed: '',
-   // image: null,
     date:'',
     time:'',
-    // building:'',
-    // flat:'',
-    // landmark:'',
     firstname:'',
     lastname:'',
     email:'',
@@ -34,35 +30,13 @@ const MobileGrooming = () => {
     }));
   };
 
-  // const handleImageChange = (e) => {
-  //   const file = e.target.files[0];
-  //   setService((prevState) => ({
-  //     ...prevState,
-  //     image: file,
-  //   }));
-  // };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const formData = new FormData();
-    formData.append('service', service.service);
-    formData.append('pet', service.pet);
-    formData.append('size', service.size);
-    formData.append('dimension', service.dimension);
-    formData.append('breed', service.breed);
-    //formData.append('image', service.image);
-    formData.append('date', service.date);
-    formData.append('time', service.time);
-    // formData.append('building',service.building);
-    // formData.append('flat', service.flat);
-    // formData.append('landmark', service.landmark);
-    formData.append('firstname', service.firstname);
-    formData.append('lastname', service.lastname);
-    formData.append('email', service.email);
-    formData.append('mobile', service.mobile);
+   
 
     try {
-      const response = await axios.post('/create-new-appointment', formData, {
+      const response = await axios.post('/api/open/mobgrooming-appointment', service, {
         headers: { 'Content-Type': 'multipart/form-data',
         Authorization: `Bearer ${localStorage.getItem("token")}`,
         },

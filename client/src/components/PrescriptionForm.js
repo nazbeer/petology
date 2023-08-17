@@ -1,236 +1,115 @@
-// src/components/PrescriptionForm.js
-import React, { useState , useEffect} from 'react';
-
-import axios from 'axios';
-import { useDispatch } from "react-redux";
-import { showLoading, hideLoading } from "../redux/alertsSlice";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { Form, Input, DatePicker, TimePicker, Select, Button } from "antd";
 import { toast } from "react-hot-toast";
-import { resolveOnChange } from 'antd/lib/input/Input';
 
 const PrescriptionForm = () => {
-
-  const [selectedUser, setSelectedUser] = useState('');
-  const [selectedPet, setSelectedPet] = useState('');
+  const [users, setUsers] = useState([]);
+  const [pets, setPets] = useState([]);
+  const [doctors, setDoctors] = useState([]);
   const [appointments, setAppointments] = useState([]);
-
-  const handleUserSelect = (e) => {
-    const userId = e.target.value;
-    setSelectedUser(userId);
-
-    // Fetch pet details based on selected user ID
-    const selectedUserPets = pets.filter((pet) => pet.userId === userId);
-    setSelectedPet(selectedUserPets[0]?.key || ''); // Assuming there is only one pet per user
-  };
+  const [form] = Form.useForm();
 
   useEffect(() => {
-    const fetchAppointments = async () => {
-      try {
-        const response = await axios.get(`/api/doctor/user/${selectedUser}/pet/${selectedPet}/appointments`, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
-          },
-        });
-        if (response.data.success) {
-          setAppointments(response.data.data);
-        }
-      } catch (error) {
-        console.error(error);
-      }
-    };
-
-    if (selectedUser && selectedPet) {
-      fetchAppointments();
-    } else {
-      setAppointments([]);
-    }
-  }, [selectedUser, selectedPet]);
-  const [pets, setPets] = useState([]);
-  const [users, setUsers] = useState([]);
-
-  const dispatch = useDispatch();
-  const getPetsData = async () => {
-    try {
-      dispatch(showLoading());
-      const response = await axios.get("/api/pet/get-all-pets", {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
-      dispatch(hideLoading());
-      if (response.data.success) {
-        setPets(response.data.data);
-      }
-    } catch (error) {
-      dispatch(hideLoading());
-    }
-  };
-  const getUsersData = async () => {
-    try {
-      dispatch(showLoading());
-      const response = await axios.get("/api/user/get-all-users", {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
-      dispatch(hideLoading());
+    // Fetch user details
+    axios.get("/api/user/get-all-approved-users").then((response) => {
       if (response.data.success) {
         setUsers(response.data.data);
       }
-    } catch (error) {
-      dispatch(hideLoading());
-    }
-  };
+    });
 
-  useEffect(() => {
-    getPetsData();
-    getUsersData();
-  }, []);
-  const [prescription, setPrescription] = useState({
-    prescription: '',
-    medicine: '',
-    description: '',
-  
-  });
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setPrescription((prevState) => ({
-      ...prevState,
-      [name]: value,
-    }));
-  };
-
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    setPrescription((prevState) => ({
-      ...prevState,
-      image: file,
-    }));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const formData = new FormData();
-    formData.append('prescription', prescription.prescription);
-    formData.append('medicine', prescription.medicine);
-    formData.append('description', prescription.description);
-
-
-    try {
-      const response = await axios.post('/api/doctor/create-new-prescription', formData, {
-        headers: { 'Content-Type': 'multipart/form-data',
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
-
-      console.log('Prescription saved successfully:', response.data);
+    // Fetch pet details
+    axios.get("/api/pets").then((response) => {
       if (response.data.success) {
-        toast.success(response.data.message);
-        //navigate('/appointments');
+        setPets(response.data.data);
       }
-      // Do something with the response, like showing a success message
+    });
+
+    // Fetch doctor details
+    axios.get("/api/doctors").then((response) => {
+      if (response.data.success) {
+        setDoctors(response.data.data);
+      }
+    });
+
+    // Fetch appointment details
+    axios.get("/api/appointments").then((response) => {
+      if (response.data.success) {
+        setAppointments(response.data.data);
+      }
+    });
+  }, []);
+
+  const handleSubmit = async (values) => {
+    try {
+      const response = await axios.post("/api/prescriptions", values);
+      if (response.data.success) {
+        toast.success("Prescription added successfully");
+        form.resetFields();
+      }
     } catch (error) {
-      toast.error("Error in adding New Prescription.");
-      //dispatch(hideLoading());
+      toast.error("Error adding prescription");
     }
   };
 
   return (
-    <div className='d-lg-flex  gap-2'>
-    <div className='col-md-9 mb-3'>
-    
-      <form onSubmit={handleSubmit}>
-        
-    <div className='card '>
-        <div className='card-body mb-3'>
-        <div className='col-md-12 d-lg-flex justify-content-evenly align-items-center gap-2'>
-              <div className='col-md-6 mb-2'>
-                <label htmlFor="patient_id">User Details</label>:
-                <select className="custom-select mr-sm-10 form-control" onChange={handleUserSelect}>
-                  {users.map((user) => (
-                    <option key={user._id} value={user._id}>
-                      <small className='text-muted'>{user._id}</small> | {user.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className='col-md-6 mb-2'>
-                <label htmlFor="patient_id">Pet Details</label>:
-                <select className="custom-select mr-sm-10 form-control" value={selectedPet} onChange={(e) => setSelectedPet(e.target.value)}>
-                  {pets.map((pet) => (
-                    <option key={pet.key} value={pet.key}>
-                      <small>{pet._id}</small> | {pet.pet}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-         
-        <div className='mb-2'>
-          <label htmlFor="Prescription">Prescription: </label>
-          <input className="form-control" 
-            type="text"
-            id="prescription"
-            name="prescription"
-            value={prescription.prescription}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div className='mb-2'>
-          <label htmlFor="medicine">Medicine:</label>
-          <input className="form-control" 
-            type="text"
-            id="medicine"
-            name="medicine"
-            value={prescription.medicine}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div className='mb-2'>
-          <label htmlFor="description">Description:</label>
-          <textarea className='form-control' rows="10" name="description"value={prescription.description} onChange={handleChange} required>
-
-          </textarea>
-         
-        </div>
-        <div className='mb-2'>
-          <label htmlFor='Next Appointment'>Next Appointment</label>
-          <div className='col-md-4 col-sm-12 d-flex jusify-content-evenly align-items-center gap-2'>
-          <input type="date" className='form-control'/>
-          <input type="time" className='form-control'/>
-          </div>
-        </div>
-      
-        </div>
-        <div className='card-footer mt-2'>
-        <button type="submit" className='btn btn-success btn-sm'>Submit</button>
-        </div>
-    
-    
-    </div>
-    </form>
-    </div>
-    <div className='col-md-3'>
    
-          {appointments.length > 0 && (
-        <div className='card'>
-          <div className='card-body'>
-          <h6>Appointments for Selected Pet</h6>
-            <div>
-              <span>{appointments.date}</span>
-              {/* {appointments.map((appointment) => (
-                <span key={appointment._id}>Appointment Date: {appointment.date}</span>
-               
-              ))} */}
-            </div>
-          </div>
-        </div>
-      )} 
-         
-    </div>
-    </div>
+    <Form form={form} onFinish={handleSubmit} layout="vertical" width={800}>
+      <Form.Item label="User" name="userId" rules={[{ required: true }]}>
+        <Select placeholder="Select User">
+          {users.map((user) => (
+            <Select.Option key={user._id} value={user._id}>
+              {user.name}
+            </Select.Option>
+          ))}
+        </Select>
+      </Form.Item>
+      <Form.Item label="Pet" name="petId" rules={[{ required: true }]}>
+        <Select placeholder="Select Pet">
+          {pets.map((pet) => (
+            <Select.Option key={pet._id} value={pet._id}>
+              {pet.name}
+            </Select.Option>
+          ))}
+        </Select>
+      </Form.Item>
+      <Form.Item label="Doctor" name="doctorId" rules={[{ required: true }]}>
+        <Select placeholder="Select Doctor">
+          {doctors.map((doctor) => (
+            <Select.Option key={doctor._id} value={doctor._id}>
+              {doctor.doctorInfo.name}
+            </Select.Option>
+          ))}
+        </Select>
+      </Form.Item>
+      <Form.Item label="Appointment" name="appointmentId" rules={[{ required: true }]}>
+        <Select placeholder="Select Appointment">
+          {appointments.map((appointment) => (
+            <Select.Option key={appointment._id} value={appointment._id}>
+              {appointment.date} - {appointment.time}
+            </Select.Option>
+          ))}
+        </Select>
+      </Form.Item>
+      <Form.Item label="Prescription" name="prescription" rules={[{ required: true }]}>
+        <Input.TextArea rows={4} />
+      </Form.Item>
+      <Form.Item label="Description" name="description" rules={[{ required: true }]}>
+        <Input.TextArea rows={4} />
+      </Form.Item>
+      <Form.Item label="Next Appointment Date" name="ndate">
+        <DatePicker style={{ width: "100%" }} />
+      </Form.Item>
+      <Form.Item label="Next Appointment Time" name="ntime">
+        <TimePicker style={{ width: "100%" }} />
+      </Form.Item>
+      <Form.Item>
+        <Button type="primary" htmlType="submit">
+          Add Prescription
+        </Button>
+      </Form.Item>
+    </Form>
+   
   );
 };
 

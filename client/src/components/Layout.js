@@ -178,8 +178,8 @@ function Layout({ children }) {
     //   icon:'ri-bear-smile-line'
     // },
     {
-      name:"Services List",
-      path:"/admin/servicelist",
+      name:"Services",
+      path:"/admin/addservices",
       icon:'ri-booklet-fill',
     },
     {

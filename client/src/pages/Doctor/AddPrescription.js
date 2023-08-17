@@ -1,24 +1,31 @@
-import React from 'react';
-import PrescriptionForm from '../../components/PrescriptionForm';
-import { useDispatch } from "react-redux";
+import React, { useState } from "react";
+import { Button } from "antd";
+import PrescriptionForm from "../../components/PrescriptionForm";
 import Layout from "../../components/Layout";
-import { showLoading, hideLoading } from "../../redux/alertsSlice";
-import axios from "axios";
-import { Table } from "antd";
-import { Link } from 'react-router';
-import moment from "moment";
-const AddPrescription = () =>{
-    return(
-        <Layout>
-        <div className="d-flex justify-content-between align-items-center">
-        <h5 className="mb-0">Add Prescription</h5>
-        
-  
-        </div>
-        <hr />
-        <PrescriptionForm />
-      </Layout>
-    )
-}
+const App = () => {
+  const [visible, setVisible] = useState(false);
 
-export default AddPrescription;
+  const showModal = () => {
+    setVisible(true);
+  };
+
+  const closeModal = () => {
+    setVisible(false);
+  };
+
+  return (
+    <Layout>
+    <div>
+       <h1>Prescription Form </h1>
+      <Button type="primary" onClick={showModal}>
+        Add Prescription
+      </Button>
+      <PrescriptionForm  onCancel={closeModal} />
+    </div>
+    </Layout>
+    
+
+  );
+};
+
+export default App;

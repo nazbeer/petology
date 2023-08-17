@@ -3,13 +3,37 @@ import { useDispatch } from "react-redux";
 import Layout from "../../components/Layout";
 import { showLoading, hideLoading } from "../../redux/alertsSlice";
 import { toast } from "react-hot-toast";
+import PrescriptionForm from "../../components/PrescriptionForm";
 import axios from "axios";
-import { Table } from "antd";
+import { Table, Button, Modal } from "antd";
 import moment from "moment";
 
 function DoctorAppointments() {
   const [appointments, setAppointments] = useState([]);
   const dispatch = useDispatch();
+  const [visible, setVisible] = useState(true);
+
+  const showModal = () => {
+    setVisible(true);
+  };
+
+  const closeModal = () => {
+    setVisible(false);
+  };
+
+  const [selectedAppointment, setSelectedAppointment] = useState(null);
+  const [modalVisible, setModalVisible] = useState(false);
+
+  const showAddPrescriptionModal = (appointment) => {
+    setSelectedAppointment(appointment);
+    setModalVisible(true);
+  };
+
+  const hideAddPrescriptionModal = () => {
+    setSelectedAppointment(null);
+    setModalVisible(false);
+  };
+
   const getAppointmentsData = async () => {
     try {
       dispatch(showLoading());
@@ -64,6 +88,11 @@ function DoctorAppointments() {
       dataIndex: "name",
       render: (text, record) => <span>{record.userInfo.name}</span>,
     },
+    // {
+    //   title: "Pet",
+    //   dataIndex: "pet",
+    //   render: (text, record) => <span>{record.petInfo.pet}</span>,
+    // },
     {
       title: "Phone",
       dataIndex: "phoneNumber",
@@ -82,28 +111,29 @@ function DoctorAppointments() {
     {
       title: "Status",
       dataIndex: "status",
+      render:(text, record) => (
+        <span className="text-capitalize">{record.status}</span>
+      )
     },
     {
       title: "Actions",
       dataIndex: "actions",
       render: (text, record) => (
-        <div className="d-flex">
-          {record.status === "pending" && (
-            <div className="d-flex">
-              <h1
-                className="anchor px-2"
-                onClick={() => changeAppointmentStatus(record, "approved")}
-              >
-                Approve
-              </h1>
-              <h1
-                className="anchor"
-                onClick={() => changeAppointmentStatus(record, "rejected")}
-              >
-                Reject
-              </h1>
+        <div className="d-flex justify-content-evently gap-2 align-items-center">
+          {record.status === "pending" ||record.status === "approved" && (
+            <div className="d-flex gap-2">
+             
+               <Button type="success"  onClick={() => changeAppointmentStatus(record, "approved")}> Approve</Button>
+           
+            
+              <Button type="danger"   onClick={() => changeAppointmentStatus(record, "rejected")}>  Reject</Button>
+            
             </div>
           )}
+          <Button type="primary" onClick={showAddPrescriptionModal}>
+            Add Prescription
+          </Button> 
+         
         </div>
       ),
     },
@@ -116,6 +146,21 @@ function DoctorAppointments() {
       <h1 className="page-header">Appointments</h1>
       <hr />
       <Table columns={columns} dataSource={appointments} />
+
+      <Modal
+        title="Add Prescription"
+        visible={modalVisible}
+        onCancel={hideAddPrescriptionModal}
+        footer={null}
+        width={700}
+      >
+        {selectedAppointment && (
+          <PrescriptionForm
+            appointmentId={selectedAppointment._id} // Pass appointmentId as a prop
+            onClose={hideAddPrescriptionModal}
+          />
+        )}
+      </Modal>
     </Layout>
   );
 }

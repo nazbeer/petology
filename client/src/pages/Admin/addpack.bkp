@@ -1,0 +1,82 @@
+// //AddPack.js
+
+// import React, {useState, useEffect} from "react";
+// import Layout from "../../components/Layout";
+// import axios from 'axios';
+// import {toast} from 'react-hot-toast';
+
+// const AddPack = () => {
+//     const [packName , setPackname]  = useState('');
+//     const [subservices, setSubservices] = useState('');
+
+//     // useEffect(() => {
+
+//     // }, []);
+//     const handleSubmit = async (e) => {
+//         e.preventDefault();
+    
+//         try {
+//             const response = await axios.post('/api/admin/create-new-pack', {
+//                 name: packName,
+//                 subservices: subservices
+//             });
+            
+//             if (response.data.success) {
+//                 toast.success(response.data.message);
+//             }
+//         } catch (error) {
+//             if (error.response && error.response.data && error.response.data.code === 11000) {
+//                 // MongoDB duplicate key error
+//                 toast.error("Service name already exists. Please choose a different name.");
+//             } else {
+//                 toast.error(error.message);
+//             }
+//         }
+//     };
+    
+
+//     return (
+//         <Layout>
+
+//             <div className="card">
+//                 <div className="card-header">
+//                     <h5 className="mb-0">Add New Service</h5>
+//                 </div>
+//                 <div className="card-body">
+//                     <form onSubmit={handleSubmit}>
+//                         <div className="col-md-12 mb-3">
+//                             <label htmlFor="">Service Name:<br/><small  className="text-muted">(Ex: Veterinary Pack 1, Veterinary Pack 2, Grooming Pack 1...)</small></label>
+//                         </div>
+//                         <div className="col-md-4 mb-3">
+//                             <input 
+//                                 className="form-control"
+//                                 name="name"
+//                                 onChange={(e) => setPackname(e.target.value)}
+//                             />
+//                         </div>
+//                         <div className="col-md-12 mb-3">
+//                             <label htmlFor="">Sub Service:<br/><small className="text-muted">(Ex: Write the services with comma. <br/>Vaccination, Consultation, Micro Chipping)</small></label>
+//                         </div>
+//                         <div className="col-md-4 mb-3">
+//                             <input 
+//                                 className="form-control"
+//                                 name="subservices"
+//                                 onChange={(e) => setSubservices(e.target.value.split(','))}
+//                             />
+//                         </div>
+//                         <div className="col-md-12  mb-3">
+//                             <button 
+//                                 type="submit" 
+//                                 className="btn btn-success btn-sm">
+//                                 Add New Service
+//                             </button>
+//                         </div>
+//                     </form>
+//                 </div>
+//             </div>
+
+//         </Layout>
+//     )
+// };
+
+// export default AddPack;
