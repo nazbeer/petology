@@ -8,9 +8,9 @@ import { Table } from "antd";
 import moment from "moment";
 
 function OpenAppointments() {
-  const [appointments, setAppointments] = useState([]);
+  const [openappointments, setopenAppointments] = useState([]);
   const dispatch = useDispatch();
-  const getAppointmentsData = async () => {
+  const getopenAppointmentsData = async () => {
     try {
       dispatch(showLoading());
       const response = await axios.get("/api/open/get-appointments-by-user-id", {
@@ -20,7 +20,7 @@ function OpenAppointments() {
       });
       dispatch(hideLoading());
       if (response.data.success) {
-        setAppointments(response.data.data);
+        setopenAppointments(response.data.data);
       }
     } catch (error) {
       dispatch(hideLoading());
@@ -64,12 +64,12 @@ function OpenAppointments() {
     }
   ];
   useEffect(() => {
-    getAppointmentsData();
+    getopenAppointmentsData();
   }, []);
   return  <Layout>
   <h4 className="page-title">My Appointments</h4>
   <hr />
-  <Table columns={columns} dataSource={appointments} />
+  <Table columns={columns} dataSource={openappointments} />
 </Layout>
 }
 

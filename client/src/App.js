@@ -48,7 +48,7 @@ import RecBreakTime from './pages/Reception/BreakTime';
 //import AddService from "./pages/Admin/AddService";
 import GroomingList from "./pages/Admin/GroomingList";
 import AddPack from "./pages/Admin/AddPack";
-
+import Prescription from "./pages/Doctor/Prescription";
 
 function App() {
   const { loading } = useSelector((state) => state.alerts);
@@ -225,7 +225,10 @@ function App() {
             </ProtectedRoute>
           }
         />
-      
+        <Route
+        path="/doctor/prescriptions"
+        element={<ProtectedRoute><Prescription /></ProtectedRoute>}
+        />
         <Route
           path="/doctor/profile/:userId"
           element={

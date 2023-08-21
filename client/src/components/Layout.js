@@ -122,12 +122,17 @@ function Layout({ children }) {
     {
       name: "Appointments",
       path: "/doctor/appointments",
-      icon: "ri-file-list-line",
+      icon: "ri-pulse-line",
     },
     {
       name: "Add Prescription",
       path: "/doctor/addprescription",
       icon: "ri-file-list-line",
+    },
+    {
+      name:"Prescriptions",
+      path:"/doctor/prescriptions",
+      icon:"ri-file-list-3-line"
     },
     {
       name: "Profile",

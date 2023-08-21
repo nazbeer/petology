@@ -1,33 +1,35 @@
-// src/components/Veterinary.js
+// src/components/MobileVeterinary.js
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast } from "react-hot-toast";
 import Header from '../../frontend_components/Header';
 import Footer from '../../frontend_components/Footer';
+import { GoogleMap, Marker, LoadScript, Autocomplete } from '@react-google-maps/api';
 
 const MobileVet = () => {
-  const [doctorList, setDoctorList] = useState([]);
-  useEffect(() =>{
-    axios.get('/api/user/get-all-approved-doctors')
-    .then((response) => setDoctorList(response.data))
-    .catch((error) => console.error(error));
-  },[]);
+  // const [doctorList, setDoctorList] = useState([]);
+  const [autocomplete, setAutocomplete] = useState(null);
+  // useEffect(() =>{
+  //   axios.get('/api/user/get-all-approved-doctors')
+  //   .then((response) => setDoctorList(response.data))
+  //   .catch((error) => console.error(error));
+  // },[]);
+  const [location, setLocation] = useState({ lat: 25.2048, lng: 55.2708 });
   const [service, setService] = useState({
-    doctor:'',
-    service: '',
+    doctor:'Any',
+    service: 'Mobile Veterinary',
     pet:'',
     size: '',
     breed: '',
     date:'',
     time:'',
-    building:'',
-    flat:'',
-    landmark:'',
+    
     firstname:'',
     lastname:'',
     email:'',
     mobile:'',
-
+    lat:'',
+    lng:'',
 
   });
 
@@ -38,50 +40,41 @@ const MobileVet = () => {
       [name]: value,
     }));
   };
-
-  // const handleImageChange = (e) => {
-  //   const file = e.target.files[0];
-  //   setService((prevState) => ({
-  //     ...prevState,
-  //     image: file,
-  //   }));
-  // };
+ 
+  
+  
+  const onPlaceChanged = () => {
+ 
+    if (autocomplete !== null) {
+      const place = autocomplete.getPlace();
+      if (place.geometry && place.geometry.location) {
+        const lat = place.geometry.location.lat();
+        const lng = place.geometry.location.lng();
+        setLocation({ lat, lng });
+        setService((prevState) => ({
+          ...prevState,
+          lat,
+          lng,
+        }));
+      }
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const formData = new FormData();
-    formData.append('doctor', service.doctor);
-    formData.append('service', service.service);
-    formData.append('pet', service.pet);
-    formData.append('size', service.size);
- 
-    formData.append('breed', service.breed);
-    //formData.append('image', service.image);
-    formData.append('date', service.date);
-    formData.append('time', service.time);
-    formData.append('building',service.building);
-    formData.append('flat', service.flat);
-    formData.append('landmark', service.landmark);
-    formData.append('firstname', service.firstname);
-    formData.append('lastname', service.lastname);
-    formData.append('email', service.email);
-    formData.append('mobile', service.mobile);
+
 
     try {
-      const response = await axios.post('/create-new-appointment', formData, {
-        headers: { 'Content-Type': 'multipart/form-data',
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
+      const response = await axios.post('/api/open/book-mobvet-appointment', service);
 
-      console.log('service saved successfully:', response.data);
+      console.log('New appointment successfully saved:', response.data.data);
       if (response.data.success) {
         toast.success(response.data.message);
         //navigate('/appointments');
       }
       // Do something with the response, like showing a success message
     } catch (error) {
-      toast.error("Error in adding New service.");
+      toast.error("Error in adding Mobile Veterinary Appointment.");
       //dispatch(hideLoading());
     }
   };
@@ -102,40 +95,24 @@ const MobileVet = () => {
           <div className='row'>
     <div className='col-md-6'>
     <div className='mb-2'>
-          <label htmlFor="service">Choose Service: </label>
-          <select className='form-control' id='service' name='service' onChange={handleChange}>
-            <option defaultValue="">Select Service...</option>
-            <option value={service.service}>Hair Cut</option>
-            <option value={service.service}>Bath</option>    
+          <label htmlFor="service">Chosen Service: </label>
+          <select className='form-control' id='service'  name='service' onChange={handleChange} disabled>
+            <option value="Mobile Veterinary">Mobile Veterinary</option>
+          
 
           </select>
          
         </div>
-    {/* <div className='mb-2'>
-          <label htmlFor="doctor">Choose Doctor: </label>
-          <select className='form-control' id='doctor' name='doctor' onChange={handleChange}>
-            <option defaultValue="">Select Doctor...</option>
-            {doctorList &&
-             doctorList.map((data, key) => {
-              return(
-                <option key ={data.key}  value={data}>{`${data}`}</option>
-                );
   
-             })
-            }
-
-          </select>
-         
-        </div> */}
         
         <div className='mb-2'>
           <label htmlFor="size">Choose Pet: </label>
-          <select className='form-control' id='pet' name='pet' onChange={handleChange}>
+          <select className='form-control' id='pet' name='pet'  onChange={handleChange}>
             <option defaultValue="">Select Pet...</option>
-            <option value={service.pet}>Dog</option>
-            <option value={service.pet}>Cat</option>    
-            <option value={service.pet}>Bird</option>    
-            <option value={service.pet}>Other</option>    
+            <option value="Dog">Dog</option>
+            <option value="Cat">Cat</option>    
+            <option value="Bird">Bird</option>    
+            <option value="Other">Other</option>    
 
           </select>
        
@@ -144,9 +121,9 @@ const MobileVet = () => {
           <label htmlFor="size">Choose Size: </label>
           <select className='form-control' id='size' name='size' onChange={handleChange}>
             <option defaultValue="">Select size...</option>
-            <option value={service.size}>S (Small)</option>
-            <option value={service.size}>M (Medium)</option>    
-            <option value={service.size}>L (Large)</option>   
+            <option value="S">S (Small)</option>
+            <option value="M">M (Medium)</option>    
+            <option value="L">L (Large)</option>   
           </select>
         </div>
 
@@ -183,42 +160,6 @@ const MobileVet = () => {
             required
           />
         </div>
-        
-        </div>
-        <div className='col-md-6'>
-        <div className='mb-2'>
-          <label htmlFor="building">Building Name:</label>
-          <input className="form-control" 
-            type="text"
-            id="building"
-            name="building"
-            value={service.building}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div className='mb-2'>
-          <label htmlFor="flat">Flat/Apartment:</label>
-          <input className="form-control" 
-            type="text"
-            id="flat"
-            name="flat"
-            value={service.flat}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div className='mb-2'>
-          <label htmlFor="landmark">Landmark:</label>
-          <input className="form-control" 
-            type="text"
-            id="landmark"
-            name="landmark"
-            value={service.landmark}
-            onChange={handleChange}
-            required
-          />
-        </div>
         <div className='mb-2'>
           <label htmlFor="firstname">First Name:</label>
           <input className="form-control" 
@@ -241,6 +182,78 @@ const MobileVet = () => {
             required
           />
         </div>
+        </div>
+        <div className='col-md-6 mb-3'>
+        <div className='mb-2'>
+          <label htmlFor="location" >Location:</label>
+       
+      <div style={{ width: '100%', height: '400px', borderRadius:'6px' }}>
+      <LoadScript googleMapsApiKey="AIzaSyAxdklbUsegbWsasCJpvfmin95xzIxiY3Y" libraries={["places"]}>
+        <GoogleMap
+          mapContainerStyle={{ width: '100%', height: '98%', borderRadius:'6px', border:'1px solid #ccc' }}
+          center={{ lat: location.lat, lng: location.lng }}
+          zoom={14}
+        >
+          {location.lat && location.lng && (
+            <Marker
+            position={{ lat: location.lat, lng: location.lng }}
+            draggable={true} // Make the marker draggable
+            onDragEnd={(e) => {
+              const lat = e.latLng.lat();
+              const lng = e.latLng.lng();
+              setLocation({ lat, lng });
+              setService((prevState) => ({
+                ...prevState,
+                lat,
+                lng,
+              }));
+          //    console.log(lat, lng)
+            }}
+            
+          />
+          )}
+
+          <Autocomplete
+              onLoad={(autocomplete) => {
+                setAutocomplete(autocomplete);
+              }}
+              onPlaceChanged={onPlaceChanged}
+          >
+            <input
+              type='text'
+              placeholder='Search for a location'
+              style={{
+                boxSizing: 'border-box',
+                border: '1px solid transparent',
+                width: '240px',
+                height: '32px',
+                padding: '12px 12px',
+                borderRadius: '6px',
+                boxShadow: '0 2px 6px rgba(0, 0, 0, 0.3)',
+                fontSize: '12px',
+                outline: 'none',
+                textOverflow: 'ellipses',
+                position: 'absolute',
+                marginLeft:'10px',
+                marginTop:'55px',
+                justifyContent:'center'
+              }}
+              
+              required  
+            />
+             {/* <input value={location.lat}  onChange={handleChange} style={{visibility:"none"}}/>
+  <input value={location.lng}  onChange={handleChange} style={{visibility:"none"}}/> */}
+
+          </Autocomplete>
+        </GoogleMap>
+      </LoadScript>
+
+
+          </div>
+    
+  
+        </div>
+        
         <div className='mb-2'>
           <label htmlFor="email">Email:</label>
           <input className="form-control" 

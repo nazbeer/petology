@@ -122,7 +122,7 @@ const getUserType = (user) => {
   } else if (user.isGroomer) {
     return "Groomer";
   } else if (user.isNurse) {
-    return "Nurse";
+    return "Receptionist";
   } else if (user.isAdmin) {
     return "Admin";
   } else {

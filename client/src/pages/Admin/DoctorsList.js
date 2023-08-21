@@ -149,7 +149,7 @@ function DoctorsList() {
     <Layout>
        <div className="d-flex justify-content-between align-items-center">
       <h3 className="">Doctor List</h3>
-     {/* <a href="/admin/apply-doctor" ><button className="btn btn-success " type="button">Add New Doctor</button></a> */}
+     <a href="/admin/apply-doctor" ><button className="btn btn-success " type="button">Add New Doctor</button></a>
 
       </div>
       <hr />
