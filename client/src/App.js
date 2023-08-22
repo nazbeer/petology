@@ -49,6 +49,8 @@ import RecBreakTime from './pages/Reception/BreakTime';
 import GroomingList from "./pages/Admin/GroomingList";
 import AddPack from "./pages/Admin/AddPack";
 import Prescription from "./pages/Doctor/Prescription";
+import MobileGroomingList from "./pages/Admin/MobileGroomingList";
+import MobileVetList from "./pages/Admin/MobileVetList";
 
 function App() {
   const { loading } = useSelector((state) => state.alerts);
@@ -214,6 +216,22 @@ function App() {
           element={
             <ProtectedRoute>
               <GroomingList />
+            </ProtectedRoute>
+          }
+        />
+          <Route
+          path="/admin/mobilegroominglist"
+          element={
+            <ProtectedRoute>
+              <MobileGroomingList/>
+            </ProtectedRoute>
+          }
+        />
+          <Route
+          path="/admin/mobilevetlist"
+          element={
+            <ProtectedRoute>
+              <MobileVetList/>
             </ProtectedRoute>
           }
         />

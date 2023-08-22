@@ -7,13 +7,16 @@ const OpenAppointment = require('../models/openAppointmentModel');
 const Pet = require("../models/petModel");
 const Service = require('../models/serviceModel');
 const opengroomingModel = require("../models/openGroomingModel");
+const mobvetappModel = require("../models/mobvetappModel");
+const mobgroomappModel= require("../models/mobgroomappModel");
+const Pack = require("../models/packModel");
 router.get('/get-all-appointments', async (req, res) => {
     try {
       const appointmentList = await OpenAppointment.find({})
         .populate('doctors', 'name') // Assuming 'doctor' field is a reference to User model
         //.populate('petlists', 'name') // Assuming 'pet' field is a reference to Pet model
         .exec();
-    //  console.log(appointmentList);
+      console.log(appointmentList);
       res.status(200).send({
         message: 'Appointment List fetched successfully',
         success: true,
@@ -34,7 +37,7 @@ router.get('/get-all-appointments', async (req, res) => {
        // .populate('doctors', 'name') // Assuming 'doctor' field is a reference to User model
         //.populate('petlists', 'name') // Assuming 'pet' field is a reference to Pet model
         .exec();
-    //  console.log(appointmentList);
+      console.log(appointmentList);
       res.status(200).send({
         message: 'Appointment List fetched successfully',
         success: true,
@@ -49,7 +52,22 @@ router.get('/get-all-appointments', async (req, res) => {
       });
     }
   });
-  
+  router.get("/get-services", async(req, res) => {
+    try{
+      const services = await Pack.find({serviceType: "Mobile Grooming"});
+      res.status(200).send({
+        message:"Services fetched successfully", 
+        success:true,
+        data : services
+      });
+    }catch (error) {
+      res.status(500).send({
+        message:"Error fetching Service List",
+        success:false,
+        error,
+      })
+    }
+  });
 router.get("/get-all-approved-doctors", async (req, res) => {
     try {
       const doctors = await Doctor.find({ status: "approved" });
@@ -61,34 +79,73 @@ router.get("/get-all-approved-doctors", async (req, res) => {
     } catch (error) {
       console.log(error);
       res.status(500).send({
-        message: "Error applying doctor account",
+        message: "Error fetching doctor list",
         success: false,
         error,
       });
     }
   });
   
-    router.post('/book-appointment', async (req, res) => {
-        try {
-        const appointmentData = req.body;
+    // router.post('/book-appointment', async (req, res) => {
+    //     try {
+    //     const appointmentData = req.body;
     
-        // Create a new appointment
-        const newAppointment = new OpenAppointment(appointmentData);
-        const savedAppointment = await newAppointment.save();
-          //  console.log('appointment', newAppointment);
-        // Update the user's appointment array
-        await User.findByIdAndUpdate(
-            appointmentData.userId,
-            { $addToSet: { appointments: savedAppointment._id } },
-            { new: true }
-        );
+    //     // Create a new appointment
+    //     const newAppointment = new OpenAppointment(appointmentData);
+    //     const savedAppointment = await newAppointment.save();
+    //     // Update the user's appointment array
+    //     await User.findByIdAndUpdate(
+    //         appointmentData.userId,
+    //         { $addToSet: { appointments: savedAppointment._id } },
+    //         { new: true }
+    //     );
     
-        res.status(200).json({ success: true, message: 'Veterniary Appointment booked successfully', data: savedAppointment });
-        } catch (error) {
-        console.error(error);
-        res.status(500).json({ success: false, message: 'An error occurred while booking the appointment' });
-        }
-    });
+    //     res.status(200).json({ success: true, message: 'Veterniary Appointment booked successfully', data: savedAppointment });
+    //     } catch (error) {
+    //     console.error(error);
+    //     res.status(500).json({ success: false, message: 'An error occurred while booking the appointment' });
+    //     }
+    // });
+    router.post('/book-mobvet-appointment', async (req, res) => {
+      try {
+      const appointmentData = req.body;
+        console.log(appointmentData);
+      // Create a new appointment
+      const newAppointment = new mobvetappModel(appointmentData);
+      const savedAppointment = await newAppointment.save();
+      // Update the user's appointment array
+      // await User.findByIdAndUpdate(
+      //     appointmentData.userId,
+      //     { $addToSet: { appointments: savedAppointment._id } },
+      //     { new: true }
+      // );
+  
+      res.status(200).json({ success: true, message: 'Mobile Veterniary Appointment booked successfully', data: savedAppointment });
+      } catch (error) {
+      console.error(error);
+      res.status(500).json({ success: false, message: 'An error occurred while booking the appointment' });
+      }
+  });
+  router.post('/book-mobgroom-appointment', async (req, res) => {
+    try {
+    const appointmentData = req.body;
+      console.log(appointmentData);
+    // Create a new appointment
+    const newAppointment = new mobgroomappModel(appointmentData);
+    const savedAppointment = await newAppointment.save();
+    // Update the user's appointment array
+    // await User.findByIdAndUpdate(
+    //     appointmentData.userId,
+    //     { $addToSet: { appointments: savedAppointment._id } },
+    //     { new: true }
+    // );
+
+    res.status(200).json({ success: true, message: 'Mobile Grooming Appointment booked successfully', data: savedAppointment });
+    } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'An error occurred while booking the appointment' });
+    }
+});
     router.post('/grooming-appointment', async (req, res) => {
       try {
       const appointmentData = req.body;
@@ -111,5 +168,29 @@ router.get("/get-all-approved-doctors", async (req, res) => {
       }
   });
   
+router.get(
+  "/get-openappointments-by-doctor-id",
+
+  async (req, res) => {
+    try {
+      const doctor = await Doctor.findOne({ userId: req.body.userId });
+      const appointments = await OpenAppointment.find({ doctorId: doctor._id });
+      // console.log(doctor);
+      console.log(appointments);
+      res.status(200).send({
+        message: "Appointments fetched successfully",
+        success: true,
+        data: appointments,
+      });
+    } catch (error) {
+      console.log(error);
+      res.status(500).send({
+        message: "Error fetching appointments",
+        success: false,
+        error,
+      });
+    }
+  }
+);
   
   module.exports = router;

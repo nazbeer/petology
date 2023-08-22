@@ -4,13 +4,12 @@ const User = require("../models/userModel");
 const Doctor = require("../models/doctorModel");
 const Appointment = require("../models/appointmentModel");
 const Pet = require("../models/petModel");
-const serviceModel = require('../models/serviceModel');
+
 const OpenAppointment = require("../models/openAppointmentModel");
 const authMiddleware = require("../middlewares/authMiddleware");
 const breaktimeModel = require("../models/breaktimeModel");
 const packModel = require("../models/packModel");
-//const { default: Appointments } = require("../client/src/pages/Appointments");
-//const { default: Appointments } = require("../client/src/pages/Appointments");
+const MobileVetApp = require("../models/mobvetappModel");
 
 // router.get("/get-all-services", authMiddleware, async (req, res) => {
 //   try{
@@ -95,7 +94,41 @@ router.get('/doctordetails/:doctorId', async (req, res) => {
     });
   }
 });
+router.get('/get-all-mobvet-appointments', authMiddleware, async(req, res) => {
+  try{
+    const mobvetapplist = await MobileVetApp.find({});
+    res.status(200).send({
+      message:'Appointment List fetched successfully',
+      success:true,
+      data: mobvetapplist,
+    });
+  } catch (error){
+    console.error('Error in getting all mobile vet appointments');
+    res.status(500).send({
+      message:'Error fetching All Appointments',
+      success: false,
+      error, 
 
+    })
+  }
+})
+router.get("/get-all-mobgroom-appointments", authMiddleware, async (req, res) =>{
+  try{
+    const mobgroomapplist =await MobileGroomApp.find({});
+    res.status(200).send({
+      message:'Appointment List fetched successfully',
+      success:true,
+      data:mobgroomapplist,
+    });
+  } catch (error){
+    console.error("Error in getting all grooming appointments");
+    res.status(500).send({message:"Error Fetching Grooming Appointment list",
+    success:false,
+    error,
+  });
+
+  }
+})
 router.get('/get-all-open-appointments', async (req, res) => {
   try {
     const appointmentList = await OpenAppointment.find({})
@@ -402,14 +435,62 @@ router.post('/change-open-appointment-status/:id', async (req, res) => {
 });
 
 
+router.post("/apply-doctor", async (req, res) => {
+  try {
+    // Extract user data from the request body
+    const { firstName, lastName, email, phoneNumber, website,address,specialization,experience,feePerCunsultation,shift } = req.body;
+
+    // Create a new user with isDoctor set to true
+    const user = new User({
+      name: `${firstName} ${lastName}`,
+      email :`${email}`,
+      password:`$2a$10$Et3V2e5GdR3eBOoXwa0suOObPmXjxHPwtvCkRJoxVaZP3hbGK2pUS`, // You 
+      mobile: `${phoneNumber}`,
+      isDoctor: true,
+    });
+
+    // Save the user to the database
+    await user.save();
+
+    // Create a new doctor with the associated user ID
+    const doctor = new Doctor({
+      user: user._id,
+      speciality,
+    });
+
+    // Save the doctor to the database
+    await doctor.save();
+
+    res.status(201).json({
+      success: true,
+      message: "Doctor account created successfully",
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "An error occurred while creating the doctor account",
+    });
+  }
+});
 
 router.post("/apply-doctor-account", authMiddleware, async (req, res) => {
   try {
+  //  const { firstName, lastName, email } = req.body;
+
     const newdoctor = new Doctor({ ...req.body, status: "pending" });
     //console.log(newdoctor);
     await newdoctor.save();
     const adminUser = await User.findOne({ isAdmin: true });
+    // const user = new User({
+    //   name: `${firstName} ${lastName}`,
+    //   email,
+    //   password:`$2a$10$Et3V2e5GdR3eBOoXwa0suOObPmXjxHPwtvCkRJoxVaZP3hbGK2pUS`, // You need to hash the password before saving (use bcrypt)
+    //   isDoctor: true,
+    // });
 
+    // Save the user to the database
+ //   await user.save();
     const unseenNotifications = adminUser.unseenNotifications;
     unseenNotifications.push({
       type: "new-doctor-request",

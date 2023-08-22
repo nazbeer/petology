@@ -8,7 +8,7 @@ import { Button, Modal } from "react-bootstrap";
 import moment from "moment";
 import { Link } from 'react-router-dom';
 import {toast} from 'react-hot-toast';
-function GroomingList(doctorId) {
+function MobileGroomingList(doctorId) {
   const [appointments, setAppointments] = useState([]);
   const [openappointments, setOpenAppointments] = useState([]);
   const [doctors, setDoctors] = useState([]);
@@ -112,31 +112,31 @@ function GroomingList(doctorId) {
     }
   };
 
-  const assignDoctorToAppointment = async () => {
-    try {
-      const response = await axios.post(
-        "/api/admin/assign-doctor-to-appointment",
-        {
-          appointmentId: selectedAppointment._id,
-          doctorId: selectedDoctor,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
-        console.log(response);
-      if (response.data.success) {
+//   const assignDoctorToAppointment = async () => {
+//     try {
+//       const response = await axios.post(
+//         "/api/admin/assign-doctor-to-appointment",
+//         {
+//           appointmentId: selectedAppointment._id,
+//           doctorId: selectedDoctor,
+//         },
+//         {
+//           headers: {
+//             Authorization: `Bearer ${localStorage.getItem("token")}`,
+//           },
+//         }
+//       );
+//         console.log(response);
+//       if (response.data.success) {
 
-        toast.success(response.data.message);
-        getAppointmentsData();
-        handleCloseModal();
-      }
-    } catch (error) {
-      toast.error("Error assigning doctor to appointment");
-    }
-  };
+//         toast.success(response.data.message);
+//         getAppointmentsData();
+//         handleCloseModal();
+//       }
+//     } catch (error) {
+//       toast.error("Error assigning doctor to appointment");
+//     }
+//   };
   
   const getAppointmentsData = async () => {
     try {
@@ -253,6 +253,7 @@ function GroomingList(doctorId) {
       render :(text, record)=>(
         <span className="text-capitalize">{record.firstname} {record.lastname}</span>
       ),
+     
     },
     {
       title:'Mobile',
@@ -268,6 +269,24 @@ function GroomingList(doctorId) {
         <span>{record.email}</span>
       )
     },
+    // {
+    //   title: 'Doctor Details',
+    //   dataIndex: 'doctorDetails',
+    //   render: () => {
+    //     if (!doctorDetails) {
+    //       return null;
+    //     }
+    //     return (
+    //       <div>
+    //         <p>
+    //           Doctor Name: {doctorDetails.firstName} {doctorDetails.lastName}
+    //         </p>
+    //         <p>Specialization: {doctorDetails.specialization}</p>
+    //         {/* Add other doctor details as needed */}
+    //       </div>
+    //     );
+    //   },
+    // },
     {
       title:'Status',
       dataIndex:"status",
@@ -422,70 +441,23 @@ function GroomingList(doctorId) {
       </div>
       <div className="col-md-6 d-lg-flex gap-3 justify-content-end align-items-center">
       <Link to="/admin/appointmentlist"><button className="btn btn-warning btn-sm" type="button">Veterinary</button></Link>
-        <Link to="/admin/groominglist"><button className="btn btn-success btn-sm" type="button">Grooming</button></Link>
+        <Link to="/admin/groominglist"><button className="btn btn-warning btn-sm" type="button">Grooming</button></Link>
         <Link to="/admin/mobilevetlist"><button className="btn btn-warning btn-sm" type="button">Mobile Vet</button></Link>
-        <Link to="/admin/mobilegroominglist"><button className="btn btn-warning btn-sm" type="button">Mobile Grooming</button></Link>
+        <Link to="/admin/mobilegroominglist"><button className="btn btn-success btn-sm" type="button">Mobile Grooming</button></Link>
       </div>
       </div>
       <hr />
-      {/* <Table columns={usercolumns} dataSource={appointments}/> */}
+      <Table columns={usercolumns} dataSource={appointments}/>
       <div>
-      {/* <Modal show={showModal} onHide={handleCloseModal} size="lg">
-      <Modal.Header closeButton>
-            <Modal.Title>
-              <div className="d-lg-flex justify-content-between align-items-center">
-                <span>Appointment Details</span>
-               
-              </div>
-            </Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            <div className="col-md-12 ">
-           <div className="d-lg-flex justify-content-between align-items-center gap-4 mb-3" >
-            <label className="text-left">Parent Name: </label> 
-            <span className="text-right">{selectedAppointment && selectedAppointment.userInfo.firstName}</span>
-            </div> 
-            <div className="d-lg-flex justify-content-between align-items-center gap-4 mb-3" >
-            <label className="text-left">Assign Doctor: </label> 
-            <span className="text-right"> <select className="form-control">
-              <option>--Select Doctor--</option>
-              {selectedAppointment && doctors.map((doctor) => (
-                <option key={doctor._id} value={doctor._id}>
-                  Dr. {doctor.firstName} {doctor.lastName}
-                </option>
-              ))}
-              
-            </select></span>
-            </div> 
-            <div className="d-lg-flex justify-content-between align-items-center gap-4  " >
-            <label className="text-left">Doctor Specialization: </label> 
-            <span className="text-right">{selectedAppointment && selectedAppointment.doctorInfo.specialization}</span>
-            </div> 
-           </div>
-          
-          
-               
-            
-
-           
-          </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={handleCloseModal}>
-            Close
-          </Button>
-          <Button variant="primary" onClick={assignDoctorToAppointment}>
-            Save Changes
-          </Button>
-        </Modal.Footer>
-      </Modal> */}
+     
       </div>
       </div>
       <div className="col-md-12">
-        {/* <h6>Open Appointment Lists</h6> */}
+        <h6>Open Appointment Lists</h6>
         <Table columns={opencolumns} dataSource={openappointments}/>
       </div>
     </Layout>
   );
 }
 
-export default GroomingList;
+export default MobileGroomingList;

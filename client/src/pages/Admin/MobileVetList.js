@@ -6,9 +6,9 @@ import axios from "axios";
 import { Table } from "antd";
 import { Button, Modal } from "react-bootstrap";
 import moment from "moment";
-import { Link } from 'react-router-dom';
 import {toast} from 'react-hot-toast';
-function GroomingList(doctorId) {
+import { Link } from 'react-router-dom';
+function MobileVetList(doctorId) {
   const [appointments, setAppointments] = useState([]);
   const [openappointments, setOpenAppointments] = useState([]);
   const [doctors, setDoctors] = useState([]);
@@ -36,7 +36,7 @@ function GroomingList(doctorId) {
         getOpenAppointmentsData();
       }
     } catch (error){
-      //toast.error("Error changing appointment status");
+     // toast.error("Error changing appointment status");
       dispatch(hideLoading());
     }
   };
@@ -88,7 +88,7 @@ function GroomingList(doctorId) {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
-
+      console.log(response.data);
       if (response.data.success) {
         setDoctors(response.data.data);
       }
@@ -155,30 +155,15 @@ function GroomingList(doctorId) {
   };
   const [doctorDetails, setDoctorDetails] = useState(null);
 
-  // useEffect(() => {
-  //   const fetchDoctorDetails = async (record) => {
-  //     try {
-  //       const response = await axios.get(`/api/admin/doctordetails/${record._id}`);
-  //       console.log(response);
-  //       if (response.data.success) {
-  //         setDoctorDetails(response.data.data);
-  //       }
-  //     } catch (error) {
-  //       console.error(error);
-  //     }
-  //   };
-
-  //   fetchDoctorDetails();
-  // }, [doctorId]);
  
   const getOpenAppointmentsData = async () => {
     try {
-      const response = await axios.get("/api/open/get-all-grooming-appointments", {
-        // headers: {
-        //   Authorization: `Bearer ${localStorage.getItem("token")}`,
-        // },
+      const response = await axios.get("/api/admin/get-all-mobvet-appointments", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
       });
-      console.log(response.data.data);
+      console.log(response);
       if (response.data.success) {
         setOpenAppointments(response.data.data);
       }
@@ -218,42 +203,56 @@ function GroomingList(doctorId) {
   }, []);
   const opencolumns = [
     {
-      title:"Service",
-      dataIndex:"module",
+        title :"Appointment Date",
+        dataIndex  :'date',
+        render:(text, record)=>(
+          <span>
+            {moment(record.date).format('LL')}
+          </span>
+        )
+      },
+      {
+        title:"Appointment Time",
+        dataIndex:"time",
+        render:(text, record)=> (
+          <span>
+            {record.time}
+          </span>
+        )
+      },
+    {
+      title:"Doctor",
+      dataIndex:"doctor",
+      render:(text, record)=>(
+        <span className="text-capitalize">
+            {record.doctor}
+        </span>
+      )
     },
     {
         title:"Services Requested",
         dataIndex: "service",
     },
     {
-      title:'Pet',
-      dataIndex : 'pet',
-    },
-    {
-      title :"Appointment Date",
-      dataIndex  :'date',
+      title:'Pet Details',
+      dataIndex : 'petdetails',
       render:(text, record)=>(
         <span>
-          {moment(record.date).format('LL')}
+            {record.pet} - {record.breed} ({record.size})
         </span>
       )
     },
     {
-      title:"Appointment Time",
-      dataIndex:"time",
-      render:(text, record)=> (
-        <span>
-          {record.time}
-        </span>
-      )
-    },
-    {
-      title:"Parent Name",
-      dataIndex:"parentName",
-      render :(text, record)=>(
-        <span className="text-capitalize">{record.firstname} {record.lastname}</span>
-      ),
-    },
+        title:"Parent Name",
+        dataIndex:"parentName",
+        render :(text, record)=>(
+          <span className="text-capitalize">{record.firstname} {record.lastname}</span>
+        ),
+       
+      },
+
+    
+   
     {
       title:'Mobile',
       dataIndex:'mobile',
@@ -268,12 +267,30 @@ function GroomingList(doctorId) {
         <span>{record.email}</span>
       )
     },
+    // {
+    //   title: 'Doctor Details',
+    //   dataIndex: 'doctorDetails',
+    //   render: () => {
+    //     if (!doctorDetails) {
+    //       return null;
+    //     }
+    //     return (
+    //       <div>
+    //         <p>
+    //           Doctor Name: {doctorDetails.firstName} {doctorDetails.lastName}
+    //         </p>
+    //         <p>Specialization: {doctorDetails.specialization}</p>
+    //         {/* Add other doctor details as needed */}
+    //       </div>
+    //     );
+    //   },
+    // },
     {
       title:'Status',
       dataIndex:"status",
-        render:(text, record) => (
-            <span className="text-capitalize">{record.status}</span>
-        )
+      render:(text, record)=>(
+        <span className="text-capitalize">{record.status}</span>
+      )
     },
     {
       title: "Actions",
@@ -396,7 +413,7 @@ function GroomingList(doctorId) {
                 className="btn btn-danger btn-sm text-capitalize"
                 onClick={() => changeAppointmentStatus(record, "blocked")}
               >
-                Cancel
+                Cancelled
               </button>
             )}
             {/* <button
@@ -416,26 +433,26 @@ function GroomingList(doctorId) {
   return (
     <Layout>
       <div className="col-md-12">
-      <div className="row d-fixed d-lg-flex justify-content-between align-items-center">
+        <div className="row d-fixed d-lg-flex justify-content-between align-items-center">
         <div className="col-md-6  d-lg-flex gap-3 justify-content-right align-items-center">
       <h6 className="page-header mb-0">Appointments List</h6>
       </div>
       <div className="col-md-6 d-lg-flex gap-3 justify-content-end align-items-center">
-      <Link to="/admin/appointmentlist"><button className="btn btn-warning btn-sm" type="button">Veterinary</button></Link>
-        <Link to="/admin/groominglist"><button className="btn btn-success btn-sm" type="button">Grooming</button></Link>
-        <Link to="/admin/mobilevetlist"><button className="btn btn-warning btn-sm" type="button">Mobile Vet</button></Link>
+       <Link to="/admin/appointmentlist"><button className="btn btn-warning btn-sm" type="button">Veterinary</button></Link>
+        <Link to="/admin/groominglist"><button className="btn btn-warning btn-sm" type="button">Grooming</button></Link>
+        <Link to="/admin/mobilevetlist"><button className="btn btn-success btn-sm" type="button">Mobile Vet</button></Link>
         <Link to="/admin/mobilegroominglist"><button className="btn btn-warning btn-sm" type="button">Mobile Grooming</button></Link>
       </div>
       </div>
       <hr />
-      {/* <Table columns={usercolumns} dataSource={appointments}/> */}
+      <Table columns={usercolumns} dataSource={appointments}/>
       <div>
-      {/* <Modal show={showModal} onHide={handleCloseModal} size="lg">
+      <Modal show={showModal} onHide={handleCloseModal} size="lg">
       <Modal.Header closeButton>
             <Modal.Title>
               <div className="d-lg-flex justify-content-between align-items-center">
                 <span>Appointment Details</span>
-               
+                {/* {selectedAppointment && selectedAppointment._id} */}
               </div>
             </Modal.Title>
           </Modal.Header>
@@ -449,11 +466,17 @@ function GroomingList(doctorId) {
             <label className="text-left">Assign Doctor: </label> 
             <span className="text-right"> <select className="form-control">
               <option>--Select Doctor--</option>
-              {selectedAppointment && doctors.map((doctor) => (
-                <option key={doctor._id} value={doctor._id}>
-                  Dr. {doctor.firstName} {doctor.lastName}
-                </option>
-              ))}
+              {
+                selectedAppointment &&
+                Array.from(new Set(doctors.map((doctor) => doctor._id))).map((doctorId) => {
+                    const doctor = doctors.find((doc) => doc._id === doctorId);
+                    return (
+                    <option key={doctor._id} value={doctor._id}>
+                        Dr. {doctor.firstName} {doctor.lastName}
+                    </option>
+                    );
+                })
+                }
               
             </select></span>
             </div> 
@@ -463,11 +486,6 @@ function GroomingList(doctorId) {
             </div> 
            </div>
           
-          
-               
-            
-
-           
           </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={handleCloseModal}>
@@ -477,15 +495,15 @@ function GroomingList(doctorId) {
             Save Changes
           </Button>
         </Modal.Footer>
-      </Modal> */}
+      </Modal>
       </div>
       </div>
       <div className="col-md-12">
-        {/* <h6>Open Appointment Lists</h6> */}
+        <h6>Open Appointment Lists</h6>
         <Table columns={opencolumns} dataSource={openappointments}/>
       </div>
     </Layout>
   );
 }
 
-export default GroomingList;
+export default MobileVetList;

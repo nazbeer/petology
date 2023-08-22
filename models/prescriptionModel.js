@@ -14,6 +14,10 @@ const prescriptionSchema = new mongoose.Schema(
     type:String,
     required:true,
    },
+   doctorId:{
+    type:String,
+    required:true,
+   },
    prescription:{
     type:String,
     required:true,

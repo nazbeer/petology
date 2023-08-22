@@ -5,6 +5,8 @@ const authMiddleware = require("../middlewares/authMiddleware");
 const Appointment = require("../models/appointmentModel");
 const User = require("../models/userModel");
 const PetList = require("../models/petModel");
+const OpenAppointment = require("../models/openAppointmentModel");
+
 
 router.post("/get-doctor-info-by-user-id", authMiddleware, async (req, res) => {
   try {
@@ -62,7 +64,7 @@ router.get(
       const doctor = await Doctor.findOne({ userId: req.body.userId });
       const appointments = await Appointment.find({ doctorId: doctor._id });
       // console.log(doctor);
-      console.log(appointments);
+ //     console.log(appointments);
       res.status(200).send({
         message: "Appointments fetched successfully",
         success: true,
@@ -176,5 +178,108 @@ router.get('/user/:userId/pet/:petId/appointments', authMiddleware, async (req, 
   }
 });
 
+router.get(
+  "/get-openappointments-by-doctor-id",
+ authMiddleware,
+  async (req, res) => {
+    try {
+      const doctor = await Doctor.findOne({ userId: req.body.userId });
+      const appointments = await OpenAppointment.find({ doctorId: doctor._id });
+      //  console.log(doctor);
+      // console.log(appointments);
+      res.status(200).send({
+        message: "Appointments fetched successfully",
+        success: true,
+        data: appointments,
+      });
+    } catch (error) {
+      console.log(error);
+      res.status(500).send({
+        message: "Error fetching appointments",
+        success: false,
+        error,
+      });
+    }
+  }
+);
 
+
+router.get("/get-all-users/:id", authMiddleware, async(req, res)=>{
+  try{
+    console.log(req.params.id);
+    const appointment = await Appointment.findOne({appointmentId: req.params.id});
+    const users = await User.findById({userId: appointment.userId});
+    //const users = await User.find({status:req.body.status});
+    res.status(200).send({
+      message: "Users list fetched succcessfully",
+      success :true,
+      data: users,
+    });
+
+  }catch (error){
+    console.log(error);
+    res.status(500).send({
+      message:"Failed to fetch user's details.",
+      success:false,
+      error,
+    });
+  }
+});
+router.get("/get-all-users", authMiddleware, async(req, res)=>{
+  try{
+    const users = await User.find();
+    //const users = await User.find({status:req.body.status});
+    res.status(200).send({
+      message: "Users list fetched succcessfully",
+      success :true,
+      data: users,
+    });
+
+  }catch (error){
+    console.log(error);
+    res.status(500).send({
+      message:"Failed to fetch user's details.",
+      success:false,
+      error,
+    });
+  }
+});
+router.get("/get-all-approved-doctors", authMiddleware, async (req, res) => {
+  try {
+    const doctors = await Doctor.find({ status: "approved" });
+   
+    res.status(200).send({
+      message: "Doctors fetched successfully",
+      success: true,
+      data: doctors,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      message: "Error applying doctor account",
+      success: false,
+      error,
+    });
+  }
+});
+router.get("/doctors/:id", authMiddleware, async (req, res) => {
+  try {
+    const doctor = await Doctor.findById(req.params.id).exec();
+    res.json({ success: true, data: doctor });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Error fetching doctor" });
+  }
+});
+router.get("/get-appointment-by-id/:id", authMiddleware, async (req, res) => {
+  try {
+    const appointment = await Appointment.findById(req.params._id)
+      .populate("users")
+      .populate("petlists")
+      .exec();
+      console.log(appointment);
+    res.json({ success: true, data: appointment });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Error fetching appointment" });
+  }
+});
 module.exports = router;

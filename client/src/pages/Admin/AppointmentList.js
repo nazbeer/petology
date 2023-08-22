@@ -415,7 +415,7 @@ function Appointmentlist(doctorId) {
                 className="btn btn-danger btn-sm text-capitalize"
                 onClick={() => changeAppointmentStatus(record, "blocked")}
               >
-                Cancelled
+                Cancel
               </button>
             )}
             <button
@@ -442,8 +442,8 @@ function Appointmentlist(doctorId) {
       <div className="col-md-6 d-lg-flex gap-3 justify-content-end align-items-center">
        <Link to="/admin/appointmentlist"><button className="btn btn-success btn-sm" type="button">Veterinary</button></Link>
         <Link to="/admin/groominglist"><button className="btn btn-warning btn-sm" type="button">Grooming</button></Link>
-        <button className="btn btn-warning btn-sm" type="button">Mobile Vet</button>
-        <button className="btn btn-warning btn-sm" type="button">Mobile Grooming</button>
+        <Link to="/admin/mobilevetlist"><button className="btn btn-warning btn-sm" type="button">Mobile Vet</button></Link>
+        <Link to="/admin/mobilegroominglist"><button className="btn btn-warning btn-sm" type="button">Mobile Grooming</button></Link>
       </div>
       </div>
       <hr />

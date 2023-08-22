@@ -19,7 +19,7 @@ const doctorSchema = new mongoose.Schema(
     },
     website: {
       type: String,
-      required: true,
+    //  required: true,
     },
     address: {
       type: String,
@@ -35,7 +35,8 @@ const doctorSchema = new mongoose.Schema(
     },
     feePerCunsultation: {
       type: Number,
-      required: true,
+    //  required: true,
+    default:'80'
     },
     shift:{
       type:String,

@@ -15,6 +15,7 @@ const serviceRoute = require("./routes/serviceRoute");
 const bookingRoute = require("./routes/bookingRoute");
 const openRoute = require("./routes/openRoute");
 const receptionRoute = require("./routes/receptionRoute");
+//const prescriptionRoute = require("./routes/prescriptionRoute");
 app.use(bodyParser.json());
 const path = require("path");
 app.use(cors());
@@ -26,6 +27,8 @@ app.use("/api/service", serviceRoute);
 app.use("/api/booking", bookingRoute);
 app.use("/api/open", openRoute);
 app.use("/api/reception", receptionRoute);
+//app.use("/api/prescription", prescriptionRoute);
+
 app.enable('trust proxy');
 if (process.env.NODE_ENV === "production") {
   app.use("/", express.static("client/build"));
