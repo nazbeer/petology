@@ -15,6 +15,8 @@ const serviceRoute = require("./routes/serviceRoute");
 const bookingRoute = require("./routes/bookingRoute");
 const openRoute = require("./routes/openRoute");
 const receptionRoute = require("./routes/receptionRoute");
+const groomerRoute = require("./routes/groomerRoute");
+
 //const prescriptionRoute = require("./routes/prescriptionRoute");
 app.use(bodyParser.json());
 const path = require("path");
@@ -27,8 +29,9 @@ app.use("/api/service", serviceRoute);
 app.use("/api/booking", bookingRoute);
 app.use("/api/open", openRoute);
 app.use("/api/reception", receptionRoute);
+app.use("/api/groomer" , groomerRoute);
 //app.use("/api/prescription", prescriptionRoute);
-
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.enable('trust proxy');
 if (process.env.NODE_ENV === "production") {
   app.use("/", express.static("client/build"));

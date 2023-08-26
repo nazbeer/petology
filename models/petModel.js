@@ -2,9 +2,14 @@ const mongoose = require("mongoose");
 
 const petSchema = new mongoose.Schema(
   {
+    
    pet:{
     type :String ,
     required: true,
+   },
+   userId:{
+    type:String,
+    required:true,
    },
    dimension:{
     type: String,

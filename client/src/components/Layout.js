@@ -21,16 +21,17 @@ function Layout({ children }) {
       path: "/user/appointmentlist",
       icon: "ri-file-list-line",
     },
-    // {
-    //   name: "Apply Doctor",
-    //   path: "/apply-doctor",
-    //   icon: "ri-hospital-line",
-    // }
-    // {
-    //   name:"Add Pets",
-    //   path:"/user/addpet",
-    //   icon:'ri-bear-smile-line'
-    // },
+    {
+      name: "Doctors",
+      path: "/user/doctors",
+      icon: "ri-hospital-line",
+    },
+    
+    {
+      name:"Add Pets",
+      path:"/user/addpet",
+      icon:'ri-bear-smile-line'
+    },
     {
       name:"Pets",
       path:"/user/pets",
@@ -83,11 +84,11 @@ function Layout({ children }) {
       path:"/reception/servicelist",
       icon:'ri-booklet-fill',
     },
-    {
-      name: "Profile",
-      path: `/reception/profile/${user?._id}`,
-      icon: "ri-user-line",
-    },
+    // {
+    //   name: "Profile",
+    //   path: `/reception/profile/${user?._id}`,
+    //   icon: "ri-user-line",
+    // },
 
   ];
   const groomerMenu = [
@@ -106,11 +107,11 @@ function Layout({ children }) {
     //   path: "/doctor/addprescription",
     //   icon: "ri-file-list-line",
     // },
-    {
-      name: "Profile",
-      path: `/groomer/profile/${user?._id}`,
-      icon: "ri-user-line",
-    },
+    // {
+    //   name: "Profile",
+    //   path: `/groomer/profile/${user?._id}`,
+    //   icon: "ri-user-line",
+    // },
 
   ];
   const doctorMenu = [
@@ -124,21 +125,21 @@ function Layout({ children }) {
       path: "/doctor/appointments",
       icon: "ri-pulse-line",
     },
-    {
-      name: "Add Prescription",
-      path: "/doctor/addprescription",
-      icon: "ri-file-list-line",
-    },
+    // {
+    //   name: "Add Prescription",
+    //   path: "/doctor/addprescription",
+    //   icon: "ri-file-list-line",
+    // },
     {
       name:"Prescriptions",
       path:"/doctor/prescriptions",
       icon:"ri-file-list-3-line"
     },
-    {
-      name: "Profile",
-      path: `/doctor/profile/${user?._id}`,
-      icon: "ri-user-line",
-    },
+    // {
+    //   name: "Profile",
+    //   path: `/doctor/profile/${user?._id}`,
+    //   icon: "ri-user-line",
+    // },
   ];
   
   const adminMenu = [
@@ -161,6 +162,11 @@ function Layout({ children }) {
       name: "Doctors",
       path: "/admin/doctorslist",
       icon: "ri-user-star-line",
+    },
+    {
+      name:"Upload History",
+      path:"/admin/uploadhistory",
+      icon:"ri-survey-line",
     },
     {
       name:"Pets",
@@ -187,11 +193,11 @@ function Layout({ children }) {
       path:"/admin/addservices",
       icon:'ri-booklet-fill',
     },
-    {
-      name: "Profile",
-      path: "/admin/profile",
-      icon: "ri-user-line",
-    },
+    // {
+    //   name: "Profile",
+    //   path: `/admin/profile/${user?._id}`,
+    //   icon: "ri-user-line",
+    // },
   ];
 
   const menuToBeRendered = user?.isAdmin ? adminMenu : user?.isDoctor ? doctorMenu :  user?.isUser ? userMenu : user?.isNurse ? receptionMenu : user?.isGroomer ? groomerMenu : userMenu;

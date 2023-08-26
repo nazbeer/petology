@@ -21,7 +21,7 @@ import Appointments from "./pages/Appointments";
 import DoctorAppointments from "./pages/Doctor/DoctorAppointments";
 import Petlist from "./pages/Admin/PetList";
 import AddPet from "./pages/Admin/AddPet";
-
+import AdminProfile from "./pages/Admin/AdminProfile";
 import Grooming from './pages/Home/Grooming';
 import MobileGrooming from "./pages/Home/MobileGrooming";
 import Veterinary from "./pages/Home/Veterinary";
@@ -51,6 +51,10 @@ import AddPack from "./pages/Admin/AddPack";
 import Prescription from "./pages/Doctor/Prescription";
 import MobileGroomingList from "./pages/Admin/MobileGroomingList";
 import MobileVetList from "./pages/Admin/MobileVetList";
+import UserPetList from "./pages/Pets";
+import DoctorList from "./pages/DoctorList";
+import BookDoctor from "./pages/BookDoctor";
+import UploadHistory from "./pages/Admin/UploadHistory";
 
 function App() {
   const { loading } = useSelector((state) => state.alerts);
@@ -153,6 +157,13 @@ function App() {
             </ProtectedRoute>
           }
           />
+          <Route
+          path="/admin/uploadhistory"
+          element={
+            <ProtectedRoute>
+              <UploadHistory/>
+            </ProtectedRoute>
+          }/>
            <Route
           path="/admin/addservices"
           element={
@@ -240,6 +251,14 @@ function App() {
           element={
             <ProtectedRoute>
               <BreakTime />
+            </ProtectedRoute>
+          }
+        />
+         <Route
+          path="/admin/profile/:userId"
+          element={
+            <ProtectedRoute>
+              <AdminProfile />
             </ProtectedRoute>
           }
         />
@@ -424,10 +443,26 @@ function App() {
           }
           />
            <Route
+          path="/user/doctors"
+          element={
+            <ProtectedRoute>
+              <DoctorList/>
+            </ProtectedRoute>
+          }
+          />
+            <Route
+          path="/user/bookdoctor/:doctorId"
+          element={
+            <ProtectedRoute>
+              <BookDoctor/>
+            </ProtectedRoute>
+          }
+          />
+           <Route
           path="/user/pets"
           element={
             <ProtectedRoute>
-              <Petlist/>
+              <UserPetList/>
             </ProtectedRoute>
           }
           />

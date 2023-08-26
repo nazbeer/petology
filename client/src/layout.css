@@ -15,6 +15,15 @@
     margin-top:0px ;
     font-weight: 300;
 }
+.ant-table-tbody>tr>td, .ant-table-thead>tr>th, .ant-table tfoot>tr>td, .ant-table tfoot>tr>th{
+    padding:5px !important;
+}
+.cursor-disabled{
+    cursor: not-allowed;
+}
+.anticon{
+    vertical-align: 0.2em !important;
+}
 .sidebar{
     /* background-color: #718b87; */
     background-color: #98bda6;
@@ -147,6 +156,10 @@
 /* .header-action-icon{
     display: none;
 } */
+.sidebar-header {
+    background-color: #000;
+    padding-bottom: 5px;
+}
 @media screen and (max-width: 768px){
     .content {
         width: 84%;

@@ -18,32 +18,31 @@ router.post("/addprescription", authMiddleware, async (req, res) => {
       ndate,
       ntime,
     } = req.body;
-    console.log(req.body);
-    const [appointments, user, doctor, pet] = await Promise.all([
-      Appointment.findById(appointmentId),
-      User.findById(userId),
-      Doctor.findById(doctorId),
-      Pet.findById(petId),
-    ]);
+    // console.log(req.body);
+    // const [appointments, user, doctor, pet] = await Promise.all([
+    //   Appointment.findById(appointmentId),
+    //   User.findById(userId),
+    //   Doctor.findById(doctorId),
+    //   Pet.findById(petId),
+    // ]);
 
-    if (!appointments || !user || !doctor || !pet) {
-      return res.status(400).json({ success: false, error: "Invalid data" });
-    }
+    // if (!appointments || !user || !doctor || !pet) {
+    //   return res.status(400).json({ success: false, error: "Invalid data" });
+    // }
 
     const prescriptionData = {
       appointment: appointmentId,
-      user,
-      doctor,
-      pet,
+      user:userId,
+      doctor:doctorId,
+      pet:petId,
       prescription,
       description,
-      nextAppointment: {
-        date: ndate,
-        time: ntime,
-      },
+      ndate,
+      ntime
     };
 
     const newPrescription = new Prescription(prescriptionData);
+    console.log(prescriptionData);
     await newPrescription.save();
 
     res.json({ success: true });

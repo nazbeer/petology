@@ -313,7 +313,7 @@ function Appointmentlist(doctorId) {
               className="btn btn-danger btn-sm text-capitalize"
               onClick={() => changeOpenAppointmentStatus(record, "blocked")}
             >
-              Cancelled
+              Cancel
             </button>
           )}
           <button
@@ -437,7 +437,7 @@ function Appointmentlist(doctorId) {
       <div className="col-md-12">
         <div className="row d-fixed d-lg-flex justify-content-between align-items-center">
         <div className="col-md-6  d-lg-flex gap-3 justify-content-right align-items-center">
-      <h6 className="page-header mb-0">Appointments List</h6>
+      <h6 className="page-header mb-0">Appointments List (Registered Users)</h6>
       </div>
       <div className="col-md-6 d-lg-flex gap-3 justify-content-end align-items-center">
        <Link to="/admin/appointmentlist"><button className="btn btn-success btn-sm" type="button">Veterinary</button></Link>
@@ -495,7 +495,7 @@ function Appointmentlist(doctorId) {
       </div>
       </div>
       <div className="col-md-12">
-        <h6>Open Appointment Lists</h6>
+        <h6>Guest Appointments</h6>
         <Table columns={opencolumns} dataSource={openappointments}/>
       </div>
     </Layout>

@@ -42,13 +42,18 @@ const appointmentSchema = new mongoose.Schema({
     required: true
   },
   lat: {
-    type: Number,
+    type: String,
     required: true
   },
   lng: {
-    type: Number,
+    type: String,
     required: true
   },
+  status:{
+    type:String,
+    default:"pending",
+    required:true
+  }
 });
 
 const mobgroomappModel = mongoose.model('MobileGroomingAppointment', appointmentSchema);

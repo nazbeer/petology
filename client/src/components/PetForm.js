@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { toast } from "react-hot-toast";
+import jwt_decode from 'jwt-decode'; 
 
 const PetForm = () => {
   const [pet, setPet] = useState({
@@ -10,8 +11,12 @@ const PetForm = () => {
     //dimension: '',
     breed: '',
     image: null,
+    userId:''
   });
-
+  const userToken = localStorage.getItem('token');
+  const decodedToken = jwt_decode(userToken);
+  const userId = decodedToken.id; // Extract the user ID from the decoded token
+ // console.log(userId);
   const handleChange = (e) => {
     const { name, value } = e.target;
     setPet((prevState) => ({
@@ -33,9 +38,9 @@ const PetForm = () => {
     const formData = new FormData();
     formData.append('pet', pet.pet);
     formData.append('size', pet.size);
-   // formData.append('dimension', pet.dimension);
     formData.append('breed', pet.breed);
     formData.append('image', pet.image);
+    formData.append('userId', userId);
 
     try {
       const response = await axios.post('/api/pet/create-new-pet', formData, {
@@ -44,7 +49,7 @@ const PetForm = () => {
         },
       });
 
-      console.log('Pet saved successfully:', response.data);
+     // console.log('Pet saved successfully:', response.data);
       if (response.data.success) {
         toast.success(response.data.message);
         //navigate('/appointments');
@@ -62,7 +67,18 @@ const PetForm = () => {
       <form onSubmit={handleSubmit}>
     <div className='card'>
         <div className='card-body mb-3'>
-    
+        <div className='mb-2 d-none'>
+              <label htmlFor='userId'>User ID:</label>
+              <input
+                className='form-control cursor-disabled bg-light'
+                type='text'
+                id='userId'
+                name='userId'
+                value={userId}
+                onChange={handleChange}
+                readOnly // User ID is read-only
+              />
+            </div>
         <div className='mb-2'>
           <label htmlFor="pet">Pet: <small className='text-muted text-danger'>(Dog, Cat, Bird, Other)</small></label>
           <input className="form-control" 

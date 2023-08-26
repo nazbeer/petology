@@ -116,25 +116,9 @@ function DoctorForm({ onFinish, initivalValues }) {
             <Input placeholder="Consultation Fee" type="number" disabled />
           </Form.Item>
         </Col>
-        {/* <Col span={8} xs={24} sm={24} lg={8}>
-          <Form.Item
-            required
-            label="Surgery Fees"
-            name="surgery"
-            rules={[{ required: true }]}
-          >
-            <Input placeholder="Surgery Fees" type="number" />
-          </Form.Item>
-        </Col> */}
+    
         <Col span={8} xs={24} sm={24} lg={8}>
-          {/* <Form.Item
-            required
-            label="Timings"
-            name="timings"
-            rules={[{ required: true }]}
-          >
-            <TimePicker.RangePicker format="HH:mm" />
-          </Form.Item> */}
+        
             <Form.Item required label="Shift" name="shift" rules={[{ required: true }]}>
           <Select onChange={handleShiftChange} >
             <Option value="day">Day Shift</Option>

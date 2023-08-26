@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Button } from "antd";
-import PrescriptionForm from "../../components/PrescriptionForm";
+import PrescriptionForm from "../Doctor/PrescriptionForm";
 import Layout from "../../components/Layout";
 const App = () => {
   const [visible, setVisible] = useState(false);

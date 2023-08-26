@@ -3,7 +3,7 @@ import { useDispatch } from "react-redux";
 import Layout from "../../components/Layout";
 import { showLoading, hideLoading } from "../../redux/alertsSlice";
 import { toast } from "react-hot-toast";
-import PrescriptionForm from "../../components/PrescriptionForm";
+import PrescriptionForm from "../Doctor/PrescriptionForm";
 import axios from "axios";
 import { Table, Button, Modal } from "antd";
 import moment from "moment";
@@ -263,10 +263,13 @@ function DoctorAppointments() {
           footer={null}
           width={700}
         >
-            {selectedAppointmentId && (
+          {selectedAppointmentId && (
             <PrescriptionForm
               selectedAppointmentId={selectedAppointmentId}
               onClose={hideAddPrescriptionModal}
+              appointmentData={
+                appointments.find((appointment) => appointment._id === selectedAppointmentId)
+              }
             />
           )}
         </Modal>

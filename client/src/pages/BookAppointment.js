@@ -8,6 +8,7 @@ import axios from "axios";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
 import DoctorForm from "../components/DoctorForm";
 import moment from "moment";
+import booknow from "../images/booknow.png";
 
 function BookAppointment() {
   const [isAvailable, setIsAvailable] = useState(false);
@@ -121,32 +122,36 @@ function BookAppointment() {
 
             <Col span={8} sm={24} xs={24} lg={8}>
               <img
-                src="https://thumbs.dreamstime.com/b/finger-press-book-now-button-booking-reservation-icon-online-149789867.jpg"
+                src={booknow}
                 alt=""
                 width="100%"
-                height='400'
+                
               />
             </Col>
             <Col span={8} sm={24} xs={24} lg={8}>
-              <h1 className="normal-text">
+            <div className="normal-text d-lg-flex justify-content-between align-items-center">
                 <b>Timings :</b> {doctor.timings[0]} - {doctor.timings[1]}
-              </h1>
-              <p>
+              </div>
+              <div className="d-lg-flex justify-content-between align-items-center">
                 <b>Phone Number : </b>
                 {doctor.phoneNumber}
-              </p>
-              <p>
+              </div>
+              <div className="d-lg-flex justify-content-between align-items-center">
                 <b>Address : </b>
                 {doctor.address}
-              </p>
-              <p>
+              </div>
+              <div className="d-lg-flex justify-content-between align-items-center">
+                <b>Pet:</b>
+                {pet ? pet?.name: 'No Pet'}
+              </div>
+              <div className="d-lg-flex justify-content-between align-items-center">
                 <b>Fee per Visit : </b>
-                {doctor.feePerCunsultation}
-              </p>
-              <p>
+                {doctor.feePerCunsultation} AED
+              </div>
+              <div className="d-lg-flex justify-content-between align-items-center">
                 <b>Website : </b>
                 {doctor.website}
-              </p>
+              </div>
               <p>
                 
               </p>

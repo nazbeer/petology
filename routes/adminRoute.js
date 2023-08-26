@@ -4,7 +4,8 @@ const User = require("../models/userModel");
 const Doctor = require("../models/doctorModel");
 const Appointment = require("../models/appointmentModel");
 const Pet = require("../models/petModel");
-
+const multer = require("multer");
+const upload = multer({ dest: "uploads/" });
 const OpenAppointment = require("../models/openAppointmentModel");
 const authMiddleware = require("../middlewares/authMiddleware");
 const breaktimeModel = require("../models/breaktimeModel");
@@ -438,7 +439,7 @@ router.post('/change-open-appointment-status/:id', async (req, res) => {
 router.post("/apply-doctor", async (req, res) => {
   try {
     // Extract user data from the request body
-    const { firstName, lastName, email, phoneNumber, website,address,specialization,experience,feePerCunsultation,shift } = req.body;
+    const { firstName, lastName, email, phoneNumber, website,address,specialization,experience,feePerCunsultation,shift, petId } = req.body;
 
     // Create a new user with isDoctor set to true
     const user = new User({
@@ -522,6 +523,7 @@ router.post("/book-appointment", authMiddleware, async (req, res) => {
     req.body.date = moment(req.body.date, "DD-MM-YYYY").toISOString();
     req.body.time = moment(req.body.time, "HH:mm").toISOString();
     const newAppointment = new Appointment(req.body);
+    console.log(req.body);
     await newAppointment.save();
     //pushing notification to doctor based on his userid
     const user = await User.findOne({ _id: req.body.doctorInfo.userId });
@@ -597,6 +599,146 @@ router.get("/get-appointments-by-user-id", authMiddleware, async (req, res) => {
       success: false,
       error,
     });
+  }
+});
+
+router.post("/update-doctor/:doctorId", authMiddleware, async (req, res) => {
+  try {
+    const { doctorId } = req.params;
+    const updatedFields = req.body;
+
+    const doctor = await Doctor.findById(doctorId);
+    if (!doctor) {
+      return res.status(404).json({ success: false, message: "Doctor not found" });
+    }
+
+    // Update doctor fields
+    for (const [key, value] of Object.entries(updatedFields)) {
+      doctor[key] = value;
+    }
+
+    await doctor.save();
+
+    return res.json({ success: true, message: "Doctor information updated successfully" });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ success: false, message: "Internal server error" });
+  }
+});
+router.get("/get-admin-profile/:userId", authMiddleware, async (req, res) => {
+  try {
+    const { userId } = req.params;
+    console.log(userId);
+    const admin = await User.findById(userId).select("-password");
+    if (!admin) {
+      return res.status(404).json({ success: false, message: "Admin not found" });
+    }
+    return res.json({ success: true, data: admin });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ success: false, message: "Internal server error" });
+  }
+});
+
+// Reset admin password by adminId
+router.post("/reset-admin-password/:userId", authMiddleware, async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { newPassword, confirmPassword } = req.body;
+
+    if (newPassword !== confirmPassword) {
+      return res.status(400).json({ success: false, message: "Passwords do not match" });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    await User.findByIdAndUpdate(adminId, { password: hashedPassword });
+
+    return res.json({ success: true, message: "Password reset successfully" });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ success: false, message: "Internal server error" });
+  }
+});
+
+// Edit Pet
+router.put("/edit-pet/:id", async (req, res) => {
+  try {
+    const petId = req.params.id;
+    const updatedPet = req.body; // Update pet data
+
+    const result = await Pet.findByIdAndUpdate(petId, updatedPet, { new: true });
+
+    if (!result) {
+      return res.status(404).json({ success: false, message: "Pet not found" });
+    }
+
+    res.status(200).json({ success: true, message: "Pet updated successfully", data: result });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+});
+
+// Delete Pet
+router.delete("/delete-pet/:id", async (req, res) => {
+  try {
+    const petId = req.params.id;
+
+    const result = await Pet.findByIdAndDelete(petId);
+
+    if (!result) {
+      return res.status(404).json({ success: false, message: "Pet not found" });
+    }
+
+    res.status(200).json({ success: true, message: "Pet deleted successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+});
+
+router.get("/history/:userId", async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const historyRecords = await History.find({ userId });
+    res.json({ success: true, data: historyRecords });
+  } catch (error) {
+    console.error("Error fetching history records:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
+// Upload user history documents
+router.post(
+  "/upload-history",
+  upload.single("document"),
+  async (req, res) => {
+    try {
+      const { userId } = req.body;
+      const documentPath = req.file ? req.file.path : "";
+
+      const newHistoryRecord = new History({ userId, documentPath });
+      await newHistoryRecord.save();
+
+      res.json({ success: true, message: "History uploaded successfully" });
+    } catch (error) {
+      console.error("Error uploading history:", error);
+      res.status(500).json({ success: false, message: "Server error" });
+    }
+  }
+);
+
+// Delete user history record by ID
+router.delete("/history/:recordId", async (req, res) => {
+  try {
+    const recordId = req.params.recordId;
+    await History.findByIdAndDelete(recordId);
+    res.json({ success: true, message: "Record deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting record:", error);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 });
 

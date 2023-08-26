@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import Layout from "../../components/Layout";
-import { showLoading, hideLoading } from "../../redux/alertsSlice";
+import Layout from "../components/Layout";
+import { showLoading, hideLoading } from "../redux/alertsSlice";
 import axios from "axios";
 import { Table } from "antd";
 import moment from "moment";
@@ -31,8 +31,11 @@ function Petlist() {
   useEffect(() => {
     getPetsData();
   }, []);
+
+  
   const base64ToDataUrl = (base64String) => {
-    return `http://127.0.0.1:5000/${base64String}.png`;
+    //console.log(base64String);
+    return `../${base64String}.png`;
   };
   const columns = [
     {
@@ -71,15 +74,7 @@ function Petlist() {
             </span>
         )
     }, 
-    {
-      title:"Dimension",
-      dataIndex:"dimension",
-      render:(text, record)=>(
-          <span>
-              {record.dimension}
-          </span>
-      )
-  }, 
+   
     
   ];
 
@@ -87,7 +82,7 @@ function Petlist() {
     <Layout>
     <div className="d-flex justify-content-between align-items-center">
       <h3 className="">Pet List</h3>
-     <a href="/admin/addpet" ><button className="btn btn-success " type="button">Add New Pet</button></a>
+     <a href="/user/addpet" ><button className="btn btn-success " type="button">Add New Pet</button></a>
 
       </div>
       <hr />

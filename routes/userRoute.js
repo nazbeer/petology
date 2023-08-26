@@ -8,7 +8,7 @@ const authMiddleware = require("../middlewares/authMiddleware");
 const Appointment = require("../models/appointmentModel");
 const moment = require("moment");
 const Pet = require("../models/petModel");
-
+const OpenAppointment = require("../models/openAppointmentModel");
 router.post("/register", async (req, res) => {
   try {
     const userExists = await User.findOne({ email: req.body.email });
@@ -77,6 +77,11 @@ router.get('/api/user/count-records', async (req, res) => {
     res.status(500).json({ error: 'Server error' });
   }
 });
+// router.get('/get-user-id', authMiddleware, (req, res) => {
+//   // Assuming user ID is stored in req.user.userId after token verification
+//   const userId = req.user._id;
+//   res.json({ success: true, userId });
+// });
 router.post("/get-user-info-by-id", authMiddleware, async (req, res) => {
   try {
     const user = await User.findOne({ _id: req.body.userId });
@@ -276,7 +281,7 @@ router.post("/book-appointment", authMiddleware, async (req, res) => {
   try {
     req.body.status = "pending";
     req.body.date = moment(req.body.date, "DD-MM-YYYY").toISOString();
-    req.body.time = moment(req.body.time, "HH:mm").toISOString();
+    req.body.time = moment(req.body.time, "h:mm A").toISOString();
     const newAppointment = new Appointment(req.body);
     await newAppointment.save();
     //pushing notification to doctor based on his userid
@@ -284,7 +289,7 @@ router.post("/book-appointment", authMiddleware, async (req, res) => {
     user.unseenNotifications.push({
       type: "new-appointment-request",
       message: `A new appointment request has been made by ${req.body.userInfo.name}`,
-      onClickPath: "/doctor/appointments",
+      onClickPath: "/user/appointmentlist",
     });
     await user.save();
     res.status(200).send({
@@ -337,6 +342,62 @@ router.post("/check-booking-avilability", authMiddleware, async (req, res) => {
   }
 });
 
+// router.post("/check-booking-avilability", authMiddleware, async (req, res) => {
+//   try {
+//     const date = moment(req.body.date, "DD-MM-YYYY").toISOString();
+//     const selectedTime = moment(req.body.time, "HH:mm");
+//     let shiftStart, shiftEnd;
+//     console.log(req.body.selectedTime);
+//     // Determine the shift timings based on the doctor's shift type
+//     if (req.body.shift === "day") {
+//       shiftStart = moment("08:00", "HH:mm");
+//       shiftEnd = moment("15:00", "HH:mm");
+//     } else if (req.body.shift === "night") {
+//       shiftStart = moment("15:00", "HH:mm");
+//       shiftEnd = moment("20:00", "HH:mm");
+//     } else {
+//       return res.status(400).send({
+//         message: "Invalid shift type",
+//         success: false,
+//       });
+//     }
+
+//     if (!selectedTime.isBetween(shiftStart, shiftEnd)) {
+//       return res.status(200).send({
+//         message: "Appointments not available during this shift",
+//         success: false,
+//       });
+//     }
+
+//     const doctorId = req.body.doctorId;
+//     const appointments = await Appointment.find({
+//       doctorId,
+//       date,
+//       time: { $gte: shiftStart.toISOString(), $lte: shiftEnd.toISOString() },
+//     });
+
+//     if (appointments.length > 0) {
+//       return res.status(200).send({
+//         message: "Appointments not available",
+//         success: false,
+//       });
+//     } else {
+//       return res.status(200).send({
+//         message: "Appointments available",
+//         success: true,
+//       });
+//     }
+//   } catch (error) {
+//     console.log(error);
+//     res.status(500).send({
+//       message: "Error checking appointment availability",
+//       success: false,
+//       error,
+//     });
+//   }
+// });
+
+
 router.get("/get-appointments-by-user-id", authMiddleware, async (req, res) => {
   try {
     const appointments = await Appointment.find({ userId: req.body.userId });
@@ -372,8 +433,27 @@ router.get("/get-all-appointments", authMiddleware, async (req, res)=>{
       error,
     })
   }
-})
+});
 
+router.get('/get-all-open-appointments', async (req, res) => {
+  try {
+    const appointmentList = await OpenAppointment.find({})
+      .populate('doctor', 'name specialization') // Assuming 'doctor' field is a reference to User model
+      .exec();
+    res.status(200).send({
+      message: 'Appointment List fetched successfully',
+      success: true,
+      data: appointmentList,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({
+      message: 'Error fetching All Appointments',
+      success: false,
+      error,
+    });
+  }
+});
 
 router.get("/get-pets-by-userid", authMiddleware, async (req, res) => {
     try {
@@ -494,6 +574,51 @@ router.delete("/delete-user/:id", async (req, res) => {
   } catch (error) {
     console.error("Error deleting user:", error);
     res.status(500).json({ error: "Internal server error" });
+  }
+});
+router.post("/cancel-appointment/:appointmentId", authMiddleware, async (req, res) => {
+  try {
+    const { appointmentId } = req.params;
+
+    // Find the appointment by appointmentId
+    const appointment = await Appointment.findById(appointmentId);
+    console.log(appointment);
+    if (!appointment) {
+      return res.status(404).json({ success: false, message: "Appointment not found" });
+    }
+
+    // Check if the appointment is already cancelled
+    if (appointment.status === "cancelled") {
+      return res.status(400).json({ success: false, message: "Appointment is already cancelled" });
+    }
+
+    // Update the appointment status to "cancelled"
+    appointment.status = "cancelled";
+    await appointment.save();
+
+    return res.json({ success: true, message: "Appointment has been cancelled successfully" });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ success: false, message: "Internal server error" });
+  }
+});
+
+
+router.get("/get-pets-by-user-id", authMiddleware, async (req, res) => {
+  try {
+    const pets = await Pet.find({ userId: req.body.userId });
+    res.status(200).send({
+      message: "Pets fetched successfully",
+      success: true,
+      data: pets,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      message: "Error fetching pets",
+      success: false,
+      error,
+    });
   }
 });
 module.exports = router;

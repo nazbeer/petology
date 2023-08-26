@@ -7,7 +7,7 @@ const appointmentSchema = new mongoose.Schema(
     },
     doctorId: {
       type: String,
-      required: true,
+      //required: true,
     },
     doctorInfo: {
       type: Object,
@@ -30,10 +30,14 @@ const appointmentSchema = new mongoose.Schema(
       required: true,
       default: "approved",
     },
-    petInfo: {
-      type: Object,
-      required: false,
-    },
+    // petInfo: {
+    //   type: Object,
+    //   required: true,
+    // },
+    // petId:{
+    //   type:String,
+    //   required:true,
+    // }
   },
   {
     timestamps: true,

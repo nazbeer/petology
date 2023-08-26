@@ -8,6 +8,12 @@ import { Button, Modal } from "react-bootstrap";
 import moment from "moment";
 import {toast} from 'react-hot-toast';
 import { Link } from 'react-router-dom';
+import Geocode from "react-geocode"; // Import the Geocode library
+
+// Set your Google Maps API key here
+Geocode.setApiKey('AIzaSyAxdklbUsegbWsasCJpvfmin95xzIxiY3Y');
+
+
 function MobileVetList(doctorId) {
   const [appointments, setAppointments] = useState([]);
   const [openappointments, setOpenAppointments] = useState([]);
@@ -16,8 +22,9 @@ function MobileVetList(doctorId) {
   const [selectedDoctor, setSelectedDoctor] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [pets, setPets] = useState([]);
-
+  //const [getAddress, getAddressFromCoordinates] = useState([]);
   const dispatch = useDispatch();
+
   const changeOpenAppointmentStatus = async (record, status) =>{
     try{
       dispatch(showLoading());
@@ -154,16 +161,31 @@ function MobileVetList(doctorId) {
     }
   };
   const [doctorDetails, setDoctorDetails] = useState(null);
-
- 
-  const getOpenAppointmentsData = async () => {
+  const [getAddress, setAddress] = useState();
+  const getAddressFromCoordinates = async (lat, lng) => {
     try {
-      const response = await axios.get("/api/admin/get-all-mobvet-appointments", {
+      const response = await Geocode.fromLatLng(lat, lng);
+      const address = response.results[0]?.formatted_address;
+     // console.log(address);
+     // return address;
+      if(response.results){
+        setAddress(response.results.formatted_address);
+      }
+    } catch (error) {
+      console.error("Error fetching address:", error);
+      return "Address not found";
+    }
+  };
+  const getOpenAppointmentsData = async (lat, lng) => {
+    try {
+      const response = await axios.get("/api/admin/get-all-mobvet-appointments", 
+      {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
-      });
-      console.log(response);
+      }
+      );
+ 
       if (response.data.success) {
         setOpenAppointments(response.data.data);
       }
@@ -189,11 +211,13 @@ function MobileVetList(doctorId) {
         console.error(error);
       }
     };
-
+   
     fetchDoctorDetails();
+   
   }, [selectedAppointment]);
-
+ 
   useEffect(() => {
+  
     getDoctorsData();
     getAppointmentsData();
     changeAppointmentStatus();
@@ -201,6 +225,10 @@ function MobileVetList(doctorId) {
     getPetsData();
     getOpenAppointmentsData();
   }, []);
+
+
+  
+
   const opencolumns = [
     {
         title :"Appointment Date",
@@ -267,24 +295,37 @@ function MobileVetList(doctorId) {
         <span>{record.email}</span>
       )
     },
-    // {
-    //   title: 'Doctor Details',
-    //   dataIndex: 'doctorDetails',
-    //   render: () => {
-    //     if (!doctorDetails) {
-    //       return null;
-    //     }
-    //     return (
-    //       <div>
-    //         <p>
-    //           Doctor Name: {doctorDetails.firstName} {doctorDetails.lastName}
-    //         </p>
-    //         <p>Specialization: {doctorDetails.specialization}</p>
-    //         {/* Add other doctor details as needed */}
-    //       </div>
-    //     );
-    //   },
-    // },
+
+    {
+      title: "Appointment Location",
+      dataIndex: "location",
+      render: async (text, record) => {
+        if (record.lat && record.lng) {
+          const address = await getAddressFromCoordinates(
+            record.lat,
+            record.lng
+          );
+          return (
+            <span>
+              {address}
+              <div style={{ height: "200px", width: "100%" }}>
+                <iframe
+               
+                  src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyAxdklbUsegbWsasCJpvfmin95xzIxiY3Y&q=${address}`}
+                  width="100%"
+                  height="100%"
+                  frameBorder="0"
+                  style={{ border: "0" }}
+                  allowFullScreen
+                ></iframe>
+              </div>
+            </span>
+          );
+        } else {
+          return <span>No location available</span>;
+        }
+      },
+    },
     {
       title:'Status',
       dataIndex:"status",
@@ -314,13 +355,7 @@ function MobileVetList(doctorId) {
               Cancel
             </button>
           )}
-          {/* <button
-            type="button"
-            className="btn btn-success btn-sm text-capitalize ml-2"
-            onClick={() => handleShowModal(record)}
-          >
-            View & Assign Doctor
-          </button> */}
+    
         </div>
       ),
     },
@@ -328,10 +363,7 @@ function MobileVetList(doctorId) {
 
   ]
   const usercolumns = [
-    // {
-    //     title: "Id",
-    //     dataIndex: "_id",
-    // },
+
     {
       title: "Parent Name",
       dataIndex: "parentname",
@@ -350,15 +382,7 @@ function MobileVetList(doctorId) {
         </span>
       ),
     },
-    // {
-    //   title:'Pet',
-    //   dataIndex:'pet',
-    //   render:(text, record)=>(
-    //     <span>
-    //       {record.petInfo.name}
-    //     </span>
-    //   )
-    // },
+ 
     {
       title: "Specialization",
       dataIndex: "specialization",
@@ -368,6 +392,28 @@ function MobileVetList(doctorId) {
         </span>
       ),
     },
+    {
+      title:"Booking Location",
+      dataIndex:"location",
+      render:(text, record)=>(
+        <span>{record.lat}</span>
+      )
+    },
+    // {
+    //   title: "Appointment Location",
+    //   dataIndex: "location",
+    //   render: async (text, record) => {
+    //     if (record.lat && record.lng) {
+    //       const address = await getAddressFromCoordinates(
+    //         record.lat,
+    //         record.lng
+    //       );
+    //       return <span>{address}</span>;
+    //     } else {
+    //       return <span>No location available</span>;
+    //     }
+    //   },
+    // },
     {
       title: "Date",
       dataIndex: "date",
@@ -413,16 +459,10 @@ function MobileVetList(doctorId) {
                 className="btn btn-danger btn-sm text-capitalize"
                 onClick={() => changeAppointmentStatus(record, "blocked")}
               >
-                Cancelled
+                Cancel
               </button>
             )}
-            {/* <button
-              type="button"
-              className="btn btn-success btn-sm text-capitalize ml-2"
-              onClick={() => handleShowModal(record)}
-            >
-              View & Assign Doctor
-            </button> */}
+          
           </div>
         ),
       },
@@ -435,7 +475,7 @@ function MobileVetList(doctorId) {
       <div className="col-md-12">
         <div className="row d-fixed d-lg-flex justify-content-between align-items-center">
         <div className="col-md-6  d-lg-flex gap-3 justify-content-right align-items-center">
-      <h6 className="page-header mb-0">Appointments List</h6>
+      <h6 className="page-header mb-0">Appointments List (Registered Users)</h6>
       </div>
       <div className="col-md-6 d-lg-flex gap-3 justify-content-end align-items-center">
        <Link to="/admin/appointmentlist"><button className="btn btn-warning btn-sm" type="button">Veterinary</button></Link>
@@ -499,7 +539,7 @@ function MobileVetList(doctorId) {
       </div>
       </div>
       <div className="col-md-12">
-        <h6>Open Appointment Lists</h6>
+        <h6>Guest Appointments</h6>
         <Table columns={opencolumns} dataSource={openappointments}/>
       </div>
     </Layout>
