@@ -11,7 +11,7 @@ const authMiddleware = require("../middlewares/authMiddleware");
 const breaktimeModel = require("../models/breaktimeModel");
 const packModel = require("../models/packModel");
 const MobileVetApp = require("../models/mobvetappModel");
-
+const History = require("../models/historyModel");
 // router.get("/get-all-services", authMiddleware, async (req, res) => {
 //   try{
 //       const service = await serviceModel.find({});
@@ -144,6 +144,24 @@ router.get('/get-all-open-appointments', async (req, res) => {
     console.error(error);
     res.status(500).send({
       message: 'Error fetching All Appointments',
+      success: false,
+      error,
+    });
+  }
+});
+
+router.get("/get-pets-by-user-id/:userId", authMiddleware, async (req, res) => {
+  try {
+    const pets = await Pet.find({ userId: req.body.userId });
+    res.status(200).send({
+      message: "Appointments fetched successfully",
+      success: true,
+      data: pets,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      message: "Error fetching appointments",
       success: false,
       error,
     });
