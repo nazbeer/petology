@@ -2,28 +2,64 @@ import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import Layout from "../../components/Layout";
 import { showLoading, hideLoading } from "../../redux/alertsSlice";
-import {toast} from 'react-hot-toast'
+import { toast } from "react-hot-toast";
 import axios from "axios";
-import { Table, Modal, Button, Form, Input} from "antd";
+import { Table, Modal, Button, Form, Input, DatePicker } from "antd";
 import moment from "moment";
 
 function DoctorsList() {
   const [doctors, setDoctors] = useState([]);
-  const [editingDoctor, setEditingDoctor] = useState(null);
+  const [editingDoctor, setEditingDoctor] = useState([]);
+
   const [editModalVisible, setEditModalVisible] = useState(false);
   const dispatch = useDispatch();
   const [form] = Form.useForm();
+  const [leaveModalVisible, setLeaveModalVisible] = useState(false);
+
+  const [leaveLoading, setLeaveLoading] = useState(false);
+  const [leaveForm] = Form.useForm();
+  const [leaveDoctor, setLeaveDoctor] = useState([]);
+  const openLeaveModal = (doctor) => {
+    leaveForm.resetFields();
+    setLeaveDoctor(doctor); // Use setLeaveDoctor here
+    leaveForm.setFieldsValue({ doctorId: doctor._id });
+    setLeaveModalVisible(true);
+  };
+
+  const closeLeaveModal = () => {
+    setLeaveModalVisible(false);
+  };
+
+  const handleSetLeave = async () => {
+    try {
+      setLeaveLoading(true);
+      const values = await leaveForm.validateFields();
+      //console.log(values);
+      await axios.post("/api/admin/set-doctor-leave", values, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+      toast.success("Doctor leave set successfully");
+      closeLeaveModal();
+      setLeaveLoading(false);
+    } catch (error) {
+      toast.error("Error setting doctor leave");
+      setLeaveLoading(false);
+    }
+  };
+
   const getDoctorsData = async () => {
     try {
       dispatch(showLoading());
-      const resposne = await axios.get("/api/admin/get-all-approved-doctors", {
+      const response = await axios.get("/api/admin/get-all-approved-doctors", {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
       dispatch(hideLoading());
-      if (resposne.data.success) {
-        setDoctors(resposne.data.data);
+      if (response.data.success) {
+        setDoctors(response.data.data);
       }
     } catch (error) {
       dispatch(hideLoading());
@@ -33,7 +69,7 @@ function DoctorsList() {
   const changeDoctorStatus = async (record, status) => {
     try {
       dispatch(showLoading());
-      const resposne = await axios.post(
+      const response = await axios.post(
         "/api/admin/change-doctor-account-status",
         { doctorId: record._id, userId: record.userId, status: status },
         {
@@ -43,19 +79,20 @@ function DoctorsList() {
         }
       );
       dispatch(hideLoading());
-      if (resposne.data.success) {
-        toast.success(resposne.data.message);
+      if (response.data.success) {
+        toast.success(response.data.message);
         getDoctorsData();
       }
     } catch (error) {
-      toast.error('Error changing doctor account status');
+      toast.error("Error changing doctor account status");
       dispatch(hideLoading());
     }
   };
+
   useEffect(() => {
     getDoctorsData();
   }, []);
-  
+
   const openEditModal = (record) => {
     setEditingDoctor(record);
     setEditModalVisible(true);
@@ -98,28 +135,34 @@ function DoctorsList() {
       dataIndex: "name",
       render: (text, record) => (
         <span>
-          {record.firstName} {record.lastName}
+         Dr. {record.firstName} {record.lastName}
         </span>
       ),
+      responsive: ["xs", "md","sm", "lg"],
     },
     {
       title: "Phone",
       dataIndex: "phoneNumber",
+      responsive: ["xs", "md","sm", "lg"],
     },
     {
       title:"Specialization",
       dataIndex:"specialization",
-      
+      render:(text, record) => (
+        <span className="text-capitalize">{record.specialization}</span>
+      ),
+      responsive: ["xs", "md","sm", "lg"],
     },
     {
       title:"Experience", 
       dataIndex:"experience",
       render:(text, record)=>(
         <p>{record.experience} Years</p>
-      )
+      ),
+      responsive: ["xs", "md","sm", "lg"],
     },
     {
-      title:"Consultation Fees",
+      title:"Reservation Fees",
       dataIndex: "feePerCunsultation",
       render: (number, record) => {
         return (
@@ -127,19 +170,10 @@ function DoctorsList() {
             {record.feePerCunsultation} AED
           </p>
         );
-      }
+      },
+      responsive: ["xs", "md","sm", "lg"],
     },
-    // {
-    //   title:"Surgery Fees",
-    //   dataIndex: "surgeryfees",
-    //   render: ( number, record) => {
-    //     return (
-    //       <p className="font-weight-600 text-success">
-    //         {record.surgeryfees} AED
-    //       </p>
-    //     );
-    //   }
-    // },
+
     {
       title: "Created At",
       dataIndex: "createdAt",
@@ -150,7 +184,8 @@ function DoctorsList() {
       dataIndex: "status",
       render:(text, record) =>(
         <p className="text-capitalize">{record.status}</p>
-      )
+      ),
+      responsive: ["xs", "md","sm", "lg"],
     },
     {
       title: "Actions",
@@ -188,8 +223,12 @@ function DoctorsList() {
         >
           edit
         </button>
+        <button className="btn btn-warning btn-sm " type="button"  onClick={() => openLeaveModal(record)}>
+          Set Leave
+        </button>
         </div>
       ),
+      responsive: ["xs", "md","sm", "lg"],
     },
   ];
   return (
@@ -200,7 +239,8 @@ function DoctorsList() {
 
       </div>
       <hr />
-      <Table columns={columns} dataSource={doctors} />
+      <Table columns={columns} dataSource={doctors}  responsive={true}
+  scroll={{ x: true }} />
       <Modal
         title="Edit Doctor"
         visible={editModalVisible}
@@ -209,9 +249,9 @@ function DoctorsList() {
         style={{borderRadius:"6px"}}
         width={600}
       >
-        <Form form={form} onFinish={updateDoctor}   labelCol={{ span: 6 }} // Adjust the span value as needed
+        <Form form={form} onFinish={updateDoctor}   labelCol={{ span: 6 }} 
           wrapperCol={{ span: 18 }}>
-          {/* Editable fields */}
+       
           <Form.Item
             name="firstName"
             label="First Name"
@@ -258,6 +298,64 @@ function DoctorsList() {
           </Form.Item>
         </Form>
       </Modal>
+     
+      <Modal
+        title={`Set Leave for Dr. ${
+          leaveDoctor ? leaveDoctor.firstName : ""
+        } ${leaveDoctor ? leaveDoctor.lastName : ""}`}
+        visible={leaveModalVisible}
+        onCancel={closeLeaveModal}
+        footer={[
+          <Button key="back" onClick={closeLeaveModal}>
+            Cancel
+          </Button>,
+          <Button
+            key="submit"
+            type="primary"
+            loading={leaveLoading}
+            onClick={handleSetLeave}
+          >
+            Set Leave
+          </Button>,
+        ]}
+      >
+        <p>Doctor ID: {leaveDoctor ? leaveDoctor._id : ""}</p>
+        <p>
+          Doctor Name:{" "}
+          {leaveDoctor ? `${leaveDoctor.firstName} ${leaveDoctor.lastName}` : ""}
+        </p>
+        <Form form={leaveForm}  labelCol={{ span: 6 }} 
+          wrapperCol={{ span: 18 }}>
+          <Form.Item
+            form={leaveForm}
+            name="doctorId"
+            label="Doctor Id" hidden
+            initialValue={leaveDoctor ? leaveDoctor._id : ""} // Pre-fill the doctorId field
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item
+            form={leaveForm}
+            name="startDate"
+            label="Start Date"
+            rules={[{ required: true, message: "Please select start date" }]}
+          >
+            <DatePicker />
+          </Form.Item>
+          <Form.Item
+            form={leaveForm}
+            name="endDate"
+            label="End Date"
+            rules={[{ required: true, message: "Please select end date" }]}
+          >
+            <DatePicker />
+          </Form.Item>
+        </Form>
+      </Modal>
+
+
+
+
     </Layout>
   );
 }

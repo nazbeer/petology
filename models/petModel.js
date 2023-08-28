@@ -30,6 +30,10 @@ const petSchema = new mongoose.Schema(
     required: true,
     // default:'image/png',
    },
+   custompetId:{
+    type:String,
+    required:true
+   },
     status:{
         type : String,
         required :false,

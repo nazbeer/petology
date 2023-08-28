@@ -319,7 +319,7 @@ router.post("/check-booking-avilability", authMiddleware, async (req, res) => {
       date,
       time: { $gte: fromTime, $lte: toTime },
     });
-    console.log(appointments);
+   // console.log(appointments);
     if (appointments.length > 0) {
       
       return res.status(200).send({
@@ -418,7 +418,7 @@ router.get("/get-appointments-by-user-id", authMiddleware, async (req, res) => {
 router.get("/get-all-appointments", authMiddleware, async (req, res)=>{
   try{
     const appointmentList = await Appointment.find({});
-    console.log(appointmentList);
+   // console.log(appointmentList);
     res.status(200).send({
       message: "Appointment List fetched successfully",
       success: true,
@@ -517,7 +517,7 @@ router.get('/api/user/:userId/pet/:petId/appointments', authMiddleware, async (r
 
   try {
     const appointments = await Appointment.find({ userId, petId });
-    console.log(appointments);
+   // console.log(appointments);
     res.status(200).json({
       success: true,
       data: appointments,
@@ -582,7 +582,7 @@ router.post("/cancel-appointment/:appointmentId", authMiddleware, async (req, re
 
     // Find the appointment by appointmentId
     const appointment = await Appointment.findById(appointmentId);
-    console.log(appointment);
+   // console.log(appointment);
     if (!appointment) {
       return res.status(404).json({ success: false, message: "Appointment not found" });
     }

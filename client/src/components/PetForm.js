@@ -3,20 +3,30 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { toast } from "react-hot-toast";
 import jwt_decode from 'jwt-decode'; 
+import { showLoading, hideLoading } from "../redux/alertsSlice";
+import { useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import moment from 'moment';
 
 const PetForm = () => {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const generateCustomID = () => {
+    const formattedDate = moment().format("YYYYMMDD");
+    const randomSuffix = Math.floor(100000 + Math.random() * 900000);
+    return `${formattedDate}-1${randomSuffix}`;
+  };
   const [pet, setPet] = useState({
     pet: '',
     size: '',
-    //dimension: '',
     breed: '',
     image: null,
-    userId:''
+    userId:'',
+    custompetId: generateCustomID(),
   });
   const userToken = localStorage.getItem('token');
   const decodedToken = jwt_decode(userToken);
   const userId = decodedToken.id; // Extract the user ID from the decoded token
- // console.log(userId);
   const handleChange = (e) => {
     const { name, value } = e.target;
     setPet((prevState) => ({
@@ -41,23 +51,24 @@ const PetForm = () => {
     formData.append('breed', pet.breed);
     formData.append('image', pet.image);
     formData.append('userId', userId);
+    formData.append('custompetId', pet.custompetId);
 
     try {
+      dispatch(showLoading());
       const response = await axios.post('/api/pet/create-new-pet', formData, {
         headers: { 'Content-Type': 'multipart/form-data',
         Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
 
-     // console.log('Pet saved successfully:', response.data);
       if (response.data.success) {
         toast.success(response.data.message);
-        //navigate('/appointments');
+       // navigate('/petlist');
       }
       // Do something with the response, like showing a success message
     } catch (error) {
       toast.error("Error in adding New Pet.");
-      //dispatch(hideLoading());
+      dispatch(hideLoading());
     }
   };
 
@@ -101,17 +112,7 @@ const PetForm = () => {
             required
           />
         </div>
-        {/* <div className='mb-2'>
-          <label htmlFor="dimension">Dimension (1.5x2 Ft):</label>
-          <input className="form-control" 
-            type="text"
-            id="dimension"
-            name="dimension"
-            value={pet.dimension}
-            onChange={handleChange}
-            required
-          />
-        </div> */}
+        
         <div className='mb-2'>
           <label htmlFor="breed">Breed:</label>
           <input className="form-control" 

@@ -83,12 +83,14 @@ function Appointmentlist(doctorId) {
 
   const getDoctorsData = async () => {
     try {
-      const response = await axios.get("/api/admin/get-all-approved-doctors", {
+      const response = await axios.get("/api/admin/get-all-approved-doctors-assign",
+       {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
-      });
-
+      }
+      );
+    //  console.log('response',response.data.data);
       if (response.data.success) {
         setDoctors(response.data.data);
       }
@@ -105,7 +107,7 @@ function Appointmentlist(doctorId) {
       });
 
       if (response.data.success) {
-        setDoctors(response.data.data);
+        setPets(response.data.data);
       }
     } catch (error) {
       console.error(error);
@@ -173,11 +175,13 @@ function Appointmentlist(doctorId) {
  
   const getOpenAppointmentsData = async () => {
     try {
-      const response = await axios.get("/api/admin/get-all-open-appointments", {
+      const response = await axios.get("/api/admin/get-all-open-appointments",
+       {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
-      });
+      }
+      );
 
       if (response.data.success) {
         setOpenAppointments(response.data.data);
@@ -220,14 +224,17 @@ function Appointmentlist(doctorId) {
     {
       title:"Service",
       dataIndex:"module",
+      responsive: ["xs", "md","sm", "lg"],
     },
     {
         title:"Services Requested",
         dataIndex: "service",
+        responsive: ["xs", "md","sm", "lg"],
     },
     {
       title:'Pet',
       dataIndex : 'pet',
+      responsive: ["xs", "md", "sm","lg"],
     },
     {
       title :"Appointment Date",
@@ -236,7 +243,8 @@ function Appointmentlist(doctorId) {
         <span>
           {moment(record.date).format('LL')}
         </span>
-      )
+      ),
+      responsive: ["xs", "md", "sm","lg"],
     },
     {
       title:"Appointment Time",
@@ -245,7 +253,8 @@ function Appointmentlist(doctorId) {
         <span>
           {record.time}
         </span>
-      )
+      ),
+      responsive: ["xs", "md","sm", "lg"],
     },
     {
       title:"Parent Name",
@@ -253,46 +262,32 @@ function Appointmentlist(doctorId) {
       render :(text, record)=>(
         <span>{record.firstname} {record.lastname}</span>
       ),
-     
+      responsive: ["xs", "md","sm", "lg"],
     },
     {
       title:'Mobile',
       dataIndex:'mobile',
       render:(text,record)=>(
         <span>{record.mobile}</span>
-      )
+      ),
+      responsive: ["xs", "md","sm", "lg"],
     },
     {
       title:'Email Address',
       dataIndex: 'email',
       render:(text, record)=>(
         <span>{record.email}</span>
-      )
+      ),
+      responsive: ["xs", "md","sm", "lg"],
     },
-    // {
-    //   title: 'Doctor Details',
-    //   dataIndex: 'doctorDetails',
-    //   render: () => {
-    //     if (!doctorDetails) {
-    //       return null;
-    //     }
-    //     return (
-    //       <div>
-    //         <p>
-    //           Doctor Name: {doctorDetails.firstName} {doctorDetails.lastName}
-    //         </p>
-    //         <p>Specialization: {doctorDetails.specialization}</p>
-    //         {/* Add other doctor details as needed */}
-    //       </div>
-    //     );
-    //   },
-    // },
+
     {
       title:'Status',
       dataIndex:"status",
       render:(text, record)=>(
         <span className="text-capitalize">{record.status}</span>
-      )
+      ),
+           responsive: ["xs", "md","sm", "lg"],
     },
     {
       title: "Actions",
@@ -325,6 +320,7 @@ function Appointmentlist(doctorId) {
           </button>
         </div>
       ),
+      responsive: ["xs", "md", "sm","lg"],
     },
     
 
@@ -342,6 +338,7 @@ function Appointmentlist(doctorId) {
           {record.userInfo.name}
         </span>
       ),
+      responsive: ["xs", "md", "sm","lg"],
     },
     {
       title: "Doctor",
@@ -351,6 +348,7 @@ function Appointmentlist(doctorId) {
           {record.doctorInfo.name || record.doctorInfo.firstName + " " + record.doctorInfo.lastName}
         </span>
       ),
+      responsive: ["xs", "md", "sm","lg"],
     },
     // {
     //   title:'Pet',
@@ -365,10 +363,11 @@ function Appointmentlist(doctorId) {
       title: "Specialization",
       dataIndex: "specialization",
       render: (text, record) => (
-        <span>
+        <span className="text-capitalize">
           {record.doctorInfo.specialization}
         </span>
       ),
+      responsive: ["xs", "md", "sm","lg"],
     },
     {
       title: "Date",
@@ -377,7 +376,8 @@ function Appointmentlist(doctorId) {
         <span>
           {moment(record.date).format('LL')}
         </span>
-      )
+      ),
+      responsive: ["xs", "md", "sm","lg"],
     },
     {
       title: "Time",
@@ -386,14 +386,16 @@ function Appointmentlist(doctorId) {
         <span>
           {moment(record.time).format('LTS')}
         </span>
-      )
+      ),
+      responsive: ["xs", "md", "sm","lg"],
     },
    {
     title: "Status",
     dataIndex: "status",
     render:(text, record) =>(
       <span className="text-capitalize">{record.status}</span>
-    )
+    ),
+    responsive: ["xs", "md", "sm","lg"],
    },
 
       {
@@ -427,6 +429,7 @@ function Appointmentlist(doctorId) {
             </button>
           </div>
         ),
+        responsive: ["xs", "md", "sm", "lg"],
       },
     
     
@@ -439,7 +442,7 @@ function Appointmentlist(doctorId) {
         <div className="col-md-6  d-lg-flex gap-3 justify-content-right align-items-center">
       <h6 className="page-header mb-0">Appointments List (Registered Users)</h6>
       </div>
-      <div className="col-md-6 d-lg-flex gap-3 justify-content-end align-items-center">
+      <div className="col-md-6 d-lg-flex d-md-flex d-sm-flex d-xs-flex gap-3 justify-content-end align-items-center">
        <Link to="/admin/appointmentlist"><button className="btn btn-success btn-sm" type="button">Veterinary</button></Link>
         <Link to="/admin/groominglist"><button className="btn btn-warning btn-sm" type="button">Grooming</button></Link>
         <Link to="/admin/mobilevetlist"><button className="btn btn-warning btn-sm" type="button">Mobile Vet</button></Link>
@@ -447,7 +450,8 @@ function Appointmentlist(doctorId) {
       </div>
       </div>
       <hr />
-      <Table columns={usercolumns} dataSource={appointments}/>
+      <Table columns={usercolumns} dataSource={appointments} responsive={true}
+  scroll={{ x: true }}/>
       <div>
       <Modal show={showModal} onHide={handleCloseModal} size="lg">
       <Modal.Header closeButton>
@@ -468,9 +472,9 @@ function Appointmentlist(doctorId) {
             <label className="text-left">Assign Doctor: </label> 
             <span className="text-right"> <select className="form-control">
               <option>--Select Doctor--</option>
-              {selectedAppointment && doctors.map((doctor) => (
-                <option key={doctor._id} value={doctor._id}>
-                  Dr. {doctor.firstName} {doctor.lastName}
+              {selectedAppointment && doctors.map((doctoro) => (
+                <option key={doctoro._id} value={doctoro._id}>
+                  Dr. {doctoro.firstName} {doctoro.lastName}
                 </option>
               ))}
               
@@ -496,7 +500,8 @@ function Appointmentlist(doctorId) {
       </div>
       <div className="col-md-12">
         <h6>Guest Appointments</h6>
-        <Table columns={opencolumns} dataSource={openappointments}/>
+        <Table columns={opencolumns} dataSource={openappointments} responsive={true}
+  scroll={{ x: true }}/>
       </div>
     </Layout>
   );

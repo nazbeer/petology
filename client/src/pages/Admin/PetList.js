@@ -132,11 +132,22 @@ function Petlist() {
   const base64ToDataUrl = (base64String) => {
     return `http://localhost:5000/${base64String}.png`;
   };
+  const generateCustomID = (createdAt) => {
+    const formattedDate = moment(createdAt).format("YYYYMMDD");
+    const randomSuffix = Math.floor(100000 + Math.random() * 900000);
+    return `${formattedDate}-1${randomSuffix}`;
+  };
+  
   const columns = [
-    // {
-    //     title: "ID",
-    //     dataIndex: "_id",
-    // },
+    {
+      title: "ID",
+      dataIndex: "custompetId", // Use the createdAt value
+      render: (text,record) => {
+        //const customID = generateCustomID(createdAt); // Generate the custom ID
+        return <span>{record.custompetId}</span>;
+      },
+      responsive: ["xs", "md", "sm", "lg"],
+    },
     {
       title:"Pet Image",
       dataIndex:"image",
@@ -145,12 +156,13 @@ function Petlist() {
            
               {renderImage(record)}
           </span>
-      )
+      ),
+      responsive: ["xs", "md","sm", "lg"],
   }, 
     {
         title:"Pet",
         dataIndex:"pet",
-        
+        responsive: ["xs", "md","sm", "lg"],
     },
     {
         title:"Breed",
@@ -159,7 +171,8 @@ function Petlist() {
             <span>
                 {record.breed}
             </span>
-        )
+        ),
+        responsive: ["xs", "md","sm", "lg"],
     }, 
     {
         title:"Size",
@@ -168,7 +181,8 @@ function Petlist() {
             <span>
                 {record.size}
             </span>
-        )
+        ),
+        responsive: ["xs", "md","sm", "lg"],
     }, 
  
   
@@ -176,7 +190,7 @@ function Petlist() {
       title: "Actions",
       dataIndex: "status",
       render: (text, record) => (
-        <div className="d-flex justify-content-evenly">
+        <div className="d-flex justify-content-evenly gap-3">
           <button
             type="button"
             className="btn btn-success btn-sm cusrsor-pointer"
@@ -200,6 +214,7 @@ function Petlist() {
           </button>
         </div>
       ),
+      responsive: ["xs", "md","sm", "lg"],
     },
     
   ];
@@ -212,7 +227,7 @@ function Petlist() {
 
       </div>
       <hr />
-      <Table columns={columns} dataSource={pets}/>
+      <Table columns={columns} dataSource={pets}  responsive={true} scroll={{ x: true }}/>
       <Modal
         title={`Edit Pet - ${editedPet.pet}`}
         visible={editModalVisible}

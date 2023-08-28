@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const historySchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "User", // Reference to the Patient model
+    ref: "users", // Reference to the Patient model
     required: true,
   },
   documentPath: {

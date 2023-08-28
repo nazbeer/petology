@@ -12,42 +12,55 @@ const breaktimeModel = require("../models/breaktimeModel");
 const packModel = require("../models/packModel");
 const MobileVetApp = require("../models/mobvetappModel");
 const History = require("../models/historyModel");
-// router.get("/get-all-services", authMiddleware, async (req, res) => {
-//   try{
-//       const service = await serviceModel.find({});
-//     //  console.log(service);
-//       res.status(200).send({
-//           success:true,
-//           message:"All services fetched successfully.",
-//           data: service,
-//       });
-//   } catch(error){
-//       res.status(500).send({
-//           success:false,
-//           message:"Unable to fetch the service List details",
-//           error,
-//       });
-//   }
-// });
+const DoctorLeave = require("../models/doctorLeaveModel");
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'uploads/'); // Directory where files will be stored
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, uniqueSuffix + path.extname(file.originalname));
+  },
+});
 
 
 router.get("/get-all-approved-doctors", authMiddleware, async (req, res) => {
   try {
-    const doctors = await Doctor.find({});
+    const doctors = await Doctor.find({ status: "approved" }); // Add the status filter
     res.status(200).send({
-      message: "Doctors fetched successfully",
+      message: "Approved doctors fetched successfully",
       success: true,
       data: doctors,
     });
   } catch (error) {
     console.log(error);
     res.status(500).send({
-      message: "Error applying doctor account",
+      message: "Error fetching approved doctors",
       success: false,
       error,
     });
   }
 });
+
+router.get("/get-all-approved-doctors-assign", authMiddleware, async (req, res) => {
+  try {
+    const doctorso = await Doctor.find({ status: "approved" }); // Add the status filter
+ //   console.log('responsenaz:', doctorso);
+    res.status(200).send({
+      message: "Approved doctors fetched successfully",
+      success: true,
+      data: doctorso,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      message: "Error fetching approved doctors",
+      success: false,
+      error,
+    });
+  }
+});
+
 
 router.post('/assign-doctor-to-appointment', authMiddleware, async (req, res) => {
   try {
@@ -188,40 +201,6 @@ router.get('/get-all-appointments', authMiddleware, async (req, res) => {
     });
   }
 });
-///old code
-
-// router.get('/get-all-packs', async (req, res) => {
-//   try {
-//     const services = await packModel.find();
-//     return res.status(200).json({ success: true, data: services });
-//   } catch (error) {
-//     console.error(error);
-//     return res.status(500).json({ success: false, message: "An error occurred while fetching services." });
-//   }
-// });
-
-// router.post('/create-new-pack', async(req, res) => {
-//   const { name, subservices } = req.body;
-  
-//   const newPack = new packModel({
-//     name,
-//     subservices,
-//   });
-
-//   try {
-//     await newPack.save();
-//     return res.status(200).json({ success: true, message: "New Service Added successfully" });
-//   } catch (error) {
-//     if (error.code === 11000) { // Duplicate key error
-//       return res.status(400).json({ success: false, message: "Service with the same name and sub-service already exists." });
-//     }
-//     console.error(error);
-//     return res.status(500).json({ success: false, message: "An error occurred while adding new Service." });
-//   }
-// });
-
-/// newcode
-// ...other imports
 
 router.post("/create-service", authMiddleware,  async (req, res) => {
   const { serviceType, serviceName, subServiceName } = req.body;
@@ -541,7 +520,7 @@ router.post("/book-appointment", authMiddleware, async (req, res) => {
     req.body.date = moment(req.body.date, "DD-MM-YYYY").toISOString();
     req.body.time = moment(req.body.time, "HH:mm").toISOString();
     const newAppointment = new Appointment(req.body);
-    console.log(req.body);
+   // console.log(req.body);
     await newAppointment.save();
     //pushing notification to doctor based on his userid
     const user = await User.findOne({ _id: req.body.doctorInfo.userId });
@@ -578,7 +557,7 @@ router.post("/check-booking-avilability", authMiddleware, async (req, res) => {
       date,
       time: { $gte: fromTime, $lte: toTime },
     });
-    console.log(appointments);
+    //console.log(appointments);
     if (appointments.length > 0) {
       
       return res.status(200).send({
@@ -646,7 +625,7 @@ router.post("/update-doctor/:doctorId", authMiddleware, async (req, res) => {
 router.get("/get-admin-profile/:userId", authMiddleware, async (req, res) => {
   try {
     const { userId } = req.params;
-    console.log(userId);
+   // console.log(userId);
     const admin = await User.findById(userId).select("-password");
     if (!admin) {
       return res.status(404).json({ success: false, message: "Admin not found" });
@@ -729,24 +708,39 @@ router.get("/history/:userId", async (req, res) => {
 });
 
 // Upload user history documents
-router.post(
-  "/upload-history",
-  upload.single("document"),
-  async (req, res) => {
-    try {
-      const { userId } = req.body;
-      const documentPath = req.file ? req.file.path : "";
+router.post('/api/admin/upload-history', upload.array('files'), (req, res) => {
+  try {
+    // At this point, files have been uploaded and saved to the specified directory
+    // You can access the uploaded files using req.files array
+    
+    // Here, you can process the uploaded files as needed
+    for (let i = 0; i < req.files.length; i++) {
+      const file = req.files[i];
+      const originalName = file.originalname;
+      const filePath = file.path;
 
-      const newHistoryRecord = new History({ userId, documentPath });
-      await newHistoryRecord.save();
+      // Generate custom _id format
+      const customId = generateCustomId();
 
-      res.json({ success: true, message: "History uploaded successfully" });
-    } catch (error) {
-      console.error("Error uploading history:", error);
-      res.status(500).json({ success: false, message: "Server error" });
+      // You can perform additional processing here
+      // For example, save the file information to a database
+      // Or perform some actions based on the file content
+
+      console.log(`Uploaded file: ${originalName}`);
+      console.log(`File path: ${filePath}`);
+      console.log(`Custom _id: ${customId}`);
     }
+
+    // Once you've processed the files, you can send a response back
+    res.status(200).json({ success: true, message: 'Files uploaded and processed successfully' });
+  } catch (error) {
+    console.error('Error uploading and processing files:', error);
+    res.status(500).json({ success: false, message: 'Error uploading and processing files' });
   }
-);
+});
+
+
+
 
 // Delete user history record by ID
 router.delete("/history/:recordId", async (req, res) => {
@@ -759,5 +753,32 @@ router.delete("/history/:recordId", async (req, res) => {
     res.status(500).json({ success: false, message: "Server error" });
   }
 });
+router.post("/set-doctor-leave", authMiddleware, async (req, res) => {
+  try {
+    const { doctorId, startDate, endDate } = req.body;
+    const leave = new DoctorLeave({
+      doctorId,
+      startDate,
+      endDate,
+    });
+    await leave.save();
+    res.status(200).json({ success: true, message: "Doctor leave set successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Error setting doctor leave" });
+  }
+});
+router.get('/get-doctor-leaves/:doctorId', async (req, res) => {
+  try {
+    const doctorId = req.params.doctorId;
+    
+    // Fetch leaves using the DoctorLeave model based on the doctorId
+    const leaves = await DoctorLeave.find({ doctorId });
 
+    res.json({ success: true, data: leaves });
+  } catch (error) {
+    console.error('Error fetching doctor leaves:', error);
+    res.status(500).json({ success: false, message: 'Error fetching doctor leaves' });
+  }
+});
 module.exports = router;

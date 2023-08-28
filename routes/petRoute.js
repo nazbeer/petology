@@ -53,10 +53,10 @@ const upload = multer({
 
 router.post('/create-new-pet', upload.single('image'), authMiddleware, async (req, res) => {
   try {
-    const { pet, size, breed, userId } = req.body;
+    const { pet, size, breed, userId, custompetId} = req.body;
     const image = req.file ? req.file.filename : ''; // Store the image filename
 
-    const newPet = new Pet({ pet, size, image, breed, userId });
+    const newPet = new Pet({ pet, size, image, breed, userId, custompetId });
     await newPet.save();
 
     res.json(newPet);
