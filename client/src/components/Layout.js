@@ -178,11 +178,11 @@ function Layout({ children }) {
     //   path:"/admin/addpet",
     //   icon:'ri-bear-smile-line'
     // },
-    {
-      name:"Break Time",
-      path:"/admin/breaktime",
-      icon: 'ri-time-line',
-    },
+    // {
+    //   name:"Break Time",
+    //   path:"/admin/breaktime",
+    //   icon: 'ri-time-line',
+    // },
     // {
     //   name:"Add Service",
     //   path:"/admin/addservice",

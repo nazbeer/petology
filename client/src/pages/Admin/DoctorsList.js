@@ -199,7 +199,7 @@ function DoctorsList() {
       title: "Leaves",
       dataIndex: "leaves",
       render: (leaves, record) => (
-        <div>
+        <div className="naz">
           {leaves && leaves.length > 0 ? (
             leaves.map((leave, index) => (
               <div key={index}>
@@ -215,6 +215,7 @@ function DoctorsList() {
         </div>
       ),
     },
+    
     
     {
       title:"Clinic Fees",

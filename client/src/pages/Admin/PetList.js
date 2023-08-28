@@ -145,7 +145,10 @@ function Petlist() {
       render: (text,record) => {
         //const customID = generateCustomID(createdAt); // Generate the custom ID
         return <span>{record.custompetId}</span>;
+        
       },
+    //  sorter: (a, b) => moment(a.custompetId) - moment(b.custompetId), // Sorting function
+    //  defaultSortOrder: "descend",
       responsive: ["xs", "md", "sm", "lg"],
     },
     {
@@ -185,7 +188,13 @@ function Petlist() {
         responsive: ["xs", "md","sm", "lg"],
     }, 
  
-  
+    // {
+    //   title: "Created At",
+    //   dataIndex: "createdAt",
+    //   render: (record, text) => moment(record.createdAt).format("DD MMM, YYYY"),
+    //   // sorter: (a, b) => moment(a.createdAt) - moment(b.createdAt), // Sorting function
+    //   // defaultSortOrder: "descend", // Default sorting order
+    // },
     {
       title: "Actions",
       dataIndex: "status",

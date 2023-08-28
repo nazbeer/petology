@@ -18,6 +18,7 @@
 .ant-table-tbody>tr>td, .ant-table-thead>tr>th, .ant-table tfoot>tr>td, .ant-table tfoot>tr>th{
     padding:5px !important;
 }
+
 .td.ant-table-cell{
    text-wrap:nowrap !important;
 }
@@ -163,7 +164,13 @@
     background-color: #000;
     padding-bottom: 5px;
 }
+.naz{
+    overflow-y: none !important; padding-right: 10px;
+}
 @media screen and (max-width: 768px){
+    .naz{
+        max-height: 100px; overflow-y: scroll !important; padding-right: 10px;
+    }
     .content {
         width: 84%;
         height: 100%;
