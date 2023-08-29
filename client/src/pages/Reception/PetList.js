@@ -3,14 +3,16 @@ import { useDispatch } from "react-redux";
 import Layout from "../../components/Layout";
 import { showLoading, hideLoading } from "../../redux/alertsSlice";
 import axios from "axios";
-import { Table } from "antd";
+import { Table, Modal, Input, Form } from "antd";
 import moment from "moment";
 import { Buffer } from 'buffer';
+import { toast } from "react-hot-toast";
 import logo from "../../images/logo-petology.png";
 function Petlist() {
   const [pets, setPets] = useState([]);
   const dispatch = useDispatch();
-  
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [editedPet, setEditedPet] = useState({});
   const getPetsData = async () => {
     try {
       dispatch(showLoading());
@@ -31,13 +33,98 @@ function Petlist() {
   useEffect(() => {
     getPetsData();
   }, []);
+  const handleView = (record) => {
+    // Implement the logic to view the pet details
+    // You can use a modal or a separate page to display the details
+    Modal.info({
+      title: `Viewing Details of ${record.pet} - ${record.breed}`,
+      size:`large`,
+      
+ 
+      content: (
+        <div className="row">
+          <div className="d-lg-flex justify-content-between align-items-center gap-3"><strong>Pet Name:</strong> {record.pet}</div>
+          <div className="d-lg-flex justify-content-between align-items-center gap-3"><strong>Breed:</strong> {record.breed}</div>
+          <div className="d-lg-flex justify-content-between align-items-center gap-3"><strong>Size:</strong> {record.size}</div>
+          <div><img src={record.image}/></div>
+         
+        </div>
+      ),
+      onOk() {},
+    });
+  };
+  
+  
+  const handleEdit = (record) => {
+    setEditedPet(record);
+    setEditModalVisible(true);
+  };
+
+  const handleCancel = () => {
+    setEditModalVisible(false);
+    setEditedPet({});
+  };
+
+  const handleSave = async () => {
+    try {
+      dispatch(showLoading());
+      const response = await axios.put(
+        `/api/pet/edit-pet/${editedPet._id}`,
+        editedPet,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      dispatch(hideLoading());
+      if (response.data.success) {
+        toast.success(response.data.message);
+        getPetsData();
+        setEditModalVisible(false);
+        setEditedPet({});
+      } else {
+        toast.error(response.data.message);
+      }
+    } catch (error) {
+      dispatch(hideLoading());
+      toast.error("Error editing pet");
+    }
+  };
+
+
+  const handleDelete = async (petId) => {
+    // Implement the logic to delete the pet
+    // Show a confirmation dialog and then make an API call to delete the pet
+    const confirmed = window.confirm("Are you sure you want to delete this pet?");
+    if (confirmed) {
+      try {
+        dispatch(showLoading());
+        const response = await axios.delete(`/api/pet/delete-pet/${petId}`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+        dispatch(hideLoading());
+        if (response.data.success) {
+          toast.success(response.data.message);
+          getPetsData();
+        } else {
+          toast.error(response.data.message);
+        }
+      } catch (error) {
+        dispatch(hideLoading());
+        toast.error("Error deleting pet");
+      }
+    }
+  };
   const renderImage = (record) => {
     if (!record.image) {
-      // If no image is found, display the default logo
+  
       return <img src={logo}  className="petimg img-responsive" alt="Default Logo" />;
     } else {
-      // If an image is found in the record, render the image
-      const imageUrl = base64ToDataUrl(record.image); // Convert base64 to data URL
+   
+      const imageUrl = base64ToDataUrl(record.image); 
       return <img src={imageUrl}  className="petimg img-responsive" alt="Pet Image" style={{   borderRadius:'100%'}} />;
     }
   };
@@ -45,25 +132,40 @@ function Petlist() {
   const base64ToDataUrl = (base64String) => {
     return `http://localhost:5000/${base64String}.png`;
   };
+  const generateCustomID = (createdAt) => {
+    const formattedDate = moment(createdAt).format("YYYYMMDD");
+    const randomSuffix = Math.floor(100000 + Math.random() * 900000);
+    return `${formattedDate}-1${randomSuffix}`;
+  };
+  
   const columns = [
     {
-        title: "ID",
-        dataIndex: "_id",
+      title: "ID",
+      dataIndex: "custompetId", // Use the createdAt value
+      render: (text,record) => {
+        //const customID = generateCustomID(createdAt); // Generate the custom ID
+        return <span>{record.custompetId}</span>;
+        
+      },
+    //  sorter: (a, b) => moment(a.custompetId) - moment(b.custompetId), // Sorting function
+    //  defaultSortOrder: "descend",
+      responsive: ["xs", "md", "sm", "lg"],
     },
     {
       title:"Pet Image",
       dataIndex:"image",
       render:(text, record)=>(
           <span className="d-flex justify-content-center">
-              {/* <img src={base64ToDataUrl(record.image)} width="64px" height="64px" className="petimg img-responsive"/> */}
+           
               {renderImage(record)}
           </span>
-      )
+      ),
+      responsive: ["xs", "md","sm", "lg"],
   }, 
     {
         title:"Pet",
         dataIndex:"pet",
-        
+        responsive: ["xs", "md","sm", "lg"],
     },
     {
         title:"Breed",
@@ -72,7 +174,8 @@ function Petlist() {
             <span>
                 {record.breed}
             </span>
-        )
+        ),
+        responsive: ["xs", "md","sm", "lg"],
     }, 
     {
         title:"Size",
@@ -81,40 +184,47 @@ function Petlist() {
             <span>
                 {record.size}
             </span>
-        )
-    }, 
-    // {
-    //   title:"Dimension",
-    //   dataIndex:"dimension",
-    //   render:(text, record)=>(
-    //       <span>
-    //           {record.dimension}
-    //       </span>
-    //   )
-  //    }, 
-  
-      {
-        title: "Actions",
-        dataIndex: "status",
-        render: (text, record) => (
-          <div className="d-flex justify-content-evenly">
-            <button type="button" className="btn btn-success btn-sm cusrsor-pointer"><i className="ri-eye-line"></i></button>
-            <button type="button" className="btn btn-warning btn-sm cusrsor-pointer"><i className="ri-edit-line"></i></button>
-            <button type="button" className="btn btn-danger  btn-sm cusrsor-pointer"><i className="ri-flag-line"></i></button>
-
-          </div>
         ),
-      },
-    
+        responsive: ["xs", "md","sm", "lg"],
+    }, 
+ 
     // {
-    //   title: "Date & Time",
+    //   title: "Created At",
     //   dataIndex: "createdAt",
-    //   render: (text, record) => (
-    //     <span>
-    //       {moment(record.date).format("DD-MM-YYYY")} {moment(record.time).format("HH:mm")}
-    //     </span>
-    //   ),
+    //   render: (record, text) => moment(record.createdAt).format("DD MMM, YYYY"),
+    //   // sorter: (a, b) => moment(a.createdAt) - moment(b.createdAt), // Sorting function
+    //   // defaultSortOrder: "descend", // Default sorting order
     // },
+    {
+      title: "Actions",
+      dataIndex: "status",
+      render: (text, record) => (
+        <div className="d-flex justify-content-evenly gap-3">
+          <button
+            type="button"
+            className="btn btn-success btn-sm cusrsor-pointer"
+            onClick={() => handleView(record)}
+          >
+            <i className="ri-eye-line"></i>
+          </button>
+          <button
+            type="button"
+            className="btn btn-warning btn-sm cusrsor-pointer"
+            onClick={() => handleEdit(record)}
+          >
+            <i className="ri-edit-line"></i>
+          </button>
+          <button
+            type="button"
+            className="btn btn-danger btn-sm cusrsor-pointer"
+            onClick={() => handleDelete(record._id)}
+          >
+            <i className="ri-flag-line"></i>
+          </button>
+        </div>
+      ),
+      responsive: ["xs", "md","sm", "lg"],
+    },
     
   ];
 
@@ -126,8 +236,27 @@ function Petlist() {
 
       </div>
       <hr />
-      <Table columns={columns} dataSource={pets}/>
-      
+      <Table columns={columns} dataSource={pets}  responsive={true} scroll={{ x: true }}/>
+      <Modal
+        title={`Edit Pet - ${editedPet.pet}`}
+        visible={editModalVisible}
+        onCancel={handleCancel}
+        onOk={handleSave}
+        okText="Save"
+        cancelText="Cancel"
+      >
+        <Form>
+          <Form.Item label="Pet Name">
+            <Input
+              value={editedPet.pet}
+              onChange={(e) =>
+                setEditedPet({ ...editedPet, pet: e.target.value })
+              }
+            />
+          </Form.Item>
+          {/* Add more form fields for editing */}
+        </Form>
+      </Modal>
     </Layout>
   );
 }

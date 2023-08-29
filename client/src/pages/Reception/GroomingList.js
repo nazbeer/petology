@@ -220,14 +220,17 @@ function GroomingList(doctorId) {
     {
       title:"Service",
       dataIndex:"module",
+      responsive: ["xs", "md","sm", "lg"],
     },
     {
         title:"Services Requested",
         dataIndex: "service",
+        responsive: ["xs", "md","sm", "lg"],
     },
     {
       title:'Pet',
       dataIndex : 'pet',
+      responsive: ["xs", "md","sm", "lg"],
     },
     {
       title :"Appointment Date",
@@ -236,7 +239,8 @@ function GroomingList(doctorId) {
         <span>
           {moment(record.date).format('LL')}
         </span>
-      )
+      ),
+      responsive: ["xs", "md","sm", "lg"],
     },
     {
       title:"Appointment Time",
@@ -245,7 +249,8 @@ function GroomingList(doctorId) {
         <span>
           {record.time}
         </span>
-      )
+      ),
+      responsive: ["xs", "md","sm", "lg"],
     },
     {
       title:"Parent Name",
@@ -253,27 +258,31 @@ function GroomingList(doctorId) {
       render :(text, record)=>(
         <span className="text-capitalize">{record.firstname} {record.lastname}</span>
       ),
+      responsive: ["xs", "md","sm", "lg"],
     },
     {
       title:'Mobile',
       dataIndex:'mobile',
       render:(text,record)=>(
         <span>{record.mobile}</span>
-      )
+      ),
+      responsive: ["xs", "md","sm", "lg"],
     },
     {
       title:'Email Address',
       dataIndex: 'email',
       render:(text, record)=>(
         <span>{record.email}</span>
-      )
+      ),
+      responsive: ["xs", "md","sm", "lg"],
     },
     {
       title:'Status',
       dataIndex:"status",
         render:(text, record) => (
             <span className="text-capitalize">{record.status}</span>
-        )
+        ),
+        responsive: ["xs", "md","sm", "lg"],
     },
     {
       title: "Actions",
@@ -306,6 +315,7 @@ function GroomingList(doctorId) {
           </button> */}
         </div>
       ),
+      responsive: ["xs", "md","sm", "lg"],
     },
     
 
@@ -323,6 +333,7 @@ function GroomingList(doctorId) {
           {record.userInfo.name}
         </span>
       ),
+      responsive: ["xs", "md","sm", "lg"],
     },
     {
       title: "Doctor",
@@ -332,6 +343,7 @@ function GroomingList(doctorId) {
           {record.doctorInfo.name || record.doctorInfo.firstName + " " + record.doctorInfo.lastName}
         </span>
       ),
+      responsive: ["xs", "md","sm", "lg"],
     },
     // {
     //   title:'Pet',
@@ -350,6 +362,7 @@ function GroomingList(doctorId) {
           {record.doctorInfo.specialization}
         </span>
       ),
+      responsive: ["xs", "md","sm", "lg"],
     },
     {
       title: "Date",
@@ -358,7 +371,8 @@ function GroomingList(doctorId) {
         <span>
           {moment(record.date).format('LL')}
         </span>
-      )
+      ),
+      responsive: ["xs", "md","sm", "lg"],
     },
     {
       title: "Time",
@@ -367,14 +381,16 @@ function GroomingList(doctorId) {
         <span>
           {moment(record.time).format('LTS')}
         </span>
-      )
+      ),
+      responsive: ["xs", "md","sm", "lg"],
     },
    {
     title: "Status",
     dataIndex: "status",
     render:(text, record) =>(
       <span className="text-capitalize">{record.status}</span>
-    )
+    ),
+    responsive: ["xs", "md","sm", "lg"],
    },
 
       {
@@ -408,6 +424,7 @@ function GroomingList(doctorId) {
             </button> */}
           </div>
         ),
+        responsive: ["xs", "md","sm", "lg"],
       },
     
     
@@ -420,7 +437,7 @@ function GroomingList(doctorId) {
         <div className="col-md-6  d-lg-flex gap-3 justify-content-right align-items-center">
       <h6 className="page-header mb-0">Appointments List</h6>
       </div>
-      <div className="col-md-6 d-lg-flex gap-3 justify-content-end align-items-center">
+      <div className="col-md-6 d-lg-flex d-md-flex d-sm-flex d-xs-flex gap-3 justify-content-end align-items-center">
       <Link to="/admin/appointmentlist"><button className="btn btn-warning btn-sm" type="button">Veterinary</button></Link>
         <Link to="/admin/groominglist"><button className="btn btn-success btn-sm" type="button">Grooming</button></Link>
         <Link to="/admin/mobilevetlist"><button className="btn btn-warning btn-sm" type="button">Mobile Vet</button></Link>
@@ -482,7 +499,8 @@ function GroomingList(doctorId) {
       </div>
       <div className="col-md-12">
         {/* <h6>Open Appointment Lists</h6> */}
-        <Table columns={opencolumns} dataSource={openappointments}/>
+        <Table columns={opencolumns} dataSource={openappointments}  responsive={true}
+  scroll={{ x: true }}/>
       </div>
     </Layout>
   );

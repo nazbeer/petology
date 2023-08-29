@@ -8,21 +8,20 @@ import { Button, Modal } from "react-bootstrap";
 import moment from "moment";
 import {toast} from 'react-hot-toast';
 import { Link } from 'react-router-dom';
-import Geocode from "react-geocode"; // Import the Geocode library
+import Geocode from "react-geocode"; 
 
 // Set your Google Maps API key here
 Geocode.setApiKey('AIzaSyAxdklbUsegbWsasCJpvfmin95xzIxiY3Y');
-
+const apiKey = 'AIzaSyAxdklbUsegbWsasCJpvfmin95xzIxiY3Y';
 
 function MobileVetList(doctorId) {
   const [appointments, setAppointments] = useState([]);
   const [openappointments, setOpenAppointments] = useState([]);
   const [doctors, setDoctors] = useState([]);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
-  const [selectedDoctor, setSelectedDoctor] = useState(null);
-  const [showModal, setShowModal] = useState(false);
+
   const [pets, setPets] = useState([]);
-  //const [getAddress, getAddressFromCoordinates] = useState([]);
+
   const dispatch = useDispatch();
 
   const changeOpenAppointmentStatus = async (record, status) =>{
@@ -40,10 +39,10 @@ function MobileVetList(doctorId) {
       dispatch(hideLoading());
       if(response.data.success){
         toast.success(response.data.message);
-        getOpenAppointmentsData();
+        //getOpenAppointmentsData();
       }
     } catch (error){
-     // toast.error("Error changing appointment status");
+    
       dispatch(hideLoading());
     }
   };
@@ -52,7 +51,7 @@ function MobileVetList(doctorId) {
       dispatch(showLoading());
 
       const response = await axios.post(
-        `/api/admin/change-appointment-status/${record._id}`, // Include the appointment ID in the URL
+        `/api/admin/change-appointment-status/${record._id}`, 
         {
           status: status,
         },
@@ -68,25 +67,11 @@ function MobileVetList(doctorId) {
         getAppointmentsData();
       }
     } catch (error) {
-     // toast.error("Error changing appointment status");
+    
       dispatch(hideLoading());
     }
   };
   
-  const handleShowModal = (record) => {
-    setSelectedAppointment(record);
-    setShowModal(true);
-  };
-
-  const handleCloseModal = () => {
-    setSelectedAppointment(null);
-    setSelectedDoctor(null);
-    setShowModal(false);
-  };
-
-  const handleDoctorSelect = (event) => {
-    setSelectedDoctor(event.target.value);
-  };
 
   const getDoctorsData = async () => {
     try {
@@ -95,7 +80,7 @@ function MobileVetList(doctorId) {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
-      console.log(response.data);
+    
       if (response.data.success) {
         setDoctors(response.data.data);
       }
@@ -119,31 +104,6 @@ function MobileVetList(doctorId) {
     }
   };
 
-  const assignDoctorToAppointment = async () => {
-    try {
-      const response = await axios.post(
-        "/api/admin/assign-doctor-to-appointment",
-        {
-          appointmentId: selectedAppointment._id,
-          doctorId: selectedDoctor,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
-        console.log(response);
-      if (response.data.success) {
-
-        toast.success(response.data.message);
-        getAppointmentsData();
-        handleCloseModal();
-      }
-    } catch (error) {
-      toast.error("Error assigning doctor to appointment");
-    }
-  };
   
   const getAppointmentsData = async () => {
     try {
@@ -160,49 +120,50 @@ function MobileVetList(doctorId) {
       console.error(error);
     }
   };
+ 
+
   const [doctorDetails, setDoctorDetails] = useState(null);
-  const [getAddress, setAddress] = useState();
-  const getAddressFromCoordinates = async (lat, lng) => {
+  const [data, setData] = useState([]);
+  const fetchData = async () => {
     try {
-      const response = await Geocode.fromLatLng(lat, lng);
-      const address = response.results[0]?.formatted_address;
-     // console.log(address);
-     // return address;
-      if(response.results){
-        setAddress(response.results.formatted_address);
-      }
-    } catch (error) {
-      console.error("Error fetching address:", error);
-      return "Address not found";
-    }
-  };
-  const getOpenAppointmentsData = async (lat, lng) => {
-    try {
-      const response = await axios.get("/api/admin/get-all-mobvet-appointments", 
-      {
+      const response = await axios.get("/api/admin/get-all-mobvet-appointments", {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
+      });
+
+      const modifiedData = [];
+      for (const item of response.data.data) {
+        const location = `${item.lat},${item.lng}`;
+        const geocodeResponse = await axios.get(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${location}&key=${apiKey}`);
+        const address = geocodeResponse.data.results[1]?.formatted_address || 'N/A';
+
+        modifiedData.push({
+          ...item,
+          location,
+          address,
+        });
       }
-      );
- 
-      if (response.data.success) {
-        setOpenAppointments(response.data.data);
-      }
+
+      setOpenAppointments(modifiedData);
     } catch (error) {
       console.error(error);
     }
   };
-  
+
   useEffect(() => {
-    // Fetch doctor details based on selected appointment
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+   
     const fetchDoctorDetails = async () => {
       try {
         if (selectedAppointment && selectedAppointment.doctorInfo) {
           const response = await axios.get(
             `/api/admin/doctordetails/${selectedAppointment.doctorInfo._id}`
           );
-          console.log(response);
+         
           if (response.data.success) {
             setDoctorDetails(response.data.data);
           }
@@ -217,13 +178,12 @@ function MobileVetList(doctorId) {
   }, [selectedAppointment]);
  
   useEffect(() => {
-  
     getDoctorsData();
     getAppointmentsData();
     changeAppointmentStatus();
     changeOpenAppointmentStatus();
     getPetsData();
-    getOpenAppointmentsData();
+   // getOpenAppointmentsData();
   }, []);
 
 
@@ -250,6 +210,7 @@ function MobileVetList(doctorId) {
         ),
         responsive: ["xs", "md","sm", "lg"],
       },
+      
     {
       title:"Doctor",
       dataIndex:"doctor",
@@ -302,37 +263,31 @@ function MobileVetList(doctorId) {
       ),
       responsive: ["xs", "md","sm", "lg"],
     },
-
     {
-      title: "Appointment Location",
-      dataIndex: "location",
-      render: async (text, record) => {
-        if (record.lat && record.lng) {
-          const address = await getAddressFromCoordinates(
-            record.lat,
-            record.lng
-          );
-          return (
-            <span>
-              {address}
-              <div style={{ height: "200px", width: "100%" }}>
-                <iframe
-               
-                  src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyAxdklbUsegbWsasCJpvfmin95xzIxiY3Y&q=${address}`}
-                  width="100%"
-                  height="100%"
-                  frameBorder="0"
-                  style={{ border: "0" }}
-                  allowFullScreen
-                ></iframe>
-              </div>
-            </span>
-          );
-        } else {
-          return <span>No location available</span>;
-        }
-      },
+      title: 'Location',
+      dataIndex: 'location',
+      key: 'location',
+      render: (text, record) => (
+        <a
+          href={`https://www.google.com/maps/search/?api=${apiKey}&query=${record.lat},${record.lng}`}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          View on Google Maps
+        </a>
+      ),
       responsive: ["xs", "md","sm", "lg"],
+    },
+    {
+      title: 'Address',
+      dataIndex: 'address',
+      key: 'address',
+      render:(text, record)=>(
+        <span>{record.address}</span>
+      ),
+     style:'width=50%',
+      responsive: ["xs", "md","sm", "lg"],
+ 
     },
     {
       title:'Status',
@@ -404,28 +359,27 @@ function MobileVetList(doctorId) {
         </span>
       ),
     },
-    {
-      title:"Booking Location",
-      dataIndex:"location",
-      render:(text, record)=>(
-        <span>{record.lat}</span>
-      ),
-      responsive: ["xs", "md","sm", "lg"],
-    },
+  
     // {
-    //   title: "Appointment Location",
-    //   dataIndex: "location",
-    //   render: async (text, record) => {
-    //     if (record.lat && record.lng) {
-    //       const address = await getAddressFromCoordinates(
-    //         record.lat,
-    //         record.lng
-    //       );
-    //       return <span>{address}</span>;
-    //     } else {
-    //       return <span>No location available</span>;
-    //     }
-    //   },
+    //   title: 'Location',
+    //   dataIndex: 'location',
+    //   key: 'location',
+    //   render: (text, record) => (
+    //     <a
+    //       href={`https://www.google.com/maps/search/?api=${apiKey}&query=${record.lat},${record.lng}`}
+    //       target="_blank"
+    //       rel="noopener noreferrer"
+    //       className="text-dark text-decoration-none"
+    //     >
+    //       View on Google Maps
+    //     </a>
+    //   ),
+    //   responsive: ["xs", "md","sm", "lg"],
+    // },
+    // {
+    //   title: 'Address',
+    //   dataIndex: 'address',
+    //   key: 'address',
     // },
     {
       title: "Date",
@@ -504,56 +458,9 @@ function MobileVetList(doctorId) {
       <hr />
       <Table columns={usercolumns} dataSource={appointments} responsive={true}
   scroll={{ x: true }}/>
+   
       <div>
-      <Modal show={showModal} onHide={handleCloseModal} size="lg">
-      <Modal.Header closeButton>
-            <Modal.Title>
-              <div className="d-lg-flex justify-content-between align-items-center">
-                <span>Appointment Details</span>
-                {/* {selectedAppointment && selectedAppointment._id} */}
-              </div>
-            </Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            <div className="col-md-12 ">
-           <div className="d-lg-flex justify-content-between align-items-center gap-4 mb-3" >
-            <label className="text-left">Parent Name: </label> 
-            <span className="text-right">{selectedAppointment && selectedAppointment.userInfo.firstName}</span>
-            </div> 
-            <div className="d-lg-flex justify-content-between align-items-center gap-4 mb-3" >
-            <label className="text-left">Assign Doctor: </label> 
-            <span className="text-right"> <select className="form-control">
-              <option>--Select Doctor--</option>
-              {
-                selectedAppointment &&
-                Array.from(new Set(doctors.map((doctor) => doctor._id))).map((doctorId) => {
-                    const doctor = doctors.find((doc) => doc._id === doctorId);
-                    return (
-                    <option key={doctor._id} value={doctor._id}>
-                        Dr. {doctor.firstName} {doctor.lastName}
-                    </option>
-                    );
-                })
-                }
-              
-            </select></span>
-            </div> 
-            <div className="d-lg-flex justify-content-between align-items-center gap-4  " >
-            <label className="text-left">Doctor Specialization: </label> 
-            <span className="text-right">{selectedAppointment && selectedAppointment.doctorInfo.specialization}</span>
-            </div> 
-           </div>
-          
-          </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={handleCloseModal}>
-            Close
-          </Button>
-          <Button variant="primary" onClick={assignDoctorToAppointment}>
-            Save Changes
-          </Button>
-        </Modal.Footer>
-      </Modal>
+    
       </div>
       </div>
       <div className="col-md-12">

@@ -55,6 +55,7 @@ import UserPetList from "./pages/Pets";
 import DoctorList from "./pages/DoctorList";
 import BookDoctor from "./pages/BookDoctor";
 import UploadHistory from "./pages/Admin/UploadHistory";
+import BookingNow from './pages/BookNow';
 
 function App() {
   const { loading } = useSelector((state) => state.alerts);
@@ -434,6 +435,10 @@ function App() {
             </ProtectedRoute>
           }
           />
+        <Route
+        path="/user/booking"
+        element={<ProtectedRoute><BookingNow/></ProtectedRoute>}
+        />
         <Route
           path="/user/addpet"
           element={

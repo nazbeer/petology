@@ -237,8 +237,7 @@ function MobileVetList(doctorId) {
           <span>
             {moment(record.date).format('LL')}
           </span>
-        ),
-        responsive: ["xs", "md","sm", "lg"],
+        )
       },
       {
         title:"Appointment Time",
@@ -247,8 +246,7 @@ function MobileVetList(doctorId) {
           <span>
             {record.time}
           </span>
-        ),
-        responsive: ["xs", "md","sm", "lg"],
+        )
       },
     {
       title:"Doctor",
@@ -257,13 +255,11 @@ function MobileVetList(doctorId) {
         <span className="text-capitalize">
             {record.doctor}
         </span>
-      ),
-      responsive: ["xs", "md","sm", "lg"],
+      )
     },
     {
         title:"Services Requested",
         dataIndex: "service",
-        responsive: ["xs", "md","sm", "lg"],
     },
     {
       title:'Pet Details',
@@ -272,8 +268,7 @@ function MobileVetList(doctorId) {
         <span>
             {record.pet} - {record.breed} ({record.size})
         </span>
-      ),
-      responsive: ["xs", "md","sm", "lg"],
+      )
     },
     {
         title:"Parent Name",
@@ -281,7 +276,7 @@ function MobileVetList(doctorId) {
         render :(text, record)=>(
           <span className="text-capitalize">{record.firstname} {record.lastname}</span>
         ),
-        responsive: ["xs", "md","sm", "lg"],
+       
       },
 
     
@@ -291,56 +286,42 @@ function MobileVetList(doctorId) {
       dataIndex:'mobile',
       render:(text,record)=>(
         <span>{record.mobile}</span>
-      ),
-      responsive: ["xs", "md","sm", "lg"],
+      )
     },
     {
       title:'Email Address',
       dataIndex: 'email',
       render:(text, record)=>(
         <span>{record.email}</span>
-      ),
-      responsive: ["xs", "md","sm", "lg"],
+      )
     },
 
     {
       title: "Appointment Location",
-      dataIndex: "location",
+      dataIndex: "lng",
+      // render:(text, record)=>(
+      //   <span>{record.lng} {record.lat}</span>
+      // )
+    
       render: async (text, record) => {
+       <span> {record.lat}</span>
         if (record.lat && record.lng) {
           const address = await getAddressFromCoordinates(
-            record.lat,
-            record.lng
+            record.latitude,
+            record.longitue
           );
-          return (
-            <span>
-              {address}
-              <div style={{ height: "200px", width: "100%" }}>
-                <iframe
-               
-                  src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyAxdklbUsegbWsasCJpvfmin95xzIxiY3Y&q=${address}`}
-                  width="100%"
-                  height="100%"
-                  frameBorder="0"
-                  style={{ border: "0" }}
-                  allowFullScreen
-                ></iframe>
-              </div>
-            </span>
-          );
+          return <span>{address}</span>;
         } else {
           return <span>No location available</span>;
         }
       },
-      responsive: ["xs", "md","sm", "lg"],
     },
     {
       title:'Status',
       dataIndex:"status",
       render:(text, record)=>(
         <span className="text-capitalize">{record.status}</span>
-      ),
-      responsive: ["xs", "md","sm", "lg"],
+      )
     },
     {
       title: "Actions",
@@ -367,7 +348,6 @@ function MobileVetList(doctorId) {
     
         </div>
       ),
-      responsive: ["xs", "md","sm", "lg"],
     },
     
 
@@ -382,7 +362,6 @@ function MobileVetList(doctorId) {
           {record.userInfo.name}
         </span>
       ),
-      responsive: ["xs", "md","sm", "lg"],
     },
     {
       title: "Doctor",
@@ -392,7 +371,6 @@ function MobileVetList(doctorId) {
           {record.doctorInfo.name || record.doctorInfo.firstName + " " + record.doctorInfo.lastName}
         </span>
       ),
-      responsive: ["xs", "md","sm", "lg"],
     },
  
     {
@@ -409,8 +387,7 @@ function MobileVetList(doctorId) {
       dataIndex:"location",
       render:(text, record)=>(
         <span>{record.lat}</span>
-      ),
-      responsive: ["xs", "md","sm", "lg"],
+      )
     },
     // {
     //   title: "Appointment Location",
@@ -434,8 +411,7 @@ function MobileVetList(doctorId) {
         <span>
           {moment(record.date).format('LL')}
         </span>
-      ),
-      responsive: ["xs", "md","sm", "lg"],
+      )
     },
     {
       title: "Time",
@@ -444,16 +420,14 @@ function MobileVetList(doctorId) {
         <span>
           {moment(record.time).format('LTS')}
         </span>
-      ),
-      responsive: ["xs", "md","sm", "lg"],
+      )
     },
    {
     title: "Status",
     dataIndex: "status",
     render:(text, record) =>(
       <span className="text-capitalize">{record.status}</span>
-    ),
-    responsive: ["xs", "md","sm", "lg"],
+    )
    },
 
       {
@@ -475,13 +449,12 @@ function MobileVetList(doctorId) {
                 className="btn btn-danger btn-sm text-capitalize"
                 onClick={() => changeAppointmentStatus(record, "blocked")}
               >
-                Cancel
+                Cancelled
               </button>
             )}
           
           </div>
         ),
-        responsive: ["xs", "md","sm", "lg"],
       },
     
     
@@ -492,9 +465,9 @@ function MobileVetList(doctorId) {
       <div className="col-md-12">
         <div className="row d-fixed d-lg-flex justify-content-between align-items-center">
         <div className="col-md-6  d-lg-flex gap-3 justify-content-right align-items-center">
-      <h6 className="page-header mb-0">Appointments List (Registered Users)</h6>
+      <h6 className="page-header mb-0">Appointments List</h6>
       </div>
-      <div className="col-md-6 d-lg-flex d-md-flex d-sm-flex d-xs-flex gap-3 justify-content-end align-items-center">
+      <div className="col-md-6 d-lg-flex gap-3 justify-content-end align-items-center">
        <Link to="/admin/appointmentlist"><button className="btn btn-warning btn-sm" type="button">Veterinary</button></Link>
         <Link to="/admin/groominglist"><button className="btn btn-warning btn-sm" type="button">Grooming</button></Link>
         <Link to="/admin/mobilevetlist"><button className="btn btn-success btn-sm" type="button">Mobile Vet</button></Link>
@@ -502,8 +475,7 @@ function MobileVetList(doctorId) {
       </div>
       </div>
       <hr />
-      <Table columns={usercolumns} dataSource={appointments} responsive={true}
-  scroll={{ x: true }}/>
+      <Table columns={usercolumns} dataSource={appointments}/>
       <div>
       <Modal show={showModal} onHide={handleCloseModal} size="lg">
       <Modal.Header closeButton>
@@ -557,9 +529,8 @@ function MobileVetList(doctorId) {
       </div>
       </div>
       <div className="col-md-12">
-        <h6>Guest Appointments</h6>
-        <Table columns={opencolumns} dataSource={openappointments} responsive={true}
-  scroll={{ x: true }}/>
+        <h6>Open Appointment Lists</h6>
+        <Table columns={opencolumns} dataSource={openappointments}/>
       </div>
     </Layout>
   );

@@ -4,13 +4,14 @@ import Layout from "../../components/Layout";
 import { showLoading, hideLoading } from "../../redux/alertsSlice";
 import { toast } from "react-hot-toast";
 import axios from "axios";
-import { Table, Modal, Button, Form, Input, DatePicker } from "antd";
+import { Table, Modal, Button, Form, Input, DatePicker, Select, Spin } from "antd";
+import { LoadingOutlined } from "@ant-design/icons";
 import moment from "moment";
 
 function DoctorsList() {
   const [doctors, setDoctors] = useState([]);
   const [editingDoctor, setEditingDoctor] = useState([]);
-
+  const [loading, setLoading] = useState(true);
   const [editModalVisible, setEditModalVisible] = useState(false);
   const dispatch = useDispatch();
   const [form] = Form.useForm();
@@ -51,6 +52,7 @@ function DoctorsList() {
 
   const getDoctorsData = async () => {
     try {
+      setLoading(true);
       dispatch(showLoading());
       const response = await axios.get("/api/admin/get-all-approved-doctors", {
         headers: {
@@ -59,10 +61,27 @@ function DoctorsList() {
       });
       dispatch(hideLoading());
       if (response.data.success) {
-        setDoctors(response.data.data);
+        const doctorsData = response.data.data;
+  
+        // Fetch leaves for each doctor and set them in the data
+        for (const doctor of doctorsData) {
+          const leavesResponse = await axios.get(`/api/admin/get-doctor-leaves/${doctor._id}`, {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          });
+  
+          if (leavesResponse.data.success) {
+            doctor.leaves = leavesResponse.data.data;
+          }
+        }
+  
+        setDoctors(doctorsData);
+        setLoading(false);
       }
     } catch (error) {
       dispatch(hideLoading());
+      setLoading(false); 
     }
   };
 
@@ -162,7 +181,44 @@ function DoctorsList() {
       responsive: ["xs", "md","sm", "lg"],
     },
     {
-      title:"Reservation Fees",
+      title: "Break Time",
+      dataIndex: "breakTime",
+      render: (text, record) => {
+        const breakTime = record.breakTime;
+        if (breakTime === '30') {
+          return <span className="text-capitalize">{breakTime} mins</span>;
+        } else if (breakTime === '1' ||  breakTime === '1.5' || breakTime === '2') {
+          return <span >{breakTime} Hour(s)</span>;
+        } else {
+          // Handle other cases if needed
+          return <span className="text-capitalize">{breakTime} </span>;
+        }
+      },
+    },
+    {
+      title: "Leaves",
+      dataIndex: "leaves",
+      render: (leaves, record) => (
+        <div className="naz">
+          {leaves && leaves.length > 0 ? (
+            leaves.map((leave, index) => (
+              <div key={index}>
+                <span>Start Date: {moment(leave.startDate).format("DD-MM-YYYY")}</span>
+                <br />
+                <span>End Date: {moment(leave.endDate).format("DD-MM-YYYY")}</span>
+                <br />
+              </div>
+            ))
+          ) : (
+            <span>No Leaves Available</span>
+          )}
+        </div>
+      ),
+    },
+    
+    
+    {
+      title:"Clinic Fees",
       dataIndex: "feePerCunsultation",
       render: (number, record) => {
         return (
@@ -231,16 +287,25 @@ function DoctorsList() {
       responsive: ["xs", "md","sm", "lg"],
     },
   ];
+  const customLoader = (
+    <div style={{ textAlign: "center", margin: "50px auto" }}>
+      <Spin indicator={<LoadingOutlined style={{ fontSize: 48, color: "#1890ff" }} spin />} />
+      <p style={{ marginTop: "10px" }}>Loading...</p>
+    </div>
+  );
   return (
     <Layout>
        <div className="d-flex justify-content-between align-items-center">
-      <h3 className="">Doctor List</h3>
+      <h5 className="page-title mb-0">Doctor List</h5>
      <a href="/admin/apply-doctor" ><button className="btn btn-success " type="button">Add New Doctor</button></a>
 
       </div>
       <hr />
-      <Table columns={columns} dataSource={doctors}  responsive={true}
-  scroll={{ x: true }} />
+      {loading ? (
+        customLoader // Use the custom loader
+      ) : (
+        <Table columns={columns} dataSource={doctors} responsive={true} scroll={{ x: true }} />
+      )}
       <Modal
         title="Edit Doctor"
         visible={editModalVisible}
@@ -249,7 +314,7 @@ function DoctorsList() {
         style={{borderRadius:"6px"}}
         width={600}
       >
-        <Form form={form} onFinish={updateDoctor}   labelCol={{ span: 6 }} 
+        <Form form={form} onFinish={updateDoctor}   labelCol={{ span: 6 }} // Adjust the span value as needed
           wrapperCol={{ span: 18 }}>
        
           <Form.Item
@@ -287,7 +352,19 @@ function DoctorsList() {
           >
             <Input />
           </Form.Item>
-        
+          <Form.Item
+    name="breakTime"
+    label="Break Time"
+    rules={[{ required: true, message: "Please select break time" }]}
+  >
+    <Select>
+      <Select.Option value={30}>30 mins</Select.Option>
+      <Select.Option value={45}>45 mins</Select.Option>
+      <Select.Option value={1}>1 hour</Select.Option>
+      <Select.Option value={1.5}>1.5 hours</Select.Option>
+      <Select.Option value={2}>2 hours</Select.Option>
+    </Select>
+  </Form.Item>
           <Form.Item labelAlign="right" >
 
             <div className="text-center mt-2">
@@ -305,6 +382,8 @@ function DoctorsList() {
         } ${leaveDoctor ? leaveDoctor.lastName : ""}`}
         visible={leaveModalVisible}
         onCancel={closeLeaveModal}
+        width={800}
+        className="d-flex justify-content-center align-items-center"
         footer={[
           <Button key="back" onClick={closeLeaveModal}>
             Cancel
@@ -319,16 +398,18 @@ function DoctorsList() {
           </Button>,
         ]}
       >
-        <p>Doctor ID: {leaveDoctor ? leaveDoctor._id : ""}</p>
-        <p>
+        <div className="d-lg-flex justify-content-between align-items-center gap-3">
+        <p className="text-dark">Doctor ID: {leaveDoctor ? leaveDoctor._id : ""}</p>
+        <p className="text-dark">
           Doctor Name:{" "}
           {leaveDoctor ? `${leaveDoctor.firstName} ${leaveDoctor.lastName}` : ""}
         </p>
-        <Form form={leaveForm}  labelCol={{ span: 6 }} 
-          wrapperCol={{ span: 18 }}>
+        </div>
+        <Form form={leaveForm} labelCol={{ span: 8 }} 
+          wrapperCol={{ span: 12 }} >
           <Form.Item
             form={leaveForm}
-            name="doctorId"
+            name="doctorId" style={{marginTop:'10px'}}
             label="Doctor Id" hidden
             initialValue={leaveDoctor ? leaveDoctor._id : ""} // Pre-fill the doctorId field
           >

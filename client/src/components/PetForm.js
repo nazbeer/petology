@@ -11,10 +11,13 @@ import moment from 'moment';
 const PetForm = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  let counter = 1; // Initialize the counter
+
   const generateCustomID = () => {
     const formattedDate = moment().format("YYYYMMDD");
-    const randomSuffix = Math.floor(100000 + Math.random() * 900000);
-    return `${formattedDate}-1${randomSuffix}`;
+    const customID = `${formattedDate}-1${counter.toString().padStart(6, '0')}`;
+    counter++; // Increment the counter for the next ID
+    return customID;
   };
   const [pet, setPet] = useState({
     pet: '',
@@ -54,7 +57,7 @@ const PetForm = () => {
     formData.append('custompetId', pet.custompetId);
 
     try {
-      dispatch(showLoading());
+      //dispatch(showLoading());
       const response = await axios.post('/api/pet/create-new-pet', formData, {
         headers: { 'Content-Type': 'multipart/form-data',
         Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -63,7 +66,8 @@ const PetForm = () => {
 
       if (response.data.success) {
         toast.success(response.data.message);
-       // navigate('/petlist');
+       // dispatch(hideLoading());
+        navigate('/petlist');
       }
       // Do something with the response, like showing a success message
     } catch (error) {

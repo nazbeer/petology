@@ -26,6 +26,11 @@ function Layout({ children }) {
       path: "/user/doctors",
       icon: "ri-hospital-line",
     },
+    {
+      name: "Booking",
+      path: "/user/booking",
+      icon: "ri-hospital-line",
+    },
     
     {
       name:"Add Pets",

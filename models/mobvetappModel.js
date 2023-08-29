@@ -52,6 +52,11 @@ const appointmentSchema = new mongoose.Schema({
     lng: {
       type: String,
       required: true
+    },
+    status:{
+      type:String,
+      default:'approved',
+      required:true
     }
   });
 
