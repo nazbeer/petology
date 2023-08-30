@@ -8,6 +8,11 @@ import { Button, Modal } from "react-bootstrap";
 import moment from "moment";
 import { Link } from 'react-router-dom';
 import {toast} from 'react-hot-toast';
+import Geocode from "react-geocode";
+
+Geocode.setApiKey('AIzaSyAxdklbUsegbWsasCJpvfmin95xzIxiY3Y');
+const apiKey = 'AIzaSyAxdklbUsegbWsasCJpvfmin95xzIxiY3Y';
+
 function MobileGroomingList(doctorId) {
   const [appointments, setAppointments] = useState([]);
   const [openappointments, setOpenAppointments] = useState([]);
@@ -33,7 +38,7 @@ function MobileGroomingList(doctorId) {
       dispatch(hideLoading());
       if(response.data.success){
         toast.success(response.data.message);
-        getOpenAppointmentsData();
+       // getOpenAppointmentsData();
       }
     } catch (error){
       //toast.error("Error changing appointment status");
@@ -65,21 +70,7 @@ function MobileGroomingList(doctorId) {
       dispatch(hideLoading());
     }
   };
-  
-  const handleShowModal = (record) => {
-    setSelectedAppointment(record);
-    setShowModal(true);
-  };
-
-  const handleCloseModal = () => {
-    setSelectedAppointment(null);
-    setSelectedDoctor(null);
-    setShowModal(false);
-  };
-
-  const handleDoctorSelect = (event) => {
-    setSelectedDoctor(event.target.value);
-  };
+ 
 
   const getDoctorsData = async () => {
     try {
@@ -112,32 +103,6 @@ function MobileGroomingList(doctorId) {
     }
   };
 
-//   const assignDoctorToAppointment = async () => {
-//     try {
-//       const response = await axios.post(
-//         "/api/admin/assign-doctor-to-appointment",
-//         {
-//           appointmentId: selectedAppointment._id,
-//           doctorId: selectedDoctor,
-//         },
-//         {
-//           headers: {
-//             Authorization: `Bearer ${localStorage.getItem("token")}`,
-//           },
-//         }
-//       );
-//         console.log(response);
-//       if (response.data.success) {
-
-//         toast.success(response.data.message);
-//         getAppointmentsData();
-//         handleCloseModal();
-//       }
-//     } catch (error) {
-//       toast.error("Error assigning doctor to appointment");
-//     }
-//   };
-  
   const getAppointmentsData = async () => {
     try {
       const response = await axios.get("/api/user/get-all-appointments", {
@@ -155,37 +120,38 @@ function MobileGroomingList(doctorId) {
   };
   const [doctorDetails, setDoctorDetails] = useState(null);
 
-  // useEffect(() => {
-  //   const fetchDoctorDetails = async (record) => {
-  //     try {
-  //       const response = await axios.get(`/api/admin/doctordetails/${record._id}`);
-  //       console.log(response);
-  //       if (response.data.success) {
-  //         setDoctorDetails(response.data.data);
-  //       }
-  //     } catch (error) {
-  //       console.error(error);
-  //     }
-  //   };
-
-  //   fetchDoctorDetails();
-  // }, [doctorId]);
- 
-  const getOpenAppointmentsData = async () => {
+  const [data, setData] = useState([]);
+  const fetchData = async () => {
     try {
-      const response = await axios.get("/api/open/get-all-grooming-appointments", {
-        // headers: {
-        //   Authorization: `Bearer ${localStorage.getItem("token")}`,
-        // },
+      const response = await axios.get("/api/admin/get-all-mobgroom-appointments", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
       });
-      console.log(response.data.data);
-      if (response.data.success) {
-        setOpenAppointments(response.data.data);
+
+      const modifiedData = [];
+      for (const item of response.data.data) {
+        const location = `${item.lat},${item.lng}`;
+        const geocodeResponse = await axios.get(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${location}&key=${apiKey}`);
+        const address = geocodeResponse.data.results[1]?.formatted_address || 'N/A';
+
+        modifiedData.push({
+          ...item,
+          location,
+          address,
+        });
       }
+      console.log(modifiedData);
+      setOpenAppointments(modifiedData);
     } catch (error) {
       console.error(error);
     }
   };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
   
   useEffect(() => {
     // Fetch doctor details based on selected appointment
@@ -214,19 +180,15 @@ function MobileGroomingList(doctorId) {
     changeAppointmentStatus();
     changeOpenAppointmentStatus();
     getPetsData();
-    getOpenAppointmentsData();
+   // getOpenAppointmentsData();
   }, []);
   const opencolumns = [
     {
       title:"Service",
-      dataIndex:"module",
+      dataIndex:"service",
       responsive: ["xs", "md","sm", "lg"],
     },
-    {
-        title:"Services Requested",
-        dataIndex: "service",
-        responsive: ["xs", "md","sm", "lg"],
-    },
+    
     {
       title:'Pet',
       dataIndex : 'pet',
@@ -275,6 +237,32 @@ function MobileGroomingList(doctorId) {
         <span>{record.email}</span>
       ),
       responsive: ["xs", "md","sm", "lg"],
+    },
+    {
+      title: 'Location',
+      dataIndex: 'location',
+      key: 'location',
+      render: (text, record) => (
+        <a
+          href={`https://www.google.com/maps/search/?api=${apiKey}&query=${record.lat},${record.lng}`}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          View on Google Maps
+        </a>
+      ),
+      responsive: ["xs", "md","sm", "lg"],
+    },
+    {
+      title: 'Address',
+      dataIndex: 'address',
+      key: 'address',
+      render:(text, record)=>(
+        <p className="address-custom ">{record.address}</p>
+      ),
+    
+      responsive: ["xs", "md","sm", "lg"],
+ 
     },
     // {
     //   title: 'Doctor Details',

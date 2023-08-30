@@ -24,6 +24,24 @@ const storage = multer.diskStorage({
 });
 
 
+router.get("/get-all-doctors", authMiddleware, async (req, res) => {
+  try {
+    const doctors = await Doctor.find({}); // Add the status filter
+    res.status(200).send({
+      message: "Approved doctors fetched successfully",
+      success: true,
+      data: doctors,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      message: "Error fetching approved doctors",
+      success: false,
+      error,
+    });
+  }
+});
+
 router.get("/get-all-approved-doctors", authMiddleware, async (req, res) => {
   try {
     const doctors = await Doctor.find({ status: "approved" }); // Add the status filter
@@ -111,6 +129,7 @@ router.get('/doctordetails/:doctorId', async (req, res) => {
 router.get('/get-all-mobvet-appointments', authMiddleware, async(req, res) => {
   try{
     const mobvetapplist = await MobileVetApp.find({});
+  
     res.status(200).send({
       message:'Appointment List fetched successfully',
       success:true,
@@ -129,6 +148,7 @@ router.get('/get-all-mobvet-appointments', authMiddleware, async(req, res) => {
 router.get("/get-all-mobgroom-appointments", authMiddleware, async (req, res) =>{
   try{
     const mobgroomapplist =await MobileGroomApp.find({});
+    console.log(mobgroomapplist)
     res.status(200).send({
       message:'Appointment List fetched successfully',
       success:true,

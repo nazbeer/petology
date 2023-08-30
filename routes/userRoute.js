@@ -9,6 +9,7 @@ const Appointment = require("../models/appointmentModel");
 const moment = require("moment");
 const Pet = require("../models/petModel");
 const OpenAppointment = require("../models/openAppointmentModel");
+const nodemailer = require('nodemailer');
 router.post("/register", async (req, res) => {
   try {
     const userExists = await User.findOne({ email: req.body.email });
@@ -23,6 +24,28 @@ router.post("/register", async (req, res) => {
     req.body.password = hashedPassword;
     const newuser = new User(req.body);
     await newuser.save();
+    const transporter = nodemailer.createTransport({
+      service: 'Gmail', // e.g., 'Gmail'
+      auth: {
+        user: 'your_email@example.com',
+        pass: 'your_email_password',
+      },
+    });
+
+    const mailOptions = {
+      from: 'nazbeer.ahammed@gmail.com',
+      to: req.body.email,
+      subject: 'Welcome to Your App',
+      text: `Hello ${req.body.name},\n\nThank you for registering on Your App!`,
+    };
+
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.log('Error sending email:', error);
+      } else {
+        console.log('Email sent:', info.response);
+      }
+    });
     res
       .status(200)
       .send({ message: "User created successfully", success: true });

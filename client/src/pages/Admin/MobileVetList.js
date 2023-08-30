@@ -283,9 +283,9 @@ function MobileVetList(doctorId) {
       dataIndex: 'address',
       key: 'address',
       render:(text, record)=>(
-        <span>{record.address}</span>
+        <p className="address-custom ">{record.address}</p>
       ),
-     style:'width=50%',
+    
       responsive: ["xs", "md","sm", "lg"],
  
     },

@@ -54,7 +54,7 @@ function DoctorsList() {
     try {
       setLoading(true);
       dispatch(showLoading());
-      const response = await axios.get("/api/admin/get-all-approved-doctors", {
+      const response = await axios.get("/api/admin/get-all-doctors", {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },

@@ -32,11 +32,11 @@ function Layout({ children }) {
       icon: "ri-hospital-line",
     },
     
-    {
-      name:"Add Pets",
-      path:"/user/addpet",
-      icon:'ri-bear-smile-line'
-    },
+    // {
+    //   name:"Add Pets",
+    //   path:"/user/addpet",
+    //   icon:'ri-bear-smile-line'
+    // },
     {
       name:"Pets",
       path:"/user/pets",

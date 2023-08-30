@@ -9,11 +9,6 @@ import { GoogleMap, Marker, LoadScript, Autocomplete } from '@react-google-maps/
 const MobileVet = () => {
   // const [doctorList, setDoctorList] = useState([]);
   const [autocomplete, setAutocomplete] = useState(null);
-  // useEffect(() =>{
-  //   axios.get('/api/user/get-all-approved-doctors')
-  //   .then((response) => setDoctorList(response.data))
-  //   .catch((error) => console.error(error));
-  // },[]);
   const [location, setLocation] = useState({ lat: 25.2048, lng: 55.2708 });
   const [service, setService] = useState({
     doctor:'Any',

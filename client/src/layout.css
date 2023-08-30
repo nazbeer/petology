@@ -4,7 +4,10 @@
     /* padding: 5px; */
     overflow: hidden;
 }
-
+.address-custom{
+    text-wrap:balance;
+    width:250px !important;
+}
 .logo{
     color: white;
     font-weight: bold;
