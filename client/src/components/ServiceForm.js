@@ -92,6 +92,7 @@ const ServiceForm = () => {
   const [pack, setPackage] = useState({
     name: "",
     subservice: "",
+    price:"",
   });
 
   const handleChange = (e) => {

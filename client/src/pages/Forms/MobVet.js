@@ -176,7 +176,7 @@ const MobVet = () => {
               <label htmlFor="location" >Location:</label>
            
           <div style={{ width: '100%', height: '400px', borderRadius:'6px' }}>
-          <LoadScript googleMapsApiKey="AIzaSyAxdklbUsegbWsasCJpvfmin95xzIxiY3Y" libraries={["places"]}>
+      
             <GoogleMap
               mapContainerStyle={{ width: '100%', height: '98%', borderRadius:'6px', border:'1px solid #ccc' }}
               center={{ lat: location1.lat, lng: location1.lng }}
@@ -232,7 +232,7 @@ const MobVet = () => {
         
               </Autocomplete>
             </GoogleMap>
-          </LoadScript>
+         
         
         
               </div>

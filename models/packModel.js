@@ -2,6 +2,14 @@ const mongoose = require("mongoose");
 
 const packSchema = new mongoose.Schema(
     {
+      pet:{
+        type:String,
+        required:true,
+      },
+      size:{
+        type:String,
+        required:true,
+      },
         name: {
           type: String,
           unique: true,
@@ -14,6 +22,10 @@ const packSchema = new mongoose.Schema(
         serviceType: {
             type: String,
             required: true,
+          },
+          price:{
+            type:String,
+            required:true
           },
         status:{
             type:String,

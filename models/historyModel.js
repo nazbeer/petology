@@ -6,9 +6,23 @@ const historySchema = new mongoose.Schema({
     ref: "users", // Reference to the Patient model
     required: true,
   },
-  documentPath: {
-    type: String,
-    required: true,
+  // document: {
+  //   path: {
+  //     type: String,
+  //     required: true,
+  //   },
+  //   originalName: {
+  //     type: String,
+  //     required: true,
+  //   },
+  //   extension: {
+  //     type: String,
+  //     required: true,
+  //   }
+  // },
+  documentPath:{
+    type:String,
+    required:true,
   },
   createdAt: {
     type: Date,

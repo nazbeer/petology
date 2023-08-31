@@ -182,7 +182,7 @@ const MobGroom = () => {
                 <label htmlFor="location" >Location:</label>
             
             <div style={{ width: '100%', height: '400px', borderRadius:'6px' }}>
-            <LoadScript googleMapsApiKey="AIzaSyBVlIq1V3-MsWkpFv8-P6w6W1vLET8zwEY" libraries={["places"]}>
+           
                 <GoogleMap
                 mapContainerStyle={{ width: '100%', height: '98%', borderRadius:'6px', border:'1px solid #ccc' }}
                 center={{ lat: location.lat, lng: location.lng }}
@@ -237,7 +237,7 @@ const MobGroom = () => {
 
                 </Autocomplete>
                 </GoogleMap>
-            </LoadScript>
+        
 
 
                 </div>

@@ -12,6 +12,10 @@
     color: white;
     font-weight: bold;
 }
+td.disabled.day {
+    cursor: not-allowed !important;
+    color: #f7f7f7 !important;
+}
 .role{
     color: white;
     font-size: 14px;

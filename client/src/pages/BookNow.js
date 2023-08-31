@@ -7,6 +7,7 @@ import MobVet from './Forms/MobVet';
 import MobGroom from './Forms/MobGroom';
 import Vet from "./Forms/Vet";
 import Groom from "./Forms/Groom";
+import { GoogleMap, Marker, LoadScript, Autocomplete } from '@react-google-maps/api';
 
 const { TabPane } = Tabs;
 
@@ -21,6 +22,7 @@ const BookNow = () => {
 
     return (
         <Layout>
+                <LoadScript googleMapsApiKey="AIzaSyAxdklbUsegbWsasCJpvfmin95xzIxiY3Y" libraries={["places"]}>
         <Tabs defaultActiveKey="veterinary">
             <TabPane
             tab={customTab(require('../images/vet.png'), 'Veterinary Clinic')}
@@ -47,6 +49,7 @@ const BookNow = () => {
         <MobGroom location={location}/>
         </TabPane>
         </Tabs>
+        </LoadScript>
         </Layout>
   );
 };

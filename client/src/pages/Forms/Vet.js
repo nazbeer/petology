@@ -2,7 +2,15 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast } from "react-hot-toast";
 import bootstrap from 'react-bootstrap';
+import 'antd/dist/antd.css';
 import { GoogleMap, Marker, LoadScript, Autocomplete } from '@react-google-maps/api';
+
+import 'bootstrap/dist/css/bootstrap.min.css'; // Import Bootstrap CSS
+import $ from 'jquery';
+import 'bootstrap/dist/js/bootstrap.bundle.min'; // Import Bootstrap JS
+import 'bootstrap-datepicker/dist/css/bootstrap-datepicker3.min.css'; // Import Bootstrap Datepicker CSS
+import 'bootstrap-datepicker';
+
 const Vet = () => {
     const [doctorList, setDoctorList] = useState([]);
     useEffect(() =>{
@@ -28,7 +36,15 @@ const Vet = () => {
      // password:''
   
     });
-  
+    useEffect(() => {
+        // Initialize the datepicker and set options
+        $('#datepicker').datepicker({
+          startDate: new Date(), // Start date is today
+          autoclose: true, // Close the datepicker when a date is selected
+          format: 'yyyy-mm-dd',
+        });
+      }, []);
+    
     const handleChange = (e) => {
       const { name, value } = e.target;
       setService((prevState) => ({
@@ -43,7 +59,11 @@ const Vet = () => {
       e.preventDefault();
   
       try {
-        const response = await axios.post('/api/user/book-appointment', service);
+        const response = await axios.post('/api/user/book-appointment', service, {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          });
   
         if (response.data.success) {
           toast.success(response.data.message);
@@ -194,6 +214,7 @@ const Vet = () => {
                 type="date"
                 id="date"
                 name="date"
+              
                 value={service.date}
                 onChange={handleChange}
                 required

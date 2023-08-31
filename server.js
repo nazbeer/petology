@@ -3,7 +3,8 @@ const app = express();
 require("dotenv").config();
 const bodyParser = require('body-parser');
 const dbConfig = require("./config/dbConfig");
-
+const multer = require('multer');
+const path = require("path");
 
 app.use(express.json());
 const cors = require('cors');
@@ -19,7 +20,7 @@ const groomerRoute = require("./routes/groomerRoute");
 
 //const prescriptionRoute = require("./routes/prescriptionRoute");
 app.use(bodyParser.json());
-const path = require("path");
+
 app.use(cors());
 app.use("/api/user", userRoute);
 app.use("/api/admin", adminRoute);
@@ -30,8 +31,24 @@ app.use("/api/booking", bookingRoute);
 app.use("/api/open", openRoute);
 app.use("/api/reception", receptionRoute);
 app.use("/api/groomer" , groomerRoute);
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, path.join(__dirname, '../uploads'));
+  },
+  filename: function (req, file, cb) {
+    const ext = path.extname(file.originalname);
+    const baseName = path.basename(file.originalname, ext);
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    const newFileName = `${baseName}-${uniqueSuffix}${ext}`;
+    cb(null, newFileName);
+  }
+});
+
+
+
+ const upload = multer({ storage: storage });
 //app.use("/api/prescription", prescriptionRoute);
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 app.enable('trust proxy');
 if (process.env.NODE_ENV === "production") {
   app.use("/", express.static("client/build"));

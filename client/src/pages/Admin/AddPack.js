@@ -3,6 +3,7 @@ import Layout from "../../components/Layout";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 import {Modal, Button } from 'antd';
+
 //import { use } from "../../../../routes/openRoute";
 
 const AddPack = () => {
@@ -10,21 +11,30 @@ const AddPack = () => {
     const [serviceType, setServiceType] = useState("");
     const [serviceName, setServiceName] = useState("");
     const [subServiceName, setSubServiceName] = useState("");
+    const [price, setPrice] = useState("");
+    const [size, setSize] = useState("");
+    const [pet, setPet]= useState("");
     const [subServices, setSubServices] = useState([]);
     const [selectedService, setSelectedService] = useState("");
     const [editModalVisible, setEditModalVisible] = useState(false);
     const [editSubServiceId, setEditSubServiceId] = useState("");
+    const [editPrice, setEditPrice] = useState("");
+    const [editPet, setEditPet] = useState("");
+    const [editSize, setEditSize]= useState("");
     const [editSubService, seteditSubService] = useState("");
     const [editServiceType, setEditServiceType]= useState("");
     const [editServiceName, setEditServiceName] = useState("");
     const [editStatus, setEditStatus] = useState();
 
-  const showEditModal = (subServiceId, serviceType , name , subService) => {
+  const showEditModal = (subServiceId, serviceType , name , subService, price, pet, size) => {
     setEditModalVisible(true);
     setEditSubServiceId(subServiceId);
     setEditServiceType(serviceType);
     setEditServiceName(name);
     seteditSubService(subService);
+    setEditPrice(price);
+    setEditPet(pet);
+    setEditSize(size);
     
 
   };
@@ -42,7 +52,11 @@ const AddPack = () => {
           serviceType: editServiceType,
           name: editServiceName,
           subService: editSubService,
+          price:editPrice,
+          pet:editPet,
+          size:editSize,
           status: editStatus,
+
         },
         {
           headers: {
@@ -50,7 +64,7 @@ const AddPack = () => {
           },
         }
       );
-        console.log(response.data);
+       // console.log(response.data);
       if (response.data.success) {
         toast.success("Sub-service updated successfully");
         closeEditModal();
@@ -111,6 +125,9 @@ const AddPack = () => {
             serviceType,
             serviceName,
             subServiceName,
+            price,
+            pet,
+            size,
           }, {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -157,6 +174,28 @@ const AddPack = () => {
               </select>
             </div>
             <div className="mb-3">
+              <label htmlFor="pet">Pet:</label>
+              <input
+                type="text"
+                id="pet"
+                className="form-control"
+                value={pet}
+                onChange={(e) => setPet(e.target.value)}
+                required
+              />
+            </div>
+            <div className="mb-3">
+              <label htmlFor="size">Size:</label>
+              <input
+                type="text"
+                id="size"
+                className="form-control"
+                value={size}
+                onChange={(e) => setSize(e.target.value)}
+                required
+              />
+            </div>
+            <div className="mb-3">
               <label htmlFor="serviceName">Package Name:</label>
               <input
                 type="text"
@@ -179,6 +218,18 @@ const AddPack = () => {
               />
             </div>
             
+            <div className="mb-3">
+              <label htmlFor="price">Price:</label>
+              <input
+                type="text"
+                id="price"
+                className="form-control"
+                value={price}
+                onChange={(e) => setPrice(e.target.value)}
+                required
+              />
+            </div>
+            
             <button type="submit" className="btn btn-success">
               Add Service
             </button>
@@ -194,15 +245,28 @@ const AddPack = () => {
           <div className="table-responsive-sm">
             <table className="table table-responsive">
                 <thead>
+                  <th>Pet</th>
+                  <th>Size</th>
                     <th>Service Name</th>
                     <th>Package Name</th>
                     <th>All Services</th>
+                    <th>Price</th>
                     <th>Status</th>
                     <th>Actions</th>
                 </thead>
                 <tbody>
                 {subServices.map((subService) => (
                     <tr key={subService._id}>
+                      <td>
+                            <span>
+                                {subService.pet}
+                            </span>
+                        </td>
+                        <td>
+                            <span>
+                                {subService.size}
+                            </span>
+                        </td>
                         <td>
                             <span>
                                 {subService.serviceType}
@@ -219,6 +283,11 @@ const AddPack = () => {
                                 {subService.subService}
                             </span>
                         </td>
+                        <td>            
+                            <span>
+                                {subService.price}
+                            </span>
+                        </td>
                         <td>
                             <span className="text-capitalize">
                                 {subService.status}
@@ -232,9 +301,12 @@ const AddPack = () => {
                           onClick={() =>
                             showEditModal(
                               subService._id,
+                              subService.pet,
+                              subService.size,
                               subService.serviceType,
                               subService.name,
                               subService.subService,
+                              subService.price,
                               subService.status
                             )
                           }
@@ -276,6 +348,28 @@ const AddPack = () => {
           </Button>,
         ]}
       >
+         <div className="mb-3">
+          <label htmlFor="editPet">Edit Pet:</label>
+          <input
+            type="text"
+            id="editPet"
+            className="form-control"
+            value={editPet}
+            onChange={(e) => setEditPet(e.target.value)}
+            required
+          />
+        </div>
+        <div className="mb-3">
+          <label htmlFor="editSize">Edit Size:</label>
+          <input
+            type="text"
+            id="editSize"
+            className="form-control"
+            value={editSize}
+            onChange={(e) => setEditSize(e.target.value)}
+            required
+          />
+        </div>
         <div className="mb-3">
           <label htmlFor="editServiceType">Service Type:</label>
           <select
@@ -312,6 +406,17 @@ const AddPack = () => {
             className="form-control"
             value={editSubService}
             onChange={(e) => seteditSubService(e.target.value)}
+            required
+          />
+        </div>
+        <div className="mb-3">
+          <label htmlFor="editPrice">Edit Price:</label>
+          <input
+            type="text"
+            id="editPrice"
+            className="form-control"
+            value={editPrice}
+            onChange={(e) => setEditPrice(e.target.value)}
             required
           />
         </div>

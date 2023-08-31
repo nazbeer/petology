@@ -27,7 +27,7 @@ router.post('/create-service', async (req, res) => {
    // console.log(req.body);
    // return;
    
-      const serviceData ={name:req.body.name, subservice:req.body.subservice};
+      const serviceData ={name:req.body.name, subservice:req.body.subservice, price:req.body.price};
         const newService = new serviceModel(serviceData);
         await newService.save().then((resss)=>{
             console.log(resss);

@@ -11,7 +11,7 @@ const authMiddleware = require("../middlewares/authMiddleware");
 const breaktimeModel = require("../models/breaktimeModel");
 const packModel = require("../models/packModel");
 const MobileVetApp = require("../models/mobvetappModel");
-const History = require("../models/historyModel");
+const HistoryModel = require("../models/historyModel");
 const DoctorLeave = require("../models/doctorLeaveModel");
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -223,13 +223,16 @@ router.get('/get-all-appointments', authMiddleware, async (req, res) => {
 });
 
 router.post("/create-service", authMiddleware,  async (req, res) => {
-  const { serviceType, serviceName, subServiceName } = req.body;
+  const { serviceType, serviceName, subServiceName, price, pet, size} = req.body;
 
   try {
     const service = await packModel.create({
       serviceType: serviceType,
       name: serviceName,
       subService: subServiceName,
+      price:price,
+      pet:pet,
+      size:size,
     });
     await service.save();
     res.status(201).json({ success: true, message: "Service added successfully" });
@@ -264,6 +267,10 @@ router.put("/edit-subservice/:id", async (req, res) => {
         serviceType: req.body.serviceType,
         name: req.body.serviceName,
         status: req.body.status,
+        price : req.body.price ,
+        pet : req.body.pet ,
+        size : req.body.size
+        
       },
       { new: true }
     );
@@ -719,7 +726,7 @@ router.delete("/delete-pet/:id", async (req, res) => {
 router.get("/history/:userId", async (req, res) => {
   try {
     const userId = req.params.userId;
-    const historyRecords = await History.find({ userId });
+    const historyRecords = await HistoryModel.find({ userId });
     res.json({ success: true, data: historyRecords });
   } catch (error) {
     console.error("Error fetching history records:", error);
@@ -728,31 +735,30 @@ router.get("/history/:userId", async (req, res) => {
 });
 
 // Upload user history documents
-router.post('/api/admin/upload-history', upload.array('files'), (req, res) => {
+router.post('/upload-history/:userId', authMiddleware, upload.array('files'), async (req, res) => {
   try {
-    // At this point, files have been uploaded and saved to the specified directory
-    // You can access the uploaded files using req.files array
-    
-    // Here, you can process the uploaded files as needed
+    const { userId } = req.params;
+
     for (let i = 0; i < req.files.length; i++) {
       const file = req.files[i];
-      const originalName = file.originalname;
-      const filePath = file.path;
-
-      // Generate custom _id format
-      const customId = generateCustomId();
-
-      // You can perform additional processing here
-      // For example, save the file information to a database
-      // Or perform some actions based on the file content
-
-      console.log(`Uploaded file: ${originalName}`);
-      console.log(`File path: ${filePath}`);
-      console.log(`Custom _id: ${customId}`);
+      const filePath = '/uploads/' + file.originalname;
+      // This is the relative path to be saved
+      //console.log(filePath);
+      // Save the uploaded file's information to MongoDB
+      const historyRecord = new HistoryModel({
+        userId,
+        // document: {
+        //   path: filePath,
+        //   originalName: file.originalname,
+        //   extension: path.extname(file.originalname)
+        // }
+        documentPath:filePath,
+      });
+      console.log('api ', historyRecord);
+      await historyRecord.save();
     }
 
-    // Once you've processed the files, you can send a response back
-    res.status(200).json({ success: true, message: 'Files uploaded and processed successfully' });
+    res.status(200).json({ success: true, message: 'Files uploaded and saved successfully' });
   } catch (error) {
     console.error('Error uploading and processing files:', error);
     res.status(500).json({ success: false, message: 'Error uploading and processing files' });
@@ -762,11 +768,12 @@ router.post('/api/admin/upload-history', upload.array('files'), (req, res) => {
 
 
 
+
 // Delete user history record by ID
 router.delete("/history/:recordId", async (req, res) => {
   try {
     const recordId = req.params.recordId;
-    await History.findByIdAndDelete(recordId);
+    await HistoryModel.findByIdAndDelete(recordId);
     res.json({ success: true, message: "Record deleted successfully" });
   } catch (error) {
     console.error("Error deleting record:", error);
