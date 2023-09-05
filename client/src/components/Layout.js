@@ -18,6 +18,11 @@ function Layout({ children }) {
     },
     {
       name: "Appointments",
+      path: "/user/userappointments",
+      icon: "ri-file-list-line",
+    },
+    {
+      name: "All Appointments",
       path: "/user/appointmentlist",
       icon: "ri-file-list-line",
     },

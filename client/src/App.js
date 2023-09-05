@@ -56,7 +56,8 @@ import DoctorList from "./pages/DoctorList";
 import BookDoctor from "./pages/BookDoctor";
 import UploadHistory from "./pages/Admin/UploadHistory";
 import BookingNow from './pages/BookNow';
-
+//import SignIn from "./pages/SignIn";
+import UserAppointments from "./pages/UserAppointments";
 function App() {
   const { loading } = useSelector((state) => state.alerts);
   return (
@@ -77,6 +78,14 @@ function App() {
             </PublicRoute>
           }
         />
+          {/* <Route
+          path="/signin"
+          element={
+            <PublicRoute>
+              <SignIn />
+            </PublicRoute>
+          }
+        /> */}
 
         <Route
           path="/register"
@@ -444,6 +453,15 @@ function App() {
           element={
             <ProtectedRoute>
               <AddPet/>
+            </ProtectedRoute>
+          }
+          />
+          
+          <Route
+          path="/user/userappointments"
+          element={
+            <ProtectedRoute>
+              <UserAppointments/>
             </ProtectedRoute>
           }
           />

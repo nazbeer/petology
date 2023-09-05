@@ -14,7 +14,7 @@ import 'bootstrap-datepicker';
 const Vet = () => {
     const [doctorList, setDoctorList] = useState([]);
     useEffect(() =>{
-      axios.get('http://localhost:5000/api/user/get-all-approved-doctors',{
+      axios.get('/api/user/get-all-approved-doctors',{
       headers: {
         Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
@@ -22,6 +22,13 @@ const Vet = () => {
       .then((response) => setDoctorList(response.data.data))
       .catch((error) => console.error(error));
     },[]);
+   
+    // const [userDetails, setUserDetails] = useState({
+    //   firstname: '',
+    //   lastname: '',
+    //   email: '',
+    //   mobile: '',
+    // });
     const [service, setService] = useState({
       module:'Veterinary',
      // doctor:'',
@@ -33,18 +40,44 @@ const Vet = () => {
       lastname:'',
       email:'',
       mobile:'',
-     // password:''
+      userId:''
+    // password:''
   
     });
     useEffect(() => {
-        // Initialize the datepicker and set options
-        $('#datepicker').datepicker({
-          startDate: new Date(), // Start date is today
-          autoclose: true, // Close the datepicker when a date is selected
-          format: 'yyyy-mm-dd',
+      // Fetch doctor list
+      axios.get('/api/user/get-all-approved-doctors', {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      })
+      .then((response) => setDoctorList(response.data.data))
+      .catch((error) => console.error(error));
+  
+      // Fetch user details 
+      const userId = localStorage.getItem('userId'); // Get user ID from localStorage
+
+      axios.get(`/api/user/user-details/${userId}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      })
+      .then((response) => {
+        console.log(response);
+        const userData = response.data.data;
+        const [firstname, lastname] = userData.name.split(' ');
+  
+        setService({
+          firstname: firstname,
+          lastname: lastname,
+          email: userData.email,
+          mobile: userData.mobile,
+          userId:userId
         });
-      }, []);
-    
+      })
+      .catch((error) => console.error(error));
+    }, []);
+
     const handleChange = (e) => {
       const { name, value } = e.target;
       setService((prevState) => ({
@@ -112,17 +145,10 @@ const Vet = () => {
                  })
                   }
     
-                {/* <option value={service.doctor}>Hair Cut</option>
-                <option value={service.doctor}>Bath</option>     */}
+             
                 <option value="Any">Any Doctor</option>
               </select>
-              {/* {doctorList &&
-                 doctorList.map((data, key) => { 
-                  return(<input type='hidden' value={data._id} name='doctorId'/>
-                  );
-      
-                })
-                 } */}
+            
             </div>
             
             <div className='mb-2'>
@@ -172,7 +198,7 @@ const Vet = () => {
                 name="firstname"
                 value={service.firstname}
                 onChange={handleChange}
-                required
+                
               />
             </div>
             <div className='mb-2'>
@@ -183,7 +209,7 @@ const Vet = () => {
                 name="lastname"
                 value={service.lastname}
                 onChange={handleChange}
-                required
+                
               />
             </div>
             <div className='mb-2'>
@@ -194,7 +220,7 @@ const Vet = () => {
                 name="email"
                 value={service.email}
                 onChange={handleChange}
-                required
+               
               />
             </div>
             <div className='mb-2'>
@@ -205,7 +231,7 @@ const Vet = () => {
                 name="mobile"
                 value={service.mobile}
                 onChange={handleChange}
-                required
+                
               />
             </div>
             <div className='mb-2'>

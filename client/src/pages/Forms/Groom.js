@@ -3,6 +3,12 @@ import axios from "axios";
 
 import { toast } from "react-hot-toast";
 const Groom =()=>{
+  const [userDetails, setUserDetails] = useState({
+    firstname: '',
+    lastname: '',
+    email: '',
+    mobile: '',
+  });
     const [service, setService] = useState({
         module: 'Grooming',
         service:'',
@@ -11,12 +17,35 @@ const Groom =()=>{
         breed: '',
         date:'',
         time:'',
-        firstname:'',
-        lastname:'',
-        email:'',
-        mobile:'',
+        // firstname:'',
+        // lastname:'',
+        // email:'',
+        // mobile:'',
       });
+      useEffect(() => {
+
+        // Fetch user details 
+        const userId = localStorage.getItem('userId'); // Get user ID from localStorage
+  
+        axios.get(`/api/user/user-details/${userId}`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+        })
+        .then((response) => {
+          console.log(response);
+          const userData = response.data.data;
+          const [firstname, lastname] = userData.name.split(' ');
     
+          setUserDetails({
+            firstname: firstname,
+            lastname: lastname,
+            email: userData.email,
+            mobile: userData.mobile,
+          });
+        })
+        .catch((error) => console.error(error));
+      }, []);
       const handleChange = (e) => {
         const { name, value } = e.target;
         setService((prevState) => ({
@@ -119,7 +148,7 @@ return(
                       type="text"
                       id="firstname"
                       name="firstname"
-                      value={service.firstname}
+                      value={userDetails.firstname}
                       onChange={handleChange}
                       required
                     />
@@ -130,7 +159,7 @@ return(
                       type="text"
                       id="lastname"
                       name="lastname"
-                      value={service.lastname}
+                      value={userDetails.lastname}
                       onChange={handleChange}
                       required
                     />
@@ -141,7 +170,7 @@ return(
                       type="email"
                       id="email"
                       name="email"
-                      value={service.email}
+                      value={userDetails.email}
                       onChange={handleChange}
                       required
                     />
@@ -152,7 +181,7 @@ return(
                       type="text"
                       id="mobile"
                       name="mobile"
-                      value={service.mobile}
+                      value={userDetails.mobile}
                       onChange={handleChange}
                       required
                     />
@@ -163,7 +192,7 @@ return(
                       type="time"
                       id="time"
                       name="time"
-                      value={service.time}
+                      value={userDetails.time}
                       onChange={handleChange}
                       required
                     />

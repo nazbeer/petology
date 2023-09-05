@@ -30,14 +30,7 @@ const appointmentSchema = new mongoose.Schema(
       required: true,
       default: "approved",
     },
-    // petInfo: {
-    //   type: Object,
-    //   required: true,
-    // },
-    // petId:{
-    //   type:String,
-    //   required:true,
-    // }
+ 
   },
   {
     timestamps: true,
