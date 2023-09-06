@@ -9,13 +9,13 @@ const MobVet = () => {
     
     const [service, setService] = useState({
       doctor:'Any',
-      service: 'Mobile Veterinary',
+      module: 'Mobile Veterinary',
+      service:'',
       pet:'',
       size: '',
       breed: '',
       date:'',
       time:'',
-      
       firstname:'',
       lastname:'',
       email:'',
@@ -51,13 +51,58 @@ const MobVet = () => {
         }
       }
     };
+    const [subservices, setSubservices] = useState([]);
+
+    useEffect(() => {
+      // Fetch sub-services from your Express.js API
+      axios.get('/api/user/subservices',{
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      } )
+        .then((response) => {
+          if (response.data.success) {
+            setSubservices(response.data.data);
+          } else {
+            console.error('Failed to fetch sub-services');
+          }
+        })
+        .catch((error) => {
+          console.error('Error:', error);
+        });
+
+        const userId = localStorage.getItem('userId'); // Get user ID from localStorage
   
+        axios.get(`/api/user/user-details/${userId}`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+        })
+        .then((response) => {
+          console.log(response);
+          const userData = response.data.data;
+          const [firstname, lastname] = userData.name.split(' ');
+    
+          setService({
+            firstname: firstname,
+            lastname: lastname,
+            email: userData.email,
+            mobile: userData.mobile,
+            userId:userId
+          });
+        })
+        .catch((error) => console.error(error));
+    }, []);
     const handleSubmit = async (e) => {
       e.preventDefault();
   
   
       try {
-        const response = await axios.post('/api/open/book-mobvet-appointment', service);
+        const response = await axios.post('/api/user/user-book-appointment', service, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+        });
   
         console.log('New appointment successfully saved:', response.data.data);
         if (response.data.success) {
@@ -81,16 +126,26 @@ const MobVet = () => {
         
               <div className='row'>
         <div className='col-md-6'>
-        <div className='mb-2'>
+        <div className='mb-2 d-none'>
               <label htmlFor="service">Chosen Service: </label>
-              <select className='form-control' id='service'  name='service' onChange={handleChange} disabled>
+              <select className='form-control' id='module'  name='module' onChange={handleChange} disabled>
                 <option value="Mobile Veterinary">Mobile Veterinary</option>
               
         
               </select>
              
             </div>
+            <div className='mb-2'>
+              <label htmlFor="service">Chosen Package: </label>
+              <select className='form-control' id='service'  name='service' onChange={handleChange} >
+              {subservices.map((subservice, index) => (
+            <option key={index} value={subservice.subService}> {subservice.subService} - Price: {subservice.price}</option>
+          ))}
+              
         
+              </select>
+             
+            </div>
             
             <div className='mb-2'>
               <label htmlFor="size">Choose Pet: </label>

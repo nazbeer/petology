@@ -10,6 +10,8 @@ const moment = require("moment");
 const Pet = require("../models/petModel");
 const OpenAppointment = require("../models/openAppointmentModel");
 const nodemailer = require('nodemailer');
+const UserappModel = require("../models/userappModel");
+const packModel = require("../models/packModel");
 // router.post("/register", async (req, res) => {
 //   try {
 //     const userExists = await User.findOne({
@@ -222,7 +224,7 @@ router.post("/login", async (req, res) => {
       $or: [
         { username: identifier },
         { email: identifier },
-        { mobile: identifier }
+        // { mobile: identifier }
       ]
     });
 
@@ -493,7 +495,27 @@ router.get("/get-all-approved-doctors", authMiddleware, async (req, res) => {
     });
   }
 });
+router.post('/user-book-appointment', async (req, res) => {
+  try {
+    const newAppointment = new UserappModel({
+      userId: req.body.userId,
+      doctorId: req.body.doctorId,
+      service: req.body.service,
+      breed: req.body.breed,
+      date: req.body.date,
+      time: req.body.time,
+      pet: req.body.pet,
+      size: req.body.size,
+      // Add other fields if needed
+    });
 
+    const savedAppointment = await newAppointment.save();
+    res.json({ success: true, message: 'Appointment booked successfully', data: savedAppointment });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Error booking appointment' });
+  }
+});
 router.post("/book-appointment", authMiddleware, async (req, res) => {
   try {
     req.body.status = "approved";
@@ -836,6 +858,16 @@ router.get("/get-pets-by-user-id", authMiddleware, async (req, res) => {
       success: false,
       error,
     });
+  }
+});
+router.get("/subservices", authMiddleware, async (req, res) => {
+  try {
+    const subservices = await packModel.find({ serviceType: 'Mobile Veterinary' }, "subService price");
+    console.log(subservices);
+    res.json({ success: true, data: subservices });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, error: "Failed to fetch sub-services" });
   }
 });
 module.exports = router;

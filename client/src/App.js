@@ -58,6 +58,7 @@ import UploadHistory from "./pages/Admin/UploadHistory";
 import BookingNow from './pages/BookNow';
 //import SignIn from "./pages/SignIn";
 import UserAppointments from "./pages/UserAppointments";
+import MobLogin from "./pages/MobLogin";
 function App() {
   const { loading } = useSelector((state) => state.alerts);
   return (
@@ -75,6 +76,14 @@ function App() {
           element={
             <PublicRoute>
               <Login />
+            </PublicRoute>
+          }
+        />
+         <Route
+          path="/otp-login"
+          element={
+            <PublicRoute>
+              <MobLogin />
             </PublicRoute>
           }
         />

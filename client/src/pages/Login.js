@@ -61,8 +61,8 @@ function Login() {
           </div>
 
           <Form layout="vertical" onFinish={onFinish}>
-            <Form.Item label="Email/Username/Mobile" name="identifier">
-              <Input placeholder="Email/Username/Mobile(052xxxx)" />
+            <Form.Item label="Email/Username" name="identifier">
+              <Input placeholder="Email/Username" />
             </Form.Item>
             <Form.Item label="Password" name="password">
               <Input placeholder="Password" type="password" />
@@ -74,7 +74,12 @@ function Login() {
             >
               LOGIN
             </Button>
-
+            <Link
+              to="/otp-login"
+              className="text-dark mt-2 text-center d-block"
+            >
+              Login with Mobile
+            </Link>
             <Link
               to="/register"
               className="text-dark mt-2 text-center d-block"

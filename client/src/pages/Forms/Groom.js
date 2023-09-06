@@ -1,26 +1,23 @@
 import React, {useEffect, useState} from "react";
 import axios from "axios";
-
+import 'antd/dist/antd.css';
 import { toast } from "react-hot-toast";
 const Groom =()=>{
-  const [userDetails, setUserDetails] = useState({
-    firstname: '',
-    lastname: '',
-    email: '',
-    mobile: '',
-  });
+
     const [service, setService] = useState({
         module: 'Grooming',
+        doctorId:'',
         service:'',
         pet:'',
         size: '',
         breed: '',
         date:'',
         time:'',
-        // firstname:'',
-        // lastname:'',
-        // email:'',
-        // mobile:'',
+        firstname:'',
+        lastname:'',
+        email:'',
+        mobile:'',
+        userId:'',
       });
       useEffect(() => {
 
@@ -37,11 +34,12 @@ const Groom =()=>{
           const userData = response.data.data;
           const [firstname, lastname] = userData.name.split(' ');
     
-          setUserDetails({
+          setService({
             firstname: firstname,
             lastname: lastname,
             email: userData.email,
             mobile: userData.mobile,
+            userId:userId
           });
         })
         .catch((error) => console.error(error));
@@ -58,7 +56,7 @@ const Groom =()=>{
     
     
         try {
-          const response = await axios.post('/api/open/grooming-appointment', service);
+          const response = await axios.post('/api/user/user-book-appointment', service);
     
           //console.log('service saved successfully:', response.data);
           if (response.data.success) {
@@ -83,6 +81,15 @@ return(
       <div className='row '>
                  
                   <div className='col-md-6'>
+                  <div className='mb-2 d-none'>
+                    <label htmlFor="doctor">Choose Doctor: </label>
+                    <select className='form-control p-0' id='doctor' name='doctorId'  onChange={handleChange} style={{height:'45px'}}>
+                 
+                      <option value="Null">Null</option>
+                  
+                    </select>
+                  
+                  </div>
                   <div className='mb-2'>
                     <label htmlFor="service">Choose Service: </label>
                     <select className='form-control p-0' id='service' name='service' multiple onChange={handleChange} style={{height:'45px'}}>
@@ -148,7 +155,7 @@ return(
                       type="text"
                       id="firstname"
                       name="firstname"
-                      value={userDetails.firstname}
+                      value={service.firstname}
                       onChange={handleChange}
                       required
                     />
@@ -159,7 +166,7 @@ return(
                       type="text"
                       id="lastname"
                       name="lastname"
-                      value={userDetails.lastname}
+                      value={service.lastname}
                       onChange={handleChange}
                       required
                     />
@@ -170,7 +177,7 @@ return(
                       type="email"
                       id="email"
                       name="email"
-                      value={userDetails.email}
+                      value={service.email}
                       onChange={handleChange}
                       required
                     />
@@ -181,7 +188,7 @@ return(
                       type="text"
                       id="mobile"
                       name="mobile"
-                      value={userDetails.mobile}
+                      value={service.mobile}
                       onChange={handleChange}
                       required
                     />
@@ -192,7 +199,7 @@ return(
                       type="time"
                       id="time"
                       name="time"
-                      value={userDetails.time}
+                      value={service.time}
                       onChange={handleChange}
                       required
                     />

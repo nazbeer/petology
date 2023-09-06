@@ -12,6 +12,9 @@
     color: white;
     font-weight: bold;
 }
+a:hover{
+    font-weight:500 !important;
+}
 td.disabled.day {
     cursor: not-allowed !important;
     color: #f7f7f7 !important;

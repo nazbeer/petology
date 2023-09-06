@@ -318,7 +318,8 @@ const getUserType = (user) => {
             email: selectedUser?.email,
             mobile: selectedUser?.mobile,
             status:selectedUser?.status,
-            userType:selectedUser?.userType
+            userType:selectedUser?.userType,
+
           }}
           style={{padding:"0px"}}
          
@@ -400,6 +401,8 @@ const getUserType = (user) => {
               <Select.Option value="admin">Admin</Select.Option>
             </Select>
           </Form.Item>
+         
+
           <Form.Item style={{ borderTop: "1px solid #f6f6f6" }} width={800} className="col-md-12">
             <div className="d-flex justify-content-center align-items-center mt-4 mb-0">
               <Button type="primary" htmlType="submit" className="btn btn-success btn-sm">
