@@ -21,11 +21,7 @@ function Layout({ children }) {
       path: "/user/userappointments",
       icon: "ri-file-list-line",
     },
-    {
-      name: "All Appointments",
-      path: "/user/appointmentlist",
-      icon: "ri-file-list-line",
-    },
+    
     {
       name: "Doctors",
       path: "/user/doctors",

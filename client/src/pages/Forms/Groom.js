@@ -5,7 +5,7 @@ import { toast } from "react-hot-toast";
 const Groom =()=>{
 
     const [service, setService] = useState({
-        module: 'Grooming',
+        module: 'grooming',
         doctorId:'',
         service:'',
         pet:'',
@@ -39,7 +39,8 @@ const Groom =()=>{
             lastname: lastname,
             email: userData.email,
             mobile: userData.mobile,
-            userId:userId
+            userId:userId,
+            module:'grooming'
           });
         })
         .catch((error) => console.error(error));
@@ -56,7 +57,11 @@ const Groom =()=>{
     
     
         try {
-          const response = await axios.post('/api/user/user-book-appointment', service);
+          const response = await axios.post('/api/user/user-book-appointment', service, {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('token')}`,
+            },
+          });
     
           //console.log('service saved successfully:', response.data);
           if (response.data.success) {
@@ -91,16 +96,6 @@ return(
                   
                   </div>
                   <div className='mb-2'>
-                    <label htmlFor="service">Choose Service: </label>
-                    <select className='form-control p-0' id='service' name='service' multiple onChange={handleChange} style={{height:'45px'}}>
-                 
-                      <option value="Hair Cut">Hair Cut</option>
-                      <option value="Bath & Blow Dry">Bath & Blow Dry</option>    
-
-                    </select>
-                  
-                  </div>
-                  <div className='mb-2'>
                     <label htmlFor="size">Choose Pet: </label>
                     <select className='form-control' id='pet' name='pet' onChange={handleChange}>
                       <option defaultValue="">Select Pet...</option>
@@ -116,12 +111,23 @@ return(
                     <label htmlFor="size">Choose Size: </label>
                     <select className='form-control' id='size' name='size' onChange={handleChange}>
                       <option defaultValue="">Select size...</option>
-                      <option value="S">S (Small)</option>
-                      <option value="M">M (Medium)</option>    
-                      <option value="L">L (Large)</option>   
+                      <option value={service.size}>S (Small - upto 19 Kg)</option>
+                <option value={service.size}>M (Medium - upto 30Kg)</option>    
+                <option value={service.size}>L (Large - 30 to 50kg or plus)</option>  
                     </select>
                   </div>
                  
+                  <div className='mb-2'>
+                    <label htmlFor="service">Choose Service: </label>
+                    <select className='form-control p-0' id='service' name='service' multiple onChange={handleChange} style={{height:'45px'}}>
+                 
+                      <option value="Hair Cut">Hair Cut</option>
+                      <option value="Bath & Blow Dry">Bath & Blow Dry</option>    
+
+                    </select>
+                  
+                  </div>
+                  
                   <div className='mb-2'>
                     <label htmlFor="breed">Breed:</label>
                     <input className="form-control" 

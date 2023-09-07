@@ -30,7 +30,7 @@ const Vet = () => {
     //   mobile: '',
     // });
     const [service, setService] = useState({
-      module:'Veterinary',
+      module:'veterinary',
      // doctor:'',
       doctorId:'',
       service:'',
@@ -73,7 +73,8 @@ const Vet = () => {
           lastname: lastname,
           email: userData.email,
           mobile: userData.mobile,
-          userId:userId
+          userId:userId,
+          module:'veterinary',
         });
       })
       .catch((error) => console.error(error));
@@ -168,9 +169,9 @@ const Vet = () => {
               <label htmlFor="size">Choose Size: </label>
               <select className='form-control' id='size' name='size' onChange={handleChange}>
                 <option defaultValue="">Select size...</option>
-                <option value={service.size}>S (Small)</option>
-                <option value={service.size}>M (Medium)</option>    
-                <option value={service.size}>L (Large)</option>   
+                <option value={service.size}>S (Small - upto 19 Kg)</option>
+                <option value={service.size}>M (Medium - upto 30Kg)</option>    
+                <option value={service.size}>L (Large - 30 to 50kg or plus)</option>   
               </select>
             </div>
           

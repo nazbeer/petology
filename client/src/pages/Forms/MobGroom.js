@@ -5,20 +5,15 @@ import bootstrap from 'react-bootstrap';
 import { GoogleMap, Marker, LoadScript, Autocomplete } from '@react-google-maps/api';
 const MobGroom = () => {
     const [autocomplete, setAutocomplete] = useState(null);
-    const [servicesList, setServicesList] = useState([]); 
-    useEffect(() => {
-        axios.get('/api/open/get-services')
-        .then((response) => {
-            setServicesList(response.data.data);
-        })
-        .catch((error) => {
-            console.error(error);
-        });
-    }, []);
+
+    const [subservices, setSubservices] = useState([]);
 
     const [location, setLocation] = useState({ lat: 25.2048, lng: 55.2708 });
     const [service, setService] = useState({
-    // doctor:'Any',
+
+        module: 'mobile_grooming',
+        doctor:null,
+        doctorId:null,
         service: '',
         pet:'',
         size: '',
@@ -32,6 +27,51 @@ const MobGroom = () => {
         lat:'',
         lng:'',
     });
+    
+    useEffect(() => {
+        // Fetch sub-services from your Express.js API
+        axios.get('/api/user/subservices1',{
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+        } )
+          .then((response) => {
+            console.log('subservices:', response.data.data);
+            if (response.data.success) {
+                
+              setSubservices(response.data.data);
+            } else {
+              console.error('Failed to fetch sub-services');
+            }
+          })
+          .catch((error) => {
+            console.error('Error:', error);
+          });
+  
+          const userId = localStorage.getItem('userId'); // Get user ID from localStorage
+    
+          axios.get(`/api/user/user-details/${userId}`, {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('token')}`,
+            },
+          })
+          .then((response) => {
+           // console.log(response);
+            const userData = response.data.data;
+            const [firstname, lastname] = userData.name.split(' ');
+      
+            setService({
+              firstname: firstname,
+              lastname: lastname,
+              email: userData.email,
+              mobile: userData.mobile,
+              userId:userId,
+              service:subservices,
+              module:'mobile_grooming'
+            });
+          })
+          .catch((error) => console.error(error));
+      }, []);
     const handleChange = (e) => {
         const { name, value } = e.target;
         setService((prevState) => ({
@@ -57,16 +97,26 @@ const MobGroom = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+    
+        console.log('Service state before POST request:', subservices);
         try {
-        const response = await axios.post('/api/open/book-mobgroom-appointment', service);
-        console.log('New appointment successfully saved:', response.data.data);
-        if (response.data.success) {
+          const response = await axios.post('/api/user/user-book-appointment', service, {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('token')}`,
+            },
+          });
+    
+          console.log('New mob grooming appointment successfully saved:', response.data.data);
+          if (response.data.success) {
             toast.success(response.data.message);
-        }
+            //navigate('/appointments');
+          }
+          // Do something with the response, like showing a success message
         } catch (error) {
-        toast.error("Error in adding Mobile Grooming Appointment.");
+          toast.error("Error in adding Mobile Veterinary Appointment.");
+          //dispatch(hideLoading());
         }
-    };
+      };
     return (
         <form onSubmit={handleSubmit}>
             <div className='card'>
@@ -76,15 +126,23 @@ const MobGroom = () => {
                 <div className='row'>
             <div className='col-md-6'>
             <div className='mb-2'>
-                <label htmlFor="service">Choose Service: </label>
-                <select className='form-control' id='service'  name='service' onChange={handleChange}>
-                    <option value="">Select Service...</option>
-                    {servicesList.map((service) => (
-                        <option key={service._id} value={service.subService}>{service.subService}</option>
-                    ))}
-                    </select>
-                
-                </div>
+              <label htmlFor="service">Chosen Package: </label>
+              <select className='form-control' id='service'  name='service' onChange={handleChange} >
+                {subservices.length > 0 ? (
+                    subservices.map((subservice, index) => (
+                        <option key={index} value={subservice.subService}>
+                        {subservice.subService} - Price: ({subservice.price})
+                        </option>
+                    ))
+                    ) : (
+                    <option value="NA">No Package available</option>
+                )}  
+
+              
+        
+              </select>
+             
+            </div>
         
                 <div className='mb-2'>
                     <label htmlFor="size">Choose Pet: </label>
@@ -115,9 +173,9 @@ const MobGroom = () => {
                 <label htmlFor="size">Choose Size: </label>
                 <select className='form-control' id='size' name='size' onChange={handleChange}>
                     <option defaultValue="">Select size...</option>
-                    <option value="S">S (Small)</option>
-                    <option value="M">M (Medium)</option>    
-                    <option value="L">L (Large)</option>   
+                    <option value={service.size}>S (Small - upto 19 Kg)</option>
+                <option value={service.size}>M (Medium - upto 30Kg)</option>    
+                <option value={service.size}>L (Large - 30 to 50kg or plus)</option>  
                 </select>
                 </div>
 

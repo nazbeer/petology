@@ -47,62 +47,73 @@ function MobVeti() {
   const getAppointmentsData = async () => {
     try {
       dispatch(showLoading());
-      const response = await axios.get("/api/admin/get-appointments-by-user-id", {
+      const response = await axios.get(`/api/user/appointments/mobvet`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
-      console.log(response);
+      console.log("response", response.data);
       dispatch(hideLoading());
       if (response.data.success) {
-        setAppointments(response.data.data);
+        setAppointments(response.data); // Set appointments to response.data.data
       }
     } catch (error) {
       dispatch(hideLoading());
     }
   };
 
+  useEffect(() => {
+    getAppointmentsData();
+  }, []);
+
+
   const columns = [
     {
-      title: "Id",
-      dataIndex: "_id",
+      title: "ID",
+      dataIndex: "customId",
     },
     {
       title: "Doctor",
       dataIndex: "name",
       render: (text, record) => (
         <span>
-          Dr. {record.doctorInfo.firstName} {record.doctorInfo.lastName}
+          Dr. {record.doctor.firstName} {record.doctor.lastName}
         </span>
       ),
     },
     {
-      title: "Pet Details",
-      dataIndex: "petInfo",
-      render: (petInfo) => (
-        <span>
-          {petInfo && petInfo.length > 0
-            ? `${petInfo[0].pet} - ${petInfo[0].breed} (${petInfo[0].size})`
-            : "N/A"}
-        </span>
-      ),
-    },
-    {
-      title: "Specialization",
-      dataIndex: "specialization",
+      title: "Service",
+      dataIndex: "service",
       render: (text, record) => (
-        <span className="text-capitalize">
-          {record.doctorInfo.specialization}
-        </span>
+        <span className="text-capitalize">{record.service}</span>
       ),
     },
     {
-      title: "Date & Time",
-      dataIndex: "createdAt",
+      title:"Client",
+      dataIndex:"name",
       render: (text, record) => (
-        <span>
-          {moment(record.date).format("D MMM, YYYY")} | {moment(record.time).format("hh:mm")}
-        </span>
+        <span className="text-capitalize">{record.user.name}</span>
+      ),
+    },
+    {
+      title:"Mobile",
+      dataIndex:"mobile",
+      render: (text, record) => (
+        <span className="text-capitalize">{record.user.mobile}</span>
+      ),
+    },
+    {
+      title:"Pet",
+      dataIndex:"pet",
+      render: (text, record) => (
+        <span className="text-capitalize">{record.pet} - {record.size} - {record.breed}</span>
+      ),
+    },
+    {
+      title:"Date & Time",
+      dataIndex:"timing",
+      render: (text, record) => (
+        <span className="text-capitalize">{moment(record.date).format('D MMM, YYYY')}| {record.time} </span>
       ),
     },
     {
@@ -128,7 +139,6 @@ function MobVeti() {
       ),
     },
   ];
-
   
 
   
@@ -145,7 +155,7 @@ function MobVeti() {
       </div>
      
       <hr />
-      <Table columns={columns} dataSource={appointments} />
+      <Table columns={columns} dataSource={appointments.data} />
      
       </>
   );

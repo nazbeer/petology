@@ -43,34 +43,61 @@ const UploadHistory = () => {
     setSelecteduser(userId);
     fetchHistoryRecords(userId);
   };
-
+  const renderFile = (path) => {
+    const ext = path.split('.').pop().toLowerCase();
+    console.log(path);
+    // If it's an image
+    if (['jpg', 'jpeg', 'png', 'gif'].includes(ext)) {
+      return <img src={path} alt="Uploaded" style={{ width: '100px', height: 'auto' }} />;
+    }
+    // If it's a PDF
+    if (ext === 'pdf') {
+      return <iframe src={path} width="100px" height="100px"></iframe>;
+    }
+    // For .doc or .docx
+    if (['doc', 'docx'].includes(ext)) {
+      return (
+        <iframe 
+          src={`https://docs.google.com/viewer?url=${path}&embedded=true`} 
+          width="100px" 
+          height="100px" 
+          frameBorder="0"
+        ></iframe>
+      );
+    }
+    // Add other file types if needed
+  //  console.log(path);
+    return <a href={path} target="_blank" rel="noreferrer">Open File</a>;
+  }
+  
   const handleUpload = async () => {
     try {
-      const formData = new FormData();
-      fileList.forEach((file) => {
-        formData.append("files", file.originFileObj);
-      });
-  
-      const response = await axios.post(`/api/admin/upload-history/${selecteduser}`, formData, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-          "Content-Type": "multipart/form-data",
-        },
-      });
-  
-      if (response.data.success) {
-        message.success("Upload successful");
-        setUploadModalVisible(false);
-        fetchHistoryRecords(selecteduser);
-      } else {
-        message.error("Upload failed");
-      }
+        const formData = new FormData();
+        fileList.forEach((file) => {
+            formData.append("files", file.originFileObj);
+        });
+
+        const response = await axios.post(`/api/admin/upload-history/${selecteduser}`, formData, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+                "Content-Type": "multipart/form-data",
+            },
+        });
+        console.log('react:', response);
+     
+        if (response.data.success) {
+            message.success("Upload successful");
+            setUploadModalVisible(false);
+            fetchHistoryRecords(selecteduser);
+        } else {
+            message.error("Upload failed");
+        }
     } catch (error) {
-      console.error("Error uploading files:", error);
-      message.error("Error uploading files");
+        console.error("Error uploading files:", error);
+        message.error("Error uploading files");
     }
-  };
-  
+};
+
 
   const handleDelete = async (recordId) => {
     // Implement the logic to delete a user history record
@@ -86,7 +113,7 @@ const UploadHistory = () => {
       console.error("Error deleting record:", error);
     }
   };
-
+ 
   const columns = [
     // Define columns for the history records table
     // You can have columns like "Date", "Description", "Actions", etc.
@@ -94,7 +121,11 @@ const UploadHistory = () => {
         title: "ID",
         dataIndex: "_id",
     },
-  
+    {
+      title: "Patient History",
+      dataIndex: "documentPath",
+     render: (path) => renderFile(path),
+    }
   ];
 
   return (
@@ -155,7 +186,7 @@ const UploadHistory = () => {
           </Button>,
         ]}
       >
-        <Upload.Dragger>
+       <Upload.Dragger onChange={(info) => setFileList(info.fileList)}>
           <p className="ant-upload-drag-icon">
             <UploadOutlined />
           </p>

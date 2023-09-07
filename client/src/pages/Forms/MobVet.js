@@ -9,7 +9,7 @@ const MobVet = () => {
     
     const [service, setService] = useState({
       doctor:'Any',
-      module: 'Mobile Veterinary',
+      module: 'mobile_veterinary',
       service:'',
       pet:'',
       size: '',
@@ -51,7 +51,7 @@ const MobVet = () => {
         }
       }
     };
-    const [subservices, setSubservices] = useState([]);
+    const [subservice, setSubservices] = useState([]);
 
     useEffect(() => {
       // Fetch sub-services from your Express.js API
@@ -88,7 +88,10 @@ const MobVet = () => {
             lastname: lastname,
             email: userData.email,
             mobile: userData.mobile,
-            userId:userId
+            userId:userId,
+            service:subservice,
+           
+            module:'mobile_veterinary'
           });
         })
         .catch((error) => console.error(error));
@@ -126,7 +129,7 @@ const MobVet = () => {
         
               <div className='row'>
         <div className='col-md-6'>
-        <div className='mb-2 d-none'>
+            <div className='mb-2 d-none'>
               <label htmlFor="service">Chosen Service: </label>
               <select className='form-control' id='module'  name='module' onChange={handleChange} disabled>
                 <option value="Mobile Veterinary">Mobile Veterinary</option>
@@ -135,18 +138,6 @@ const MobVet = () => {
               </select>
              
             </div>
-            <div className='mb-2'>
-              <label htmlFor="service">Chosen Package: </label>
-              <select className='form-control' id='service'  name='service' onChange={handleChange} >
-              {subservices.map((subservice, index) => (
-            <option key={index} value={subservice.subService}> {subservice.subService} - Price: {subservice.price}</option>
-          ))}
-              
-        
-              </select>
-             
-            </div>
-            
             <div className='mb-2'>
               <label htmlFor="size">Choose Pet: </label>
               <select className='form-control' id='pet' name='pet'  onChange={handleChange}>
@@ -163,12 +154,32 @@ const MobVet = () => {
               <label htmlFor="size">Choose Size: </label>
               <select className='form-control' id='size' name='size' onChange={handleChange}>
                 <option defaultValue="">Select size...</option>
-                <option value="S">S (Small)</option>
-                <option value="M">M (Medium)</option>    
-                <option value="L">L (Large)</option>   
+                <option value={service.size}>S (Small - upto 19 Kg)</option>
+                <option value={service.size}>M (Medium - upto 30Kg)</option>    
+                <option value={service.size}>L (Large - 30 to 50kg or plus)</option>  
               </select>
             </div>
         
+            <div className='mb-2'>
+              <label htmlFor="service">Chosen Package: </label>
+              <select className='form-control' id='service'  name='subservice' onChange={handleChange} >
+              {subservice.length > 0 ? (
+  subservice.map((services, index) => (
+    <option key={index} value={services.subService + services.price}>
+      {services.subService} - Price: ({services.price})
+    </option>
+  ))
+) : (
+  <option>No Package available</option>
+)}
+
+              
+        
+              </select>
+             
+            </div>
+            
+          
             <div className='mb-2'>
               <label htmlFor="breed">Breed:</label>
               <input className="form-control" 
