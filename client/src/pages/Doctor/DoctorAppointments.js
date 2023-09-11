@@ -22,7 +22,7 @@ function DoctorAppointments() {
     try {
       dispatch(showLoading());
       const response = await axios.get(
-        "http://127.0.0.1:5000/api/doctor/get-appointments-by-doctor-id",
+        "/api/doctor/appointments/veterinary",
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -74,22 +74,26 @@ function DoctorAppointments() {
   const columns = [
     {
       title: "Id",
-      dataIndex: "_id",
+      dataIndex: "customID",
+      render: (text, record) => <span>{record.customId}</span>,
     },
     {
       title: "Patient",
       dataIndex: "name",
-      render: (text, record) => <span>{record.userInfo.name}</span>,
+      render: (text, record) => <span>{record.user.name}</span>,
     },
-    // {
-    //   title: "Pet",
-    //   dataIndex: "pet",
-    //   render: (text, record) => <span>{record.petInfo.pet}</span>,
-    // },
+   
     {
       title: "Phone",
       dataIndex: "phoneNumber",
-      render: (text, record) => <span>{record.doctorInfo.phoneNumber}</span>,
+      render: (text, record) => <span>{record.doctor.phoneNumber}</span>,
+    },
+    {
+      title:"Pet",
+      dataIndex:"pet",
+      render: (text, record) => (
+        <span className="text-capitalize">{record.pet} - {record.size} - {record.breed}</span>
+      ),
     },
     {
       title: "Date & Time",
@@ -97,10 +101,11 @@ function DoctorAppointments() {
       render: (text, record) => (
         <span>
           {moment(record.date).format("DD MMM, YYYY")}{" | "}
-          {moment(record.time).format("hh:mm")}
+          {record.time}
         </span>
       ),
     },
+
     {
       title: "Status",
       dataIndex: "status",
@@ -116,8 +121,8 @@ function DoctorAppointments() {
           {record.status === "pending" ||record.status === "approved" && (
             <div className="d-flex gap-2">
              
-               <Button type="success"  onClick={() => changeAppointmentStatus(record, "approved")}> Approve</Button>
-           
+               {/* <Button type="success"  onClick={() => changeAppointmentStatus(record, "approved")}> Approve</Button>
+            */}
             
               <Button type="danger"   onClick={() => changeAppointmentStatus(record, "rejected")}>  Reject</Button>
             
@@ -142,7 +147,7 @@ function DoctorAppointments() {
   const getopenAppointmentsData = async () => {
     try {
       dispatch(showLoading());
-      const response = await axios.get("http://127.0.0.1:5000/api/doctor/get-openappointments-by-doctor-id", 
+      const response = await axios.get("/api/doctor/get-openappointments-by-doctor-id", 
       {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -274,7 +279,7 @@ function DoctorAppointments() {
           )}
         </Modal>
       </div>
-        <div>
+        <div className="d-none">
         <h6 className="page-title">Open Appointments</h6>
         <hr />
         <Table columns={opencolumns} dataSource={openappointments} />

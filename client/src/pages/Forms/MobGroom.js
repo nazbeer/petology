@@ -130,7 +130,7 @@ const MobGroom = () => {
               <select className='form-control' id='service'  name='service' onChange={handleChange} >
                 {subservices.length > 0 ? (
                     subservices.map((subservice, index) => (
-                        <option key={index} value={subservice.subService}>
+                        <option key={index} value={subservice._id}>
                         {subservice.subService} - Price: ({subservice.price})
                         </option>
                     ))

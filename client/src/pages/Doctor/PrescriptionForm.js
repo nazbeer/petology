@@ -5,8 +5,8 @@ import { toast } from "react-hot-toast";
 import moment from "moment";
 
 const PrescriptionForm = ({ selectedAppointmentId, onClose, appointmentData }) => {
-    const [form] = Form.useForm();
-  
+  const [form] = Form.useForm();
+
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [doctors, setDoctors] = useState([]);
   const [users, setUsers] = useState([]);
@@ -15,32 +15,35 @@ const PrescriptionForm = ({ selectedAppointmentId, onClose, appointmentData }) =
   useEffect(() => {
     form.setFieldsValue({
       appointmentId: selectedAppointmentId,
-      userId: appointmentData?.userInfo?.userId,
-      userName : appointmentData?.userInfo?.name,
-      petName: appointmentData?.petInfo?.name,
-      petId: appointmentData?.petInfo?._id,
-      doctorId: appointmentData?.doctorInfo?.firstName + " " + appointmentData?.doctorInfo?.lastName ,
-      
+      customID:appointmentData?.customId,
+      userId: appointmentData?.user?.userId,
+      userName: appointmentData?.user?.name,
+      petName: appointmentData?.user?.pet,
+      petId: appointmentData?.petInfo?.pet,
+      doctorId:appointmentData?.doctor?._id,
+      doctorName: `${appointmentData?.doctorInfo?.firstName} ${appointmentData?.doctorInfo?.lastName}`,
     });
   }, [selectedAppointmentId, appointmentData]);
+
  // console.log(appointmentData?.petInfo);
-//   useEffect(() => {
-//     if (selectedAppointmentId) {
-//       axios
-//         .get(`/api/admin/get-appointment-by-id/${selectedAppointmentId}`, {
-//           headers: {
-//             Authorization: `Bearer ${localStorage.getItem("token")}`,
-//           },
-//         })
-//         .then((response) => {
-//           if (response.data.success) {
-//             setSelectedAppointment(response.data.data);
-//           }
-//         });
-//     }
+  useEffect(() => {
+    if (selectedAppointmentId) {
+      axios
+        .get(`/api/doctor/get-appointment-by-id/${selectedAppointmentId}`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        })
+        .then((response) => {
+          console.log(response);
+          if (response.data.success) {
+            setSelectedAppointment(response.data.data);
+          }
+        });
+    }
 
    
-//   }, [selectedAppointmentId]);
+  }, [selectedAppointmentId]);
 
   const handleSubmit = async (values) => {
     try {
@@ -68,30 +71,34 @@ const PrescriptionForm = ({ selectedAppointmentId, onClose, appointmentData }) =
    
 
     <Form form={form} onFinish={handleSubmit} layout="vertical" width={800}>
-      <Form.Item label="Appointment ID" name="appointmentId">
+      <Form.Item label="Appointment ID" name="customID" >
         <Input disabled />
       </Form.Item>
-
+      <Form.Item label="Appointment ID" name="appointmentId" hidden>
+        <Input disabled />
+      </Form.Item>
       <Form.Item label="User" name="userId" hidden>
         <Input disabled />
       </Form.Item>
 
       <Form.Item label="User" name="userName" rules={[{ required: true }]}>
-        <Input disabled />
+        <Input  disabled />
       </Form.Item>
 
-      <Form.Item label="Pet" name="petName" >
-        <Input disabled />
+      <Form.Item label="Pet" name="petName"  >
+        <Input value="Dog" placeholder="Dog" disabled />
       </Form.Item>
 
       <Form.Item label="Pet" name="petId" hidden>
         <Input disabled />
       </Form.Item>
 
-      <Form.Item label="Doctor" name="doctorId" rules={[{ required: true }]}>
+      {/* <Form.Item label="Doctor" name="doctorId" >
         <Input disabled />
+      </Form.Item> */}
+      <Form.Item label="Doctor" name="doctorId">
+        <Input value={form.getFieldValue('doctorId')} disabled />
       </Form.Item>
-
       <Form.Item
         label="Prescription"
         name="prescription"

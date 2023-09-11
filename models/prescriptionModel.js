@@ -8,7 +8,7 @@ const prescriptionSchema = new mongoose.Schema(
    },
    petId:{
     type: String,
-    required:true, 
+    required:false, 
    },
    appointmentId:{
     type:String,

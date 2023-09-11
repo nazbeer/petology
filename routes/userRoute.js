@@ -12,6 +12,7 @@ const OpenAppointment = require("../models/openAppointmentModel");
 const nodemailer = require('nodemailer');
 const UserappModel = require("../models/userappModel");
 const packModel = require("../models/packModel");
+const crypto = require('crypto');
 // router.post("/register", async (req, res) => {
 //   try {
 //     const userExists = await User.findOne({
@@ -69,7 +70,7 @@ const packModel = require("../models/packModel");
 //     // });
 // });
 router.post("/register", async (req, res) => {
-  console.log(req.body);
+  //console.log(req.body);
 
   try {
     let conditions = [];
@@ -97,24 +98,78 @@ router.post("/register", async (req, res) => {
         .status(400)
         .send({ message: "User already exists", success: false });
     }
-
+    const activationToken = crypto.randomBytes(32).toString('hex');
     const password = req.body.password;
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
     req.body.password = hashedPassword;
 
     const newUser = new User(req.body);
+    newUser.activationToken = activationToken;
     await newUser.save();
+    const activationLink = `http://localhost:3000/#/activate/${activationToken}`;
 
-    res
-      .status(201) // Status code 201 represents "Created"
-      .send({ message: "User created successfully", success: true });
+    const transporter = nodemailer.createTransport({
+      host: "mailslurp.mx",
+      port: 2587,
+      auth: {
+        user: "3XuAF86a05YLhLwO2vYB3oykQflir7J1",
+        pass: "y05g7jL61VapbV2eFOrCqrd2FVNJeWrB"
+      }
+  });
+  const mailOptions = {
+    from: '6598040e-ceb7-44ae-a975-e1630c4856e4@mailslurp.com',
+    to: req.body.email,
+    subject: 'Welcome to Petology',
+    html: `
+      <html>
+        <body>
+          <p>Hello ${req.body.name},</p>
+          <p>Thank you for registering on Your App!</p>
+          <p>Please click the following link to activate your account:</p>
+          <a href="${activationLink}">Activate Account</a>
+        </body>
+      </html>
+    `,
+  };
+  
+
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      console.log('Error sending email:', error);
+    } else {
+      console.log('Email sent:', info.response);
+    }
+  });
+  res.status(201).send({
+    message:
+      'User registered successfully. Please check your email for activation instructions.',
+    success: true,
+  });
   } catch (error) {
     console.log(error);
     res
       .status(500)
       .send({ message: "Error creating user", success: false, error });
   }
+});
+router.get('/activate/:token', async (req, res) => {
+  const { token } = req.query;
+  console.log(token);
+  // Find the user by the activation token
+  const user = await User.findOne({ activationToken: token });
+
+  if (!user) {
+    return res.status(400).send('Invalid activation token');
+  }
+
+  // Activate the user
+  user.isActivated = true;
+  user.activationToken = undefined; // Remove the token to prevent reuse
+  await user.save();
+
+  // Redirect or send a success message
+  return res.redirect('/login'); // Redirect to the login page or send a success message
 });
 
 router.post("/register-old", async (req, res) => {
@@ -227,7 +282,7 @@ router.post("/login", async (req, res) => {
         // { mobile: identifier }
       ]
     });
-
+  
     if (!user) {
       return res
         .status(200)
@@ -495,27 +550,7 @@ router.get("/get-all-approved-doctors", authMiddleware, async (req, res) => {
     });
   }
 });
-router.post('/user-book-appointment', async (req, res) => {
-  try {
-    const newAppointment = new UserappModel({
-      userId: req.body.userId,
-      doctorId: req.body.doctorId,
-      service: req.body.service,
-      breed: req.body.breed,
-      date: req.body.date,
-      time: req.body.time,
-      pet: req.body.pet,
-      size: req.body.size,
-      // Add other fields if needed
-    });
 
-    const savedAppointment = await newAppointment.save();
-    res.json({ success: true, message: 'Appointment booked successfully', data: savedAppointment });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: 'Error booking appointment' });
-  }
-});
 router.post("/book-appointment", authMiddleware, async (req, res) => {
   try {
     req.body.status = "approved";
@@ -860,9 +895,44 @@ router.get("/get-pets-by-user-id", authMiddleware, async (req, res) => {
     });
   }
 });
+router.post('/user-book-appointment', authMiddleware, async (req, res) => {
+  try {
+    const newAppointment = new UserappModel({
+      module:req.body.module,
+      userId: req.body.userId,
+      doctorId: req.body.doctorId,
+      service: req.body.service,
+      breed: req.body.breed,
+      date: req.body.date,
+      time: req.body.time,
+      pet: req.body.pet,
+      size: req.body.size,
+      lng: req.body.lng,
+      lat: req.body.lat,
+
+      // Add other fields if needed
+    });
+
+    const savedAppointment = await newAppointment.save();
+    res.json({ success: true, message: 'Appointment booked successfully', data: savedAppointment });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Error booking appointment' });
+  }
+});
 router.get("/subservices", authMiddleware, async (req, res) => {
   try {
     const subservices = await packModel.find({ serviceType: 'Mobile Veterinary' }, "subService price");
+  //  console.log(subservices);
+    res.json({ success: true, data: subservices });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, error: "Failed to fetch sub-services" });
+  }
+});
+router.get("/subservices1", authMiddleware, async (req, res) => {
+  try {
+    const subservices = await packModel.find({ serviceType: 'Mobile Grooming' }, "subService price");
     console.log(subservices);
     res.json({ success: true, data: subservices });
   } catch (error) {
@@ -870,4 +940,94 @@ router.get("/subservices", authMiddleware, async (req, res) => {
     res.status(500).json({ success: false, error: "Failed to fetch sub-services" });
   }
 });
+router.get('/appointments/grooming', authMiddleware, async (req, res) => {
+  try {
+   // const moduleType = req.params.module;
+    
+    // Fetch appointments for the specified module
+    const appointments = await UserappModel.find({ module: 'grooming' });
+    
+    // If appointments are found, you can fetch user details only
+    const populatedAppointments = await Promise.all(appointments.map(async (appointment) => {
+      const userId = appointment.userId;
+
+      // Assuming you have a User model for user details
+      const user = await User.findOne({ _id: userId });
+   //   console.log("user:", user);
+
+      return {
+        ...appointment.toObject(),
+        user,
+      };
+    }));
+    
+    console.log("populated Appointments:", populatedAppointments);
+    res.json({ success: true, data: populatedAppointments });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
+router.get('/appointments/veterinary', authMiddleware, async (req, res) => {
+  try {
+   // const moduleType = req.params.module;
+    
+    // Fetch appointments for the specified module
+    const appointments = await UserappModel.find({ module: 'veterinary' });
+    
+    // If appointments are found, you can fetch user details only
+    const populatedAppointments = await Promise.all(appointments.map(async (appointment) => {
+      const userId = appointment.userId;
+      const doctorId = appointment.doctorId;
+      // Assuming you have a User model for user details
+      const user = await User.findOne({ _id: userId });
+      const doctor = await Doctor.findOne({ _id: doctorId });
+     // console.log("user:", user);
+
+      return {
+        ...appointment.toObject(),
+        user,
+        doctor
+      };
+    }));
+    
+    console.log("populated Appointments:", populatedAppointments);
+    res.json({ success: true, data: populatedAppointments });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
+router.get('/appointments/mobvet', authMiddleware, async (req, res) => {
+  try {
+   // const moduleType = req.params.module;
+    
+    // Fetch appointments for the specified module
+    const appointments = await UserappModel.find({ module: 'mobile_veterinary' });
+    
+    // If appointments are found, you can fetch user details only
+    const populatedAppointments = await Promise.all(appointments.map(async (appointment) => {
+      const userId = appointment.userId;
+    //  const doctorId = appointment.doctorId;
+      // Assuming you have a User model for user details
+      const user = await User.findOne({ _id: userId });
+   //   const doctor = await Doctor.findOne({ _id: doctorId });
+    //  console.log("user:", user);
+
+      return {
+        ...appointment.toObject(),
+        user,
+      //  doctor
+      };
+    }));
+    
+    console.log("populated Appointments:", populatedAppointments);
+    res.json({ success: true, data: populatedAppointments });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
+
+
 module.exports = router;

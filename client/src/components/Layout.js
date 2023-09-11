@@ -22,11 +22,11 @@ function Layout({ children }) {
       icon: "ri-file-list-line",
     },
     
-    {
-      name: "Doctors",
-      path: "/user/doctors",
-      icon: "ri-hospital-line",
-    },
+    // {
+    //   name: "Doctors",
+    //   path: "/user/doctors",
+    //   icon: "ri-hospital-line",
+    // },
     {
       name: "Booking",
       path: "/user/booking",

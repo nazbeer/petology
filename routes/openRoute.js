@@ -86,26 +86,26 @@ router.get("/get-all-approved-doctors", async (req, res) => {
     }
   });
   
-    // router.post('/book-appointment', async (req, res) => {
-    //     try {
-    //     const appointmentData = req.body;
+    router.post('/book-appointment', async (req, res) => {
+        try {
+        const appointmentData = req.body;
     
-    //     // Create a new appointment
-    //     const newAppointment = new OpenAppointment(appointmentData);
-    //     const savedAppointment = await newAppointment.save();
-    //     // Update the user's appointment array
-    //     await User.findByIdAndUpdate(
-    //         appointmentData.userId,
-    //         { $addToSet: { appointments: savedAppointment._id } },
-    //         { new: true }
-    //     );
+        // Create a new appointment
+        const newAppointment = new OpenAppointment(appointmentData);
+        const savedAppointment = await newAppointment.save();
+        // Update the user's appointment array
+        await User.findByIdAndUpdate(
+            appointmentData.userId,
+            { $addToSet: { appointments: savedAppointment._id } },
+            { new: true }
+        );
     
-    //     res.status(200).json({ success: true, message: 'Veterniary Appointment booked successfully', data: savedAppointment });
-    //     } catch (error) {
-    //     console.error(error);
-    //     res.status(500).json({ success: false, message: 'An error occurred while booking the appointment' });
-    //     }
-    // });
+        res.status(200).json({ success: true, message: 'Veterniary Appointment booked successfully', data: savedAppointment });
+        } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'An error occurred while booking the appointment' });
+        }
+    });
     router.post('/book-mobvet-appointment', async (req, res) => {
       try {
       const appointmentData = req.body;

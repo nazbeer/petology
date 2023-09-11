@@ -89,8 +89,6 @@ const MobVet = () => {
             email: userData.email,
             mobile: userData.mobile,
             userId:userId,
-            service:subservice,
-           
             module:'mobile_veterinary'
           });
         })
@@ -99,7 +97,7 @@ const MobVet = () => {
     const handleSubmit = async (e) => {
       e.preventDefault();
   
-  
+      console.log(e.target.value);
       try {
         const response = await axios.post('/api/user/user-book-appointment', service, {
           headers: {
@@ -162,10 +160,10 @@ const MobVet = () => {
         
             <div className='mb-2'>
               <label htmlFor="service">Chosen Package: </label>
-              <select className='form-control' id='service'  name='subservice' onChange={handleChange} >
+              <select className='form-control' id='service'  name='service' onChange={handleChange} >
               {subservice.length > 0 ? (
   subservice.map((services, index) => (
-    <option key={index} value={services.subService + services.price}>
+    <option key={index} value={services._id}>
       {services.subService} - Price: ({services.price})
     </option>
   ))

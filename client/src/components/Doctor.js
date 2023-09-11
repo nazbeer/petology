@@ -6,7 +6,7 @@ function Doctor({ doctor }) {
   return (
     <div
       className="card cursor-pointer mb-4"
-      onClick={() => navigate(`/user/bookdoctor/${doctor._id}`)}
+      onClick={() => navigate(`/user/booking`)}
     >
       <div className="card-header font-weight-600"> Dr. {doctor.firstName} {doctor.lastName}</div>
      <div className="card-body">
@@ -29,7 +29,7 @@ function Doctor({ doctor }) {
       </div>
       </div>
       <div className="card-footer pull-right ">
-        <button className="btn btn-success btn-sm" type="button" onClick={() => navigate(`/user/bookdoctor/${doctor._id}`)}>View Details</button>
+        <button className="btn btn-success btn-sm" type="button" onClick={() => navigate(`/user/booking`)}>Book Now</button>
       </div>
     </div>
   );

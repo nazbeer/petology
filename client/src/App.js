@@ -59,6 +59,8 @@ import BookingNow from './pages/BookNow';
 //import SignIn from "./pages/SignIn";
 import UserAppointments from "./pages/UserAppointments";
 import MobLogin from "./pages/MobLogin";
+import ActivationPage from "./pages/ActivationPage";
+
 function App() {
   const { loading } = useSelector((state) => state.alerts);
   return (
@@ -84,6 +86,14 @@ function App() {
           element={
             <PublicRoute>
               <MobLogin />
+            </PublicRoute>
+          }
+        />
+         <Route
+          path="/activate/:token"
+          element={
+            <PublicRoute>
+              <ActivationPage />
             </PublicRoute>
           }
         />

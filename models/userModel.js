@@ -57,6 +57,10 @@ const userSchema = new mongoose.Schema(
     },
     otp: String,
     otpExpires: Date,
+    isActivated: {
+      type: Boolean,
+      default: false, // The user is initially not activated
+    },
   },
   {
     timestamps: true,
