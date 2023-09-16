@@ -1,5 +1,5 @@
-import { Button, Form, Input } from "antd";
-import React from "react";
+import { Button, Form, Input, Tabs } from "antd";
+import React, { useState } from "react";
 import toast from "react-hot-toast";
 import { useDispatch } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
@@ -8,33 +8,36 @@ import { hideLoading, showLoading } from "../redux/alertsSlice";
 import logo from "../images/logo-petology.png";
 import Header from "../frontend_components/Header";
 import jwt_decode from "jwt-decode";
+import MobileLogin from './MobLogin';
+const { TabPane } = Tabs;
+
 function Login() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState("email"); // Default to "Login with Email"
 
   const onFinish = async (values) => {
     try {
       dispatch(showLoading());
-      const response = await axios.post("/api/user/login", values);
+      const response = await axios.post(`/api/user/login-${activeTab}`, values);
       dispatch(hideLoading());
 
       if (response.data.success) {
         toast.success(response.data.message);
         localStorage.setItem("token", response.data.data);
-   
-        const decodedToken = jwt_decode(response.data.data); // Decode the JWT token
-        const userId = decodedToken.id; // Extract the user ID from the decoded token
-        localStorage.setItem("userId", userId); // Save the user ID
-  
+
+        const decodedToken = jwt_decode(response.data.data);
+        const userId = decodedToken.id;
+        localStorage.setItem("userId", userId);
+
         if (response.data.isUser === true) {
-          navigate("/user"); // Navigate to the user page
+          navigate("/user");
         } else if (response.data.isDoctor === true) {
-          navigate("/doctor"); // Navigate to the doctor page
+          navigate("/doctor");
         } else if (response.data.isAdmin === true) {
-          navigate("/dashboard"); // Navigate to the admin dashboard
+          navigate("/dashboard");
         } else {
-          // If the user type is not specified or invalid, you can handle the navigation accordingly.
-          navigate("/home"); // Navigate to the home page or any other fallback page.
+          navigate("/home");
         }
       } else {
         toast.error(response.data.message);
@@ -60,33 +63,32 @@ function Login() {
             />
           </div>
 
-          <Form layout="vertical" onFinish={onFinish}>
-            <Form.Item label="Email/Username" name="identifier">
-              <Input placeholder="Email/Username" />
-            </Form.Item>
-            <Form.Item label="Password" name="password">
-              <Input placeholder="Password" type="password" />
-            </Form.Item>
+          <Tabs activeKey={activeTab} onChange={(key) => setActiveTab(key)}>
+            <TabPane tab="Login with Email" key="email" >
+              <Form layout="vertical" onFinish={onFinish}>
+                <Form.Item label="Email/Username" name="identifier">
+                  <Input placeholder="Email/Username" />
+                </Form.Item>
+                <Form.Item label="Password" name="password">
+                  <Input placeholder="Password" type="password" />
+                </Form.Item>
 
-            <Button
-              className="primary-button my-2 full-width-button"
-              htmlType="submit"
-            >
-              LOGIN
-            </Button>
-            <Link
-              to="/otp-login"
-              className="text-dark mt-2 text-center d-block"
-            >
-              Login with Mobile
-            </Link>
-            <Link
-              to="/register"
-              className="text-dark mt-2 text-center d-block"
-            >
-              CLICK HERE TO REGISTER
-            </Link>
-          </Form>
+                <Button
+                  className="primary-button my-2 full-width-button"
+                  htmlType="submit"
+                >
+                  LOGIN
+                </Button>
+              </Form>
+            </TabPane>
+            <TabPane tab="Login with Mobile" key="mobile">
+              {/* Add the form for mobile login here */}
+              <MobileLogin/>
+            </TabPane>
+          </Tabs>
+          <Link to="/register" className="text-dark mt-2 text-center d-block">
+            CLICK HERE TO REGISTER
+          </Link>
         </div>
       </div>
     </main>

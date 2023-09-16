@@ -51,10 +51,12 @@ const MobVet = () => {
         }
       }
     };
+
     const [subservice, setSubservices] = useState([]);
 
     useEffect(() => {
       // Fetch sub-services from your Express.js API
+
       axios.get('/api/user/subservices',{
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
@@ -162,14 +164,14 @@ const MobVet = () => {
               <label htmlFor="service">Chosen Package: </label>
               <select className='form-control' id='service'  name='service' onChange={handleChange} >
               {subservice.length > 0 ? (
-  subservice.map((services, index) => (
-    <option key={index} value={services._id}>
-      {services.subService} - Price: ({services.price})
-    </option>
-  ))
-) : (
-  <option>No Package available</option>
-)}
+                subservice.map((services, index) => (
+                  <option key={index} value={services._id}>
+                    {services.subService} - Price: ({services.price})
+                  </option>
+                ))
+              ) : (
+                <option>No Package available</option>
+              )}
 
               
         
@@ -186,7 +188,7 @@ const MobVet = () => {
                 name="breed"
                 value={service.breed}
                 onChange={handleChange}
-                required
+                
               />
             </div>
             <div className='mb-2'>

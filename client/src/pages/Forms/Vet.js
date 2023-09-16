@@ -122,6 +122,27 @@ const Vet = () => {
               <div className='row'>
         <div className='col-md-6'>
         <div className='mb-2'>
+              <label htmlFor="size">Choose Pet: </label>
+              <select className='form-control' id='pet' name='pet' onChange={handleChange}>
+                <option defaultValue="">Select Pet...</option>
+                <option value={service.pet}>Dog</option>
+                <option value={service.pet}>Cat</option>    
+                <option value={service.pet}>Bird</option>    
+                <option value={service.pet}>Other</option>    
+    
+              </select>
+           
+            </div>
+            <div className='mb-2'>
+              <label htmlFor="size">Choose Size: </label>
+              <select className='form-control' id='size' name='size' onChange={handleChange}>
+                <option defaultValue="">Select size...</option>
+                <option value={service.size}>S (Small - upto 19 Kg)</option>
+                <option value={service.size}>M (Medium - upto 30Kg)</option>    
+                <option value={service.size}>L (Large - 30 to 50kg or plus)</option>   
+              </select>
+            </div>
+        <div className='mb-2'>
               <label htmlFor="service">Choose Service: </label>
               <select className='form-control p-0' id='service' name='service' multiple onChange={handleChange} style={{height:'120px'}}>
          
@@ -153,27 +174,7 @@ const Vet = () => {
             
             </div>
             
-            <div className='mb-2'>
-              <label htmlFor="size">Choose Pet: </label>
-              <select className='form-control' id='pet' name='pet' onChange={handleChange}>
-                <option defaultValue="">Select Pet...</option>
-                <option value={service.pet}>Dog</option>
-                <option value={service.pet}>Cat</option>    
-                <option value={service.pet}>Bird</option>    
-                <option value={service.pet}>Other</option>    
-    
-              </select>
-           
-            </div>
-            <div className='mb-2'>
-              <label htmlFor="size">Choose Size: </label>
-              <select className='form-control' id='size' name='size' onChange={handleChange}>
-                <option defaultValue="">Select size...</option>
-                <option value={service.size}>S (Small - upto 19 Kg)</option>
-                <option value={service.size}>M (Medium - upto 30Kg)</option>    
-                <option value={service.size}>L (Large - 30 to 50kg or plus)</option>   
-              </select>
-            </div>
+          
           
             <div className='mb-2'>
               <label htmlFor="breed">Breed:</label>
@@ -183,7 +184,7 @@ const Vet = () => {
                 name="breed"
                 value={service.breed}
                 onChange={handleChange}
-                required
+                
               />
             </div>
             

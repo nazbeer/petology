@@ -14,7 +14,7 @@ const appointmentSchema = new mongoose.Schema({
   doctorId: { type: String, required: true, default: 'null' },
   module: { type: String, required: false },
   service: { type: String, required: true },
-  breed: { type: String, required: true },
+  breed: { type: String, required: false },
   date: { type: Date, required: true },
   time: { type: String, required: true },
   pet: { type: String, required: true },

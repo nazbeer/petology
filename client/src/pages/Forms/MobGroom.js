@@ -125,26 +125,8 @@ const MobGroom = () => {
         
                 <div className='row'>
             <div className='col-md-6'>
-            <div className='mb-2'>
-              <label htmlFor="service">Chosen Package: </label>
-              <select className='form-control' id='service'  name='service' onChange={handleChange} >
-                {subservices.length > 0 ? (
-                    subservices.map((subservice, index) => (
-                        <option key={index} value={subservice._id}>
-                        {subservice.subService} - Price: ({subservice.price})
-                        </option>
-                    ))
-                    ) : (
-                    <option value="NA">No Package available</option>
-                )}  
-
               
-        
-              </select>
-             
-            </div>
-        
-                <div className='mb-2'>
+            <div className='mb-2'>
                     <label htmlFor="size">Choose Pet: </label>
                     <select className='form-control' id='pet' name='pet'  onChange={handleChange}>
                     <option defaultValue="">Select Pet...</option>
@@ -179,6 +161,25 @@ const MobGroom = () => {
                 </select>
                 </div>
 
+            <div className='mb-2'>
+              <label htmlFor="service">Chosen Package: </label>
+              <select className='form-control' id='service'  name='service' onChange={handleChange} >
+                {subservices.length > 0 ? (
+                    subservices.map((subservice, index) => (
+                        <option key={index} value={subservice._id}>
+                        {subservice.subService} - Price: ({subservice.price})
+                        </option>
+                    ))
+                    ) : (
+                    <option value="NA">No Package available</option>
+                )}  
+
+              
+        
+              </select>
+             
+            </div>
+        
                 <div className='mb-2'>
                 <label htmlFor="breed">Breed:</label>
                 <input className="form-control" 
@@ -187,7 +188,7 @@ const MobGroom = () => {
                     name="breed"
                     value={service.breed}
                     onChange={handleChange}
-                    required
+                    
                 />
                 </div>
                 <div className='mb-2'>

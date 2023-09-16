@@ -1,10 +1,6 @@
-import { BsFillShieldLockFill, BsTelephoneFill } from "react-icons/bs";
+import React, { useState } from "react";
 import { CgSpinner } from "react-icons/cg";
-import logo from "../images/logo-petology.png";
-import Header from "../frontend_components/Header";
-import OtpInput from "otp-input-react";
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link , useNavigate } from "react-router-dom";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 import { auth } from "../firebase.config";
@@ -12,12 +8,13 @@ import { RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
 import { toast, Toaster } from "react-hot-toast";
 
 const MobLogin = () => {
+
   const [otp, setOtp] = useState("");
   const [ph, setPh] = useState("");
   const [loading, setLoading] = useState(false);
   const [showOTP, setShowOTP] = useState(false);
   const [user, setUser] = useState(null);
-
+  const navigate = useNavigate();
   function onCaptchVerify() {
     if (!window.recaptchaVerifier) {
       window.recaptchaVerifier = new RecaptchaVerifier(
@@ -47,7 +44,7 @@ const MobLogin = () => {
         window.confirmationResult = confirmationResult;
         setLoading(false);
         setShowOTP(true);
-        toast.success("OTP sended successfully!");
+        toast.success("OTP sent successfully!");
       })
       .catch((error) => {
         console.log(error);
@@ -55,6 +52,22 @@ const MobLogin = () => {
       });
   }
 
+  // function onOTPVerify() {
+  //   setLoading(true);
+  //   window.confirmationResult
+  //     .confirm(otp)
+  //     .then(async (res) => {
+  //       console.log(res);
+  //       setUser(res.user);
+  //       setLoading(false);
+  //     })
+  //     .catch((err) => {
+  //       console.log(err);
+  //       setLoading(false);
+  //     });
+  // }
+
+  
   function onOTPVerify() {
     setLoading(true);
     window.confirmationResult
@@ -63,6 +76,21 @@ const MobLogin = () => {
         console.log(res);
         setUser(res.user);
         setLoading(false);
+
+        // Redirect based on user type using navigate
+        if (res.user) {
+          if (res.user.isDoctor) {
+            navigate("/doctor");
+          } else if (res.user.isNurse) {
+            navigate("/reception");
+          } else if (res.user.isGroomer) {
+            navigate("/groomer");
+          } else if (res.user.isAdmin) {
+            navigate("/admin");
+          } else {
+            navigate("/user");
+          }
+        }
       })
       .catch((err) => {
         console.log(err);
@@ -70,51 +98,41 @@ const MobLogin = () => {
       });
   }
 
-  return (   
-     <main>
-    <Header />
-    <div className="authentication">
-      <div className="authentication-form  p-3">
-        <div className="text-center">
-          <img
-            src={logo}
-            alt="logo"
-            width="100px"
-            className="text-center d-flex"
-            style={{ marginLeft: "35%" }}
-          />
-        </div>
-    <section className=" flex items-center justify-center h-screen">
+  return (
+    <section className="flex items-center justify-center h-screen">
       <div>
         <Toaster toastOptions={{ duration: 4000 }} />
         <div id="recaptcha-container"></div>
         {user ? (
-          <h2 className="text-center text-white font-medium text-2xl">
-            👍Login Success
-          </h2>
+          // Check the type of user and navigate accordingly
+          user.isDoctor ? (
+            navigate("/doctor")
+          ) : user.isNurse ? (
+            navigate("/nurse")
+          ) : user.isGroomer ? (
+            navigate("/groomer")
+          ) : user.isAdmin ? (
+            navigate("/admin")
+          ) : (
+            navigate("/user")
+          )
         ) : (
           <div className="w-80 flex flex-col gap-4 rounded-lg p-4">
-           
             {showOTP ? (
               <>
-                {/* <div className="bg-white text-emerald-500 w-fit mx-auto p-4 rounded-full">
-                  <BsFillShieldLockFill size={30} />
-                </div> */}
                 <label
                   htmlFor="otp"
                   className="font-bold text-xl  text-center"
                 >
                   Enter your OTP
                 </label>
-                <OtpInput
+                <input
+                  type="text"
+                  id="otp"
                   value={otp}
-                  onChange={setOtp}
-                  OTPLength={6}
-                  otpType="number"
-                  disabled={false}
-                  autoFocus
-                  className="opt-container "
-                ></OtpInput>
+                  onChange={(e) => setOtp(e.target.value)}
+                  className="opt-container"
+                />
                 <button
                   onClick={onOTPVerify}
                   className="btn btn-success mt-3 w-full flex gap-1 items-center justify-center py-2.5 text-white rounded"
@@ -124,38 +142,45 @@ const MobLogin = () => {
                   )}
                   <span>Verify OTP</span>
                 </button>
-                <Link to="/otp-login" className="text-dark mt-2 text-center d-block">Back to OTP Login</Link>
+                <Link to="/otp-login" className="text-dark mt-2 text-center">
+                  Back to OTP Login
+                </Link>
               </>
             ) : (
               <>
-           
                 <label
                   htmlFor=""
                   className="font-bold text-xl text-center mb-3 d-block"
                 >
-                  Verify your phone number
+                  Enter Mobile Number
                 </label>
-                <PhoneInput country={"ae"} value={ph} onChange={setPh} className="text-left"/>
-                <button
-                  onClick={onSignup}
-                  className="btn btn-success d-block text-center mt-3 w-full py-2.5 text-white rounded"
-                >
-                  {loading && (
-                    <CgSpinner size={20} className="mt-1 animate-spin" />
-                  )}
-                  <span className="d-block text-center">Send code via SMS</span>
-                </button>
-                <Link to="/login" className="text-dark mt-2 text-center d-block">Login with Email or Username</Link>
-            <Link to="/register" className="text-dark mt-2 text-center d-block">
-              CLICK HERE TO REGISTER
-            </Link>
+                <PhoneInput
+                  onlyCountries={["ae"]}
+                  defaultCountry={"ae"}
+                  country={"ae"}
+                  value={ph}
+                  onChange={setPh}
+                  inputClass="text-left w-100"
+                />
+                <div className="text-center d-grid">
+                  <button
+                    onClick={onSignup}
+                    className="btn btn-success d-block text-center mt-3 w-full py-2.5 text-white rounded"
+                  >
+                    {loading && (
+                      <CgSpinner size={20} className="mt-1 animate-spin" />
+                    )}
+                    <span className="d-block text-center">
+                      Send code via SMS
+                    </span>
+                  </button>
+                </div>
               </>
             )}
           </div>
         )}
       </div>
     </section>
-    </div></div></main>
   );
 };
 

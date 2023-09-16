@@ -13,64 +13,8 @@ const nodemailer = require('nodemailer');
 const UserappModel = require("../models/userappModel");
 const packModel = require("../models/packModel");
 const crypto = require('crypto');
-// router.post("/register", async (req, res) => {
-//   try {
-//     const userExists = await User.findOne({
-//       $or: [
-//         { email: req.body.email },
-//         { username: req.body.username },
-//         { mobile: req.body.mobile }
-//       ]
-//     });
 
-//     if (userExists) {
-//       return res
-//         .status(200)
-//         .send({ message: "User already exists with the provided username, email, or mobile number", success: false });
-//     }
-//     const password = req.body.password;
-//     const salt = await bcrypt.genSalt(10);
-//     const hashedPassword = await bcrypt.hash(password, salt);
-//     req.body.password = hashedPassword;
-//     const newuser = new User(req.body);
-//     console.log(newuser);
-//     await newuser.save();
-    
-//     res
-//       .status(200)
-//       .send({ message: "User created successfully", success: true });
-//   } catch (error) {
-//     console.log(error);
-//     res
-//       .status(500)
-//       .send({ message: "Error creating user", success: false, error });
-//   }
-
-//   // const transporter = nodemailer.createTransport({
-//     //   service: 'gmail', // e.g., 'Gmail'
-//     //   auth: {
-//     //     user: 'nazbeer.ahammed@gmail.com',
-//     //     pass: 'Meherin@2019!',
-//     //   },
-//     // });
-
-//     // const mailOptions = {
-//     //   from: 'nazbeer.ahammed@gmail.com',
-//     //   to: req.body.email,
-//     //   subject: 'Welcome to Your App',
-//     //   text: `Hello ${req.body.name},\n\nThank you for registering on Your App!`,
-//     // };
-
-//     // transporter.sendMail(mailOptions, (error, info) => {
-//     //   if (error) {
-//     //     console.log('Error sending email:', error);
-//     //   } else {
-//     //     console.log('Email sent:', info.response);
-//     //   }
-//     // });
-// });
 router.post("/register", async (req, res) => {
-  //console.log(req.body);
 
   try {
     let conditions = [];
@@ -208,28 +152,7 @@ const userExists = await User.findOne({ $or: conditions });
     req.body.password = hashedPassword;
     const newuser = new User(req.body);
     await newuser.save();
-    // const transporter = nodemailer.createTransport({
-    //   service: 'Gmail', // e.g., 'Gmail'
-    //   auth: {
-    //     user: 'your_email@example.com',
-    //     pass: 'your_email_password',
-    //   },
-    // });
-
-    // const mailOptions = {
-    //   from: 'nazbeer.ahammed@gmail.com',
-    //   to: req.body.email,
-    //   subject: 'Welcome to Your App',
-    //   text: `Hello ${req.body.name},\n\nThank you for registering on Your App!`,
-    // };
-
-    // transporter.sendMail(mailOptions, (error, info) => {
-    //   if (error) {
-    //     console.log('Error sending email:', error);
-    //   } else {
-    //     console.log('Email sent:', info.response);
-    //   }
-    // });
+ 
     res
       .status(200)
       .send({ message: "User created successfully", success: true });
@@ -241,36 +164,81 @@ const userExists = await User.findOne({ $or: conditions });
   }
 });
 
-// router.post("/login", async (req, res) => {
-//   try {
-//     const user = await User.findOne({ email: req.body.email });
-//     if (!user) {
-//       return res
-//         .status(200)
-//         .send({ message: "User does not exist", success: false });
-//     }
-//     const isMatch = await bcrypt.compare(req.body.password, user.password);
-//     if (!isMatch) {
-//       return res
-//         .status(200)
-//         .send({ message: "Password is incorrect", success: false });
-//     } else {
-//       const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-//         expiresIn: "1d",
-//       });
-//       res
-//         .status(200)
-//         .send({ message: "Login successful", success: true, data: token });
-//     }
-//   } catch (error) {
-//     console.log(error);
-//     res
-//       .status(500)
-//       .send({ message: "Error logging in", success: false, error });
-//   }
-// });
+router.post("/send-login-mobile", 
+async function sendSignInLinkToPhoneNumber(req, res) {
+  try {
+    // Get the authentication service
 
-router.post("/login", async (req, res) => {
+    const phoneNumber = req.body.phoneNumber;
+    console.log(phoneNumber);
+
+    // Send a verification code to the user's phone
+    auth
+      .sendSignInLinkToPhoneNumber(phoneNumber)
+      .then(function () {
+        res.send(result);
+        // The verification code has been sent to the user's phone
+      })
+      .catch(function (error) {
+        // An error occurred while sending the verification code
+        console.log(error);
+      });
+  } catch (error) {
+    console.log(error);
+  }
+});
+router.post("/get-login-mobile", async function signInWithPhoneNumber(req, res) {
+  try {
+    // Get the authentication service
+    const { identifier } = req.body;
+
+    // Find the user either by username, email, or mobile
+    const user = await User.findOne({
+      $or: [
+        // { username: identifier },
+        // { email: identifier },
+         { mobile: identifier }
+      ]
+    });
+  
+    if (!user) {
+      return res
+        .status(200)
+        .send({ message: "User does not exist", success: false });
+    }
+
+    const token = jwt.sign(
+      {
+        id: user._id,
+        isUser: user.isUser,
+        isDoctor: user.isDoctor,
+        isAdmin: user.isAdmin,
+        isNurse: user.isNurse,
+        isGroomer: user.isGroomer
+      },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "1d",
+      }
+    );
+    // Send a verification code to the user's phone
+    // Sign the user in using the verification code they received on their phone
+    auth
+      .signInWithPhoneNumber(phoneNumber, verificationCode)
+      .then(function (result) {
+        // The user has been signed in
+        
+        res.send(result, token);
+      })
+      .catch(function (error) {
+        console.log(error);
+        // An error occurred while signing the user in
+      });
+  } catch (error) {
+    console.log(error);
+  }
+})
+router.post("/login-email",  async (req, res) => {
   try {
     const { identifier, password } = req.body;
 
@@ -332,11 +300,6 @@ router.get('/api/user/count-records', async (req, res) => {
     res.status(500).json({ error: 'Server error' });
   }
 });
-// router.get('/get-user-id', authMiddleware, (req, res) => {
-//   // Assuming user ID is stored in req.user.userId after token verification
-//   const userId = req.user._id;
-//   res.json({ success: true, userId });
-// });
 
 
 router.get('/user-details/:userId', authMiddleware, async (req, res) => {
@@ -616,60 +579,6 @@ router.post("/check-booking-avilability", authMiddleware, async (req, res) => {
   }
 });
 
-// router.post("/check-booking-avilability", authMiddleware, async (req, res) => {
-//   try {
-//     const date = moment(req.body.date, "DD-MM-YYYY").toISOString();
-//     const selectedTime = moment(req.body.time, "HH:mm");
-//     let shiftStart, shiftEnd;
-//     console.log(req.body.selectedTime);
-//     // Determine the shift timings based on the doctor's shift type
-//     if (req.body.shift === "day") {
-//       shiftStart = moment("08:00", "HH:mm");
-//       shiftEnd = moment("15:00", "HH:mm");
-//     } else if (req.body.shift === "night") {
-//       shiftStart = moment("15:00", "HH:mm");
-//       shiftEnd = moment("20:00", "HH:mm");
-//     } else {
-//       return res.status(400).send({
-//         message: "Invalid shift type",
-//         success: false,
-//       });
-//     }
-
-//     if (!selectedTime.isBetween(shiftStart, shiftEnd)) {
-//       return res.status(200).send({
-//         message: "Appointments not available during this shift",
-//         success: false,
-//       });
-//     }
-
-//     const doctorId = req.body.doctorId;
-//     const appointments = await Appointment.find({
-//       doctorId,
-//       date,
-//       time: { $gte: shiftStart.toISOString(), $lte: shiftEnd.toISOString() },
-//     });
-
-//     if (appointments.length > 0) {
-//       return res.status(200).send({
-//         message: "Appointments not available",
-//         success: false,
-//       });
-//     } else {
-//       return res.status(200).send({
-//         message: "Appointments available",
-//         success: true,
-//       });
-//     }
-//   } catch (error) {
-//     console.log(error);
-//     res.status(500).send({
-//       message: "Error checking appointment availability",
-//       success: false,
-//       error,
-//     });
-//   }
-// });
 
 
 router.get("/get-appointments-by-user-id", authMiddleware, async (req, res) => {

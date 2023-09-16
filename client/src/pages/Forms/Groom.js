@@ -136,7 +136,7 @@ return(
                       name="breed"
                       value={service.breed}
                       onChange={handleChange}
-                      required
+                      
                     />
                   </div>
                   <div className='mb-2'>

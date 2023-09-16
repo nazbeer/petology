@@ -20,6 +20,10 @@ const petSchema = new mongoose.Schema(
     enum: ['S', 'M', 'L'],
     required:true,
    },
+   age:{
+    type:String,
+
+   },
    breed:{
     type:String,
     required:true,

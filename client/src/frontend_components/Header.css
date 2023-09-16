@@ -152,6 +152,9 @@
   display: inline-flex;
   padding-left:10px;
 }
+.react-tel-input .form-control{
+  width:100% !important;
+}
 @media (max-width: 768px) {
   .header1 {
     display: flex;
