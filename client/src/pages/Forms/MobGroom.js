@@ -165,7 +165,7 @@ const MobGroom = () => {
                   />
                 </div>
               )}
-              {service.pet && (
+              {service.pet === 'Dog' && (
                 <div className="mb-2">
                   <label htmlFor="size">Choose Size: </label>
                   <select

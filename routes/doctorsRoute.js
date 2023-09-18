@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const nodemailer = require("nodemailer");
 const Doctor = require("../models/doctorModel");
 const authMiddleware = require("../middlewares/authMiddleware");
 const Appointment = require("../models/appointmentModel");
@@ -7,7 +8,7 @@ const User = require("../models/userModel");
 const PetList = require("../models/petModel");
 const OpenAppointment = require("../models/openAppointmentModel");
 const Prescription = require("../models/prescriptionModel");
-const UserappModel= require("../models/userappModel");
+const UserappModel = require("../models/userappModel");
 
 router.post("/get-doctor-info-by-user-id", authMiddleware, async (req, res) => {
   try {
@@ -65,7 +66,7 @@ router.get(
       const doctor = await Doctor.findOne({ userId: req.body.userId });
       const appointments = await Appointment.find({ doctorId: doctor._id });
       // console.log(doctor);
- //     console.log(appointments);
+      //     console.log(appointments);
       res.status(200).send({
         message: "Appointments fetched successfully",
         success: true,
@@ -101,7 +102,7 @@ router.post("/change-appointment-status", authMiddleware, async (req, res) => {
 
     res.status(200).send({
       message: "Appointment status updated successfully",
-      success: true
+      success: true,
     });
   } catch (error) {
     console.log(error);
@@ -112,26 +113,25 @@ router.post("/change-appointment-status", authMiddleware, async (req, res) => {
     });
   }
 });
-router.get('/doctorcount', async (req, res) => {
+router.get("/doctorcount", async (req, res) => {
   try {
     const count = await Doctor.countDocuments();
     res.json({ count });
   } catch (error) {
-    console.error('Error counting doctors:', error);
-    res.status(500).json({ error: 'Server error' });
+    console.error("Error counting doctors:", error);
+    res.status(500).json({ error: "Server error" });
   }
 });
 
-
 // Route for fetching all pets for a specific user
-router.get('/user/:userId/pets', authMiddleware, async (req, res) => {
+router.get("/user/:userId/pets", authMiddleware, async (req, res) => {
   try {
     const { userId } = req.params;
     const pets = await PetList.find({ userId });
     res.json({ success: true, data: pets });
   } catch (error) {
-    console.error('Error fetching pets:', error);
-    res.status(500).json({ success: false, message: 'Server error' });
+    console.error("Error fetching pets:", error);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 });
 
@@ -147,7 +147,7 @@ router.get('/user/:userId/pets', authMiddleware, async (req, res) => {
 //       // If isUser is true, fetch the user along with the appointments
 //       const user = await User.findById(userId);
 //       const appointments = await Appointment.find({ userId, petId });
-     
+
 //       res.json({ success: true, data: { user, appointments } });
 //     } else {
 //       // If isUser is false or not provided, only fetch the appointments
@@ -160,31 +160,33 @@ router.get('/user/:userId/pets', authMiddleware, async (req, res) => {
 //   }
 // });
 
-router.get('/user/:userId/pet/:petId/appointments', authMiddleware, async (req, res) => {
-  const { userId, petId } = req.params;
+router.get(
+  "/user/:userId/pet/:petId/appointments",
+  authMiddleware,
+  async (req, res) => {
+    const { userId, petId } = req.params;
 
-  try {
-    const appointments = await Appointment.find({ userId, petId });
-    // console.log(appointments);
-    res.status(200).json({
-      success: true,
-      data: appointments,
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      success: false,
-      message: 'An error occurred while fetching appointments.',
-    });
+    try {
+      const appointments = await Appointment.find({ userId, petId });
+      // console.log(appointments);
+      res.status(200).json({
+        success: true,
+        data: appointments,
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({
+        success: false,
+        message: "An error occurred while fetching appointments.",
+      });
+    }
   }
-});
+);
 
 router.get(
   "/get-openappointments-by-doctor-id",
- authMiddleware,
+  authMiddleware,
   async (req, res) => {
-    
-
     try {
       const doctor = await Doctor.findOne({ userId: req.body.userId });
       const appointments = await OpenAppointment.find({ doctorId: doctor._id });
@@ -206,43 +208,42 @@ router.get(
   }
 );
 
-
-router.get("/get-all-users/:id", authMiddleware, async(req, res)=>{
-  try{
+router.get("/get-all-users/:id", authMiddleware, async (req, res) => {
+  try {
     console.log(req.params.id);
-    const appointment = await Appointment.findOne({appointmentId: req.params.id});
-    const users = await User.findById({userId: appointment.userId});
+    const appointment = await Appointment.findOne({
+      appointmentId: req.params.id,
+    });
+    const users = await User.findById({ userId: appointment.userId });
     //const users = await User.find({status:req.body.status});
     res.status(200).send({
       message: "Users list fetched succcessfully",
-      success :true,
+      success: true,
       data: users,
     });
-
-  }catch (error){
+  } catch (error) {
     console.log(error);
     res.status(500).send({
-      message:"Failed to fetch user's details.",
-      success:false,
+      message: "Failed to fetch user's details.",
+      success: false,
       error,
     });
   }
 });
-router.get("/get-all-users", authMiddleware, async(req, res)=>{
-  try{
+router.get("/get-all-users", authMiddleware, async (req, res) => {
+  try {
     const users = await User.find();
     //const users = await User.find({status:req.body.status});
     res.status(200).send({
       message: "Users list fetched succcessfully",
-      success :true,
+      success: true,
       data: users,
     });
-
-  }catch (error){
+  } catch (error) {
     console.log(error);
     res.status(500).send({
-      message:"Failed to fetch user's details.",
-      success:false,
+      message: "Failed to fetch user's details.",
+      success: false,
       error,
     });
   }
@@ -250,7 +251,7 @@ router.get("/get-all-users", authMiddleware, async(req, res)=>{
 router.get("/get-all-approved-doctors", authMiddleware, async (req, res) => {
   try {
     const doctors = await Doctor.find({ status: "approved" });
-   
+
     res.status(200).send({
       message: "Doctors fetched successfully",
       success: true,
@@ -279,10 +280,12 @@ router.get("/get-appointment-by-id/:id", authMiddleware, async (req, res) => {
       .populate("users")
       .populate("petlists")
       .exec();
-      // console.log(appointment);
+    // console.log(appointment);
     res.json({ success: true, data: appointment });
   } catch (error) {
-    res.status(500).json({ success: false, message: "Error fetching appointment" });
+    res
+      .status(500)
+      .json({ success: false, message: "Error fetching appointment" });
   }
 });
 router.post("/addprescription", authMiddleware, async (req, res) => {
@@ -306,11 +309,56 @@ router.post("/addprescription", authMiddleware, async (req, res) => {
       prescription,
       description,
       ndate,
-      ntime,
+      // ntime,
     };
+
+    console.log(userId);
+
+    const appointment = await UserappModel.findOne({ _id: appointmentId });
+    const user = await User.findOne({ _id: appointment.userId });
+    const doctor = await Doctor.findOne({ _id: doctorId });
+    console.log(user.email, doctor.firstName);
 
     const newPrescription = new Prescription(prescriptionData);
     await newPrescription.save();
+
+    const transporter = nodemailer.createTransport({
+      host: "mailslurp.mx",
+      port: 2587,
+      auth: {
+        user: "7XCD5XTQcysTVxIaAICEQ4glqoUPnaaS",
+        pass: "ZS7ZvQV6hviecqx5PpkJ4bKfWmmL9iXo",
+      },
+    });
+    const mailOptions = {
+      from: "ec735522-7f4c-4bdc-8d29-166736820c26@mailslurp.mx",
+      to: user.email,
+      subject: "Appointment Scheduled for Pet Name",
+      html: `
+      <html>
+        <body>
+          <p>Hello ${user.name},</p>
+          <p>Thank you for scheduling the Appointment!</p>
+          <p>The given below are the details for your appointment</p>
+          ${
+            doctor
+              ? `<p>Doctor Name ${doctor.firstName} ${doctor.lastName}</p>`
+              : ``
+          }
+          <p>Appointment Date: ${ndate}</p>
+          <p>Appointment Time: ${ntime}</p>
+        </body>
+      </html>
+    `,
+    };
+
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.log("Error sending email:", error);
+      } else {
+        console.log("Email sent:", info.response);
+      }
+    });
 
     res.json({ success: true });
   } catch (error) {
@@ -318,7 +366,7 @@ router.post("/addprescription", authMiddleware, async (req, res) => {
   }
 });
 
-router.get('/get-prescription', authMiddleware, async (req, res) => {
+router.get("/get-prescription", authMiddleware, async (req, res) => {
   try {
     // Fetch all prescriptions from the database
     const prescriptions = await Prescription.find({});
@@ -328,41 +376,43 @@ router.get('/get-prescription', authMiddleware, async (req, res) => {
   } catch (error) {
     // Handle errors and send an error response
     console.error(`Error fetching prescriptions: ${error.message}`);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: "Internal server error" });
   }
 });
-router.get('/appointments/veterinary', authMiddleware, async (req, res) => {
+router.get("/appointments/veterinary", authMiddleware, async (req, res) => {
   try {
-   // const moduleType = req.params.module;
-    
+    // const moduleType = req.params.module;
+
     // Fetch appointments for the specified module
-    const appointments = await UserappModel.find({ module: 'veterinary' });
+    const appointments = await UserappModel.find({ module: "veterinary" });
     // console.log('vdt:',appointments);
     // If appointments are found, you can fetch user details only
-    const populatedAppointments = await Promise.all(appointments.map(async (appointment) => {
-      const userId = appointment.userId;
-      const doctorId = appointment.doctorId;
-      // Assuming you have a User model for user details
-      // console.log('ids', userId, doctorId)
-      const user = await User.findOne({ _id: userId });
-      const doctor = await Doctor.findOne({ _id: doctorId });
-    //  console.log("user:", user);
+    const populatedAppointments = await Promise.all(
+      appointments.map(async (appointment) => {
+        const userId = appointment.userId;
+        const doctorId = appointment.doctorId;
+        // Assuming you have a User model for user details
+        // console.log('ids', userId, doctorId)
+        const user = await User.findOne({ _id: userId });
+        const doctor = await Doctor.findOne({ _id: doctorId });
+        //  console.log("user:", user);
 
-      return {
-        ...appointment.toObject(),
-        user,
-        doctor
-      };
-    }));
-    
+        return {
+          ...appointment.toObject(),
+          user,
+          doctor,
+        };
+      })
+    );
+
     // console.log("populated Appointments:", populatedAppointments);
     res.json({ success: true, data: populatedAppointments });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Internal Server Error' });
+    res.status(500).json({ message: "Internal Server Error" });
   }
 });
-router.get('/get-appointment-by-id/:id', authMiddleware, async (req, res) => {
+router.get("/get-appointment-by-id/:id", authMiddleware, async (req, res) => {
   try {
     const appointmentId = req.params.id;
 
@@ -370,7 +420,9 @@ router.get('/get-appointment-by-id/:id', authMiddleware, async (req, res) => {
     const appointment = await UserappModel.findById(appointmentId);
     // console.log(appointment);
     if (!appointment) {
-      return res.status(404).json({ success: false, error: 'Appointment not found' });
+      return res
+        .status(404)
+        .json({ success: false, error: "Appointment not found" });
     }
 
     res.json({ success: true, data: appointment });

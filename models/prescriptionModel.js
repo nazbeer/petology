@@ -30,10 +30,10 @@ const prescriptionSchema = new mongoose.Schema(
     type:Date,
     
    },
-   ntime:{
-    type:Date,
+  //  ntime:{
+  //   type:Date,
 
-   },
+  //  },
     status:{
         type : String,
         required :false,
