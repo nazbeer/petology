@@ -11,7 +11,8 @@ autoIncrement.initialize(mongoose.connection);
 const appointmentSchema = new mongoose.Schema({
   userId: { type: String, required: true },
   doctor: { type: String, required: true, default: 'Any' },
-  doctorId: { type: String, required: true, default: 'null' },
+  doctorId: { type: String, required: false},
+  age: { type: String, required: false},
   module: { type: String, required: false },
   service: { type: String, required: true },
   breed: { type: String, required: false },

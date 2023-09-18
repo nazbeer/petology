@@ -344,7 +344,6 @@ router.get("/user-details/:userId", authMiddleware, async (req, res) => {
 
 router.post("/get-user-info-by-id", authMiddleware, async (req, res) => {
   try {
-    console.log('hi')
     const user = await User.findOne({ _id: req.body.userId });
     user.password = undefined;
     if (!user) {
@@ -862,6 +861,7 @@ router.post("/user-book-appointment", authMiddleware, async (req, res) => {
       doctorId: req.body.doctorId,
       service: req.body.service,
       breed: req.body.breed,
+      age: req.body.age,
       date: req.body.date,
       time: req.body.time,
       pet: req.body.pet,
@@ -880,7 +880,7 @@ router.post("/user-book-appointment", authMiddleware, async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    console.log(error)
+    console.log(error);
     res
       .status(500)
       .json({ success: false, message: "Error booking appointment" });
@@ -952,6 +952,7 @@ router.get("/appointments/veterinary", authMiddleware, async (req, res) => {
 
     // Fetch appointments for the specified module
     const appointments = await UserappModel.find({ module: "veterinary" });
+    console.log('appointments', appointments)
 
     // If appointments are found, you can fetch user details only
     const populatedAppointments = await Promise.all(
@@ -960,7 +961,7 @@ router.get("/appointments/veterinary", authMiddleware, async (req, res) => {
         const doctorId = appointment.doctorId;
         // Assuming you have a User model for user details
         const user = await User.findOne({ _id: userId });
-        const doctor = await Doctor.findOne({ _id: doctorId });
+       const doctor = await Doctor.findOne({ _id: doctorId });
         // console.log("user:", user);
 
         return {

@@ -73,14 +73,14 @@ const MobLogin = () => {
         const decodedToken = jwt_decode(response.data.data);
         const userId = decodedToken.id;
         localStorage.setItem("userId", userId);
-        if (user) {
-          if (user.isDoctor) {
+        if (decodedToken) {
+          if (decodedToken.isDoctor) {
             navigate("/doctor");
-          } else if (user.isNurse) {
+          } else if (decodedToken.isNurse) {
             navigate("/reception");
-          } else if (user.isGroomer) {
+          } else if (decodedToken.isGroomer) {
             navigate("/groomer");
-          } else if (user.isAdmin) {
+          } else if (decodedToken.isAdmin) {
             navigate("/admin");
           } else {
             navigate("/user");
