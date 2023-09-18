@@ -1,46 +1,50 @@
 import React, { useState } from "react";
 import { CgSpinner } from "react-icons/cg";
-import { Link , useNavigate } from "react-router-dom";
+import firebase from "firebase";
+import { Link, useNavigate } from "react-router-dom";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 import { auth } from "../firebase.config";
-import { RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
+import jwt_decode from "jwt-decode";
+
+// import { RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
 import { toast, Toaster } from "react-hot-toast";
+import axios from "axios";
+import { hideLoading, showLoading } from "../redux/alertsSlice";
+import { useDispatch } from "react-redux";
 
 const MobLogin = () => {
-
   const [otp, setOtp] = useState("");
   const [ph, setPh] = useState("");
   const [loading, setLoading] = useState(false);
   const [showOTP, setShowOTP] = useState(false);
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+
   function onCaptchVerify() {
-    if (!window.recaptchaVerifier) {
-      window.recaptchaVerifier = new RecaptchaVerifier(
-        "recaptcha-container",
-        {
-          size: "invisible",
-          callback: (response) => {
-            onSignup();
-          },
-          "expired-callback": () => {},
-        },
-        auth
-      );
-    }
+    let verify = new firebase.auth.RecaptchaVerifier("recaptcha-container", {
+      size: "invisible",
+      callback: (response) => {
+        // cb
+      },
+    });
+
+    return verify;
   }
 
   function onSignup() {
     setLoading(true);
-    onCaptchVerify();
+    const appVerifier = onCaptchVerify();
 
-    const appVerifier = window.recaptchaVerifier;
+    // const appVerifier = window.recaptchaVerifier;
 
     const formatPh = "+" + ph;
 
-    signInWithPhoneNumber(auth, formatPh, appVerifier)
+    auth
+      .signInWithPhoneNumber(formatPh, appVerifier)
       .then((confirmationResult) => {
+        console.log(confirmationResult);
         window.confirmationResult = confirmationResult;
         setLoading(false);
         setShowOTP(true);
@@ -51,6 +55,46 @@ const MobLogin = () => {
         setLoading(false);
       });
   }
+
+  const onFinish = async () => {
+    console.log("+" + ph);
+    try {
+      dispatch(showLoading());
+      const response = await axios.post("/api/user/get-login-mobile", {
+        identifier: "+" + ph,
+      });
+      console.log(response.data); // Check the response for debugging purposes
+      dispatch(hideLoading());
+
+      if (response.data.success) {
+        // toast.success(response.data.message);
+        localStorage.setItem("token", response.data.data);
+
+        const decodedToken = jwt_decode(response.data.data);
+        const userId = decodedToken.id;
+        localStorage.setItem("userId", userId);
+        if (decodedToken) {
+          if (decodedToken.isDoctor) {
+            navigate("/doctor");
+          } else if (decodedToken.isNurse) {
+            navigate("/reception");
+          } else if (decodedToken.isGroomer) {
+            navigate("/groomer");
+          } else if (decodedToken.isAdmin) {
+            navigate("/admin");
+          } else {
+            navigate("/user");
+          }
+        }
+      } else {
+        toast.error(response.data.message);
+      }
+    } catch (error) {
+      console.log(JSON.stringify(error));
+      dispatch(hideLoading());
+      toast.error("Something went wrong");
+    }
+  };
 
   // function onOTPVerify() {
   //   setLoading(true);
@@ -67,7 +111,6 @@ const MobLogin = () => {
   //     });
   // }
 
-  
   function onOTPVerify() {
     setLoading(true);
     window.confirmationResult
@@ -76,21 +119,22 @@ const MobLogin = () => {
         console.log(res);
         setUser(res.user);
         setLoading(false);
+        onFinish();
 
         // Redirect based on user type using navigate
-        if (res.user) {
-          if (res.user.isDoctor) {
-            navigate("/doctor");
-          } else if (res.user.isNurse) {
-            navigate("/reception");
-          } else if (res.user.isGroomer) {
-            navigate("/groomer");
-          } else if (res.user.isAdmin) {
-            navigate("/admin");
-          } else {
-            navigate("/user");
-          }
-        }
+        // if (res.user) {
+        //   if (res.user.isDoctor) {
+        //     navigate("/doctor");
+        //   } else if (res.user.isNurse) {
+        //     navigate("/reception");
+        //   } else if (res.user.isGroomer) {
+        //     navigate("/groomer");
+        //   } else if (res.user.isAdmin) {
+        //     navigate("/admin");
+        //   } else {
+        //     navigate("/user");
+        //   }
+        // }
       })
       .catch((err) => {
         console.log(err);
@@ -102,7 +146,7 @@ const MobLogin = () => {
     <section className="flex items-center justify-center h-screen">
       <div>
         <Toaster toastOptions={{ duration: 4000 }} />
-        <div id="recaptcha-container"></div>
+
         {user ? (
           // Check the type of user and navigate accordingly
           user.isDoctor ? (
@@ -120,10 +164,7 @@ const MobLogin = () => {
           <div className="w-80 flex flex-col gap-4 rounded-lg p-4">
             {showOTP ? (
               <>
-                <label
-                  htmlFor="otp"
-                  className="font-bold text-xl  text-center"
-                >
+                <label htmlFor="otp" className="font-bold text-xl  text-center">
                   Enter your OTP
                 </label>
                 <input
@@ -162,6 +203,8 @@ const MobLogin = () => {
                   onChange={setPh}
                   inputClass="text-left w-100"
                 />
+                <div id="recaptcha-container"></div>
+
                 <div className="text-center d-grid">
                   <button
                     onClick={onSignup}

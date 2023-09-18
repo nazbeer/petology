@@ -9,13 +9,12 @@ const Appointment = require("../models/appointmentModel");
 const moment = require("moment");
 const Pet = require("../models/petModel");
 const OpenAppointment = require("../models/openAppointmentModel");
-const nodemailer = require('nodemailer');
+const nodemailer = require("nodemailer");
 const UserappModel = require("../models/userappModel");
 const packModel = require("../models/packModel");
-const crypto = require('crypto');
+const crypto = require("crypto");
 
 router.post("/register", async (req, res) => {
-
   try {
     let conditions = [];
 
@@ -32,7 +31,10 @@ router.post("/register", async (req, res) => {
     }
 
     if (conditions.length === 0) {
-      return res.status(400).send({ message: "No valid search parameters provided", success: false });
+      return res.status(400).send({
+        message: "No valid search parameters provided",
+        success: false,
+      });
     }
 
     const userExists = await User.findOne({ $or: conditions });
@@ -42,7 +44,7 @@ router.post("/register", async (req, res) => {
         .status(400)
         .send({ message: "User already exists", success: false });
     }
-    const activationToken = crypto.randomBytes(32).toString('hex');
+    const activationToken = crypto.randomBytes(32).toString("hex");
     const password = req.body.password;
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
@@ -58,14 +60,14 @@ router.post("/register", async (req, res) => {
       port: 2587,
       auth: {
         user: "3XuAF86a05YLhLwO2vYB3oykQflir7J1",
-        pass: "y05g7jL61VapbV2eFOrCqrd2FVNJeWrB"
-      }
-  });
-  const mailOptions = {
-    from: '6598040e-ceb7-44ae-a975-e1630c4856e4@mailslurp.com',
-    to: req.body.email,
-    subject: 'Welcome to Petology',
-    html: `
+        pass: "y05g7jL61VapbV2eFOrCqrd2FVNJeWrB",
+      },
+    });
+    const mailOptions = {
+      from: "6598040e-ceb7-44ae-a975-e1630c4856e4@mailslurp.com",
+      to: req.body.email,
+      subject: "Welcome to Petology",
+      html: `
       <html>
         <body>
           <p>Hello ${req.body.name},</p>
@@ -75,21 +77,20 @@ router.post("/register", async (req, res) => {
         </body>
       </html>
     `,
-  };
-  
+    };
 
-  transporter.sendMail(mailOptions, (error, info) => {
-    if (error) {
-      console.log('Error sending email:', error);
-    } else {
-      console.log('Email sent:', info.response);
-    }
-  });
-  res.status(201).send({
-    message:
-      'User registered successfully. Please check your email for activation instructions.',
-    success: true,
-  });
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.log("Error sending email:", error);
+      } else {
+        console.log("Email sent:", info.response);
+      }
+    });
+    res.status(201).send({
+      message:
+        "User registered successfully. Please check your email for activation instructions.",
+      success: true,
+    });
   } catch (error) {
     console.log(error);
     res
@@ -97,14 +98,14 @@ router.post("/register", async (req, res) => {
       .send({ message: "Error creating user", success: false, error });
   }
 });
-router.get('/activate/:token', async (req, res) => {
+router.get("/activate/:token", async (req, res) => {
   const { token } = req.query;
   console.log(token);
   // Find the user by the activation token
   const user = await User.findOne({ activationToken: token });
 
   if (!user) {
-    return res.status(400).send('Invalid activation token');
+    return res.status(400).send("Invalid activation token");
   }
 
   // Activate the user
@@ -113,34 +114,36 @@ router.get('/activate/:token', async (req, res) => {
   await user.save();
 
   // Redirect or send a success message
-  return res.redirect('/login'); // Redirect to the login page or send a success message
+  return res.redirect("/login"); // Redirect to the login page or send a success message
 });
 
 router.post("/register-old", async (req, res) => {
   console.log(req.body);
   try {
-
     let conditions = [];
 
-if (req.body.email) {
-    conditions.push({ email: req.body.email });
-}
+    if (req.body.email) {
+      conditions.push({ email: req.body.email });
+    }
 
-if (req.body.username) {
-    conditions.push({ username: req.body.username });
-}
+    if (req.body.username) {
+      conditions.push({ username: req.body.username });
+    }
 
-if (req.body.mobile) {
-    conditions.push({ mobile: req.body.mobile });
-}
+    if (req.body.mobile) {
+      conditions.push({ mobile: req.body.mobile });
+    }
 
-if (conditions.length === 0) {
-    return res.status(400).send({ message: "No valid search parameters provided", success: false });
-}
+    if (conditions.length === 0) {
+      return res.status(400).send({
+        message: "No valid search parameters provided",
+        success: false,
+      });
+    }
 
-const userExists = await User.findOne({ $or: conditions });
+    const userExists = await User.findOne({ $or: conditions });
 
- //   const userExists = await User.findOne({ email: req.body.email });
+    //   const userExists = await User.findOne({ email: req.body.email });
     if (userExists) {
       return res
         .status(200)
@@ -152,7 +155,7 @@ const userExists = await User.findOne({ $or: conditions });
     req.body.password = hashedPassword;
     const newuser = new User(req.body);
     await newuser.save();
- 
+
     res
       .status(200)
       .send({ message: "User created successfully", success: true });
@@ -164,81 +167,99 @@ const userExists = await User.findOne({ $or: conditions });
   }
 });
 
-router.post("/send-login-mobile", 
-async function sendSignInLinkToPhoneNumber(req, res) {
-  try {
-    // Get the authentication service
+router.post(
+  "/send-login-mobile",
+  async function sendSignInLinkToPhoneNumber(req, res) {
+    try {
+      // Get the authentication service
 
-    const phoneNumber = req.body.phoneNumber;
-    console.log(phoneNumber);
+      const phoneNumber = req.body.phoneNumber;
+      console.log(phoneNumber);
 
-    // Send a verification code to the user's phone
-    auth
-      .sendSignInLinkToPhoneNumber(phoneNumber)
-      .then(function () {
-        res.send(result);
-        // The verification code has been sent to the user's phone
-      })
-      .catch(function (error) {
-        // An error occurred while sending the verification code
-        console.log(error);
-      });
-  } catch (error) {
-    console.log(error);
-  }
-});
-router.post("/get-login-mobile", async function signInWithPhoneNumber(req, res) {
-  try {
-    // Get the authentication service
-    const { identifier } = req.body;
-
-    // Find the user either by username, email, or mobile
-    const user = await User.findOne({
-      $or: [
-        // { username: identifier },
-        // { email: identifier },
-         { mobile: identifier }
-      ]
-    });
-  
-    if (!user) {
-      return res
-        .status(200)
-        .send({ message: "User does not exist", success: false });
+      // Send a verification code to the user's phone
+      auth
+        .sendSignInLinkToPhoneNumber(phoneNumber)
+        .then(function () {
+          res.send(result);
+          // The verification code has been sent to the user's phone
+        })
+        .catch(function (error) {
+          // An error occurred while sending the verification code
+          console.log(error);
+        });
+    } catch (error) {
+      console.log(error);
     }
-
-    const token = jwt.sign(
-      {
-        id: user._id,
-        isUser: user.isUser,
-        isDoctor: user.isDoctor,
-        isAdmin: user.isAdmin,
-        isNurse: user.isNurse,
-        isGroomer: user.isGroomer
-      },
-      process.env.JWT_SECRET,
-      {
-        expiresIn: "1d",
-      }
-    );
-    // Send a verification code to the user's phone
-    // Sign the user in using the verification code they received on their phone
-    auth
-      .signInWithPhoneNumber(phoneNumber, verificationCode)
-      .then(function (result) {
-        // The user has been signed in
-        
-        res.send(result, token);
-      })
-      .catch(function (error) {
-        console.log(error);
-        // An error occurred while signing the user in
-      });
-  } catch (error) {
-    console.log(error);
   }
-})
-router.post("/login-email",  async (req, res) => {
+);
+router.post(
+  "/get-login-mobile",
+  async function signInWithPhoneNumber(req, res) {
+    try {
+      // Get the authentication service
+      const { identifier } = req.body;
+      console.log(req.body);
+
+      // Find the user either by username, email, or mobile
+      const user = await User.findOne({
+        $or: [
+          // { username: identifier },
+          // { email: identifier },
+          { mobile: identifier },
+        ],
+      });
+
+      console.log(user);
+
+      if (!user) {
+        return res
+          .status(200)
+          .send({ message: "User does not exist", success: false });
+      }
+
+      const token = jwt.sign(
+        {
+          id: user._id,
+          isUser: user.isUser,
+          isDoctor: user.isDoctor,
+          isAdmin: user.isAdmin,
+          isNurse: user.isNurse,
+          isGroomer: user.isGroomer,
+        },
+        process.env.JWT_SECRET,
+        {
+          expiresIn: "1d",
+        }
+      );
+      if (token) {
+        res.status(200).send({
+          message: "Token generated Successfully",
+          success: true,
+          data: token,
+        });
+      }
+      // Send a verification code to the user's phone
+      // Sign the user in using the verification code they received on their phone
+      // auth
+      //   .signInWithPhoneNumber(phoneNumber, verificationCode)
+      //   .then(function (result) {
+      //     // The user has been signed in
+
+      //     res.send(result, token);
+      //   })
+      //   .catch(function (error) {
+      //     console.log(error);
+      //     // An error occurred while signing the user in
+      //   });
+    } catch (error) {
+      console.log(error);
+      res
+        .status(500)
+        .send({ message: "Error Generating Token", success: false, error });
+    }
+  }
+);
+router.post("/login-email", async (req, res) => {
   try {
     const { identifier, password } = req.body;
 
@@ -248,9 +269,9 @@ router.post("/login-email",  async (req, res) => {
         { username: identifier },
         { email: identifier },
         // { mobile: identifier }
-      ]
+      ],
     });
-  
+
     if (!user) {
       return res
         .status(200)
@@ -272,7 +293,7 @@ router.post("/login-email",  async (req, res) => {
         isDoctor: user.isDoctor,
         isAdmin: user.isAdmin,
         isNurse: user.isNurse,
-        isGroomer: user.isGroomer
+        isGroomer: user.isGroomer,
       },
       process.env.JWT_SECRET,
       {
@@ -280,42 +301,44 @@ router.post("/login-email",  async (req, res) => {
       }
     );
 
-    res.status(200).send({ message: "Login successful", success: true, data: token });
-
+    res
+      .status(200)
+      .send({ message: "Login successful", success: true, data: token });
   } catch (error) {
     console.log(error);
-    res.status(500).send({ message: "Error logging in", success: false, error });
+    res
+      .status(500)
+      .send({ message: "Error logging in", success: false, error });
   }
 });
-router.get('/api/user/count-records', async (req, res) => {
+router.get("/api/user/count-records", async (req, res) => {
   try {
-    const collection = db.stats('doctors'); // Replace with your collection name
+    const collection = db.stats("doctors"); // Replace with your collection name
 
     // Count the documents in the collection
     const count = await collection.countDocuments();
 
     res.json({ count });
   } catch (error) {
-    console.error('Error counting documents:', error);
-    res.status(500).json({ error: 'Server error' });
+    console.error("Error counting documents:", error);
+    res.status(500).json({ error: "Server error" });
   }
 });
 
-
-router.get('/user-details/:userId', authMiddleware, async (req, res) => {
+router.get("/user-details/:userId", authMiddleware, async (req, res) => {
   try {
     const { userId } = req.params;
     console.log(userId);
     const user = await User.findOne({ _id: userId });
 
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({ message: "User not found" });
     }
 
     res.json({ data: user });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 
@@ -371,60 +394,63 @@ router.post("/apply-doctor-account", authMiddleware, async (req, res) => {
     });
   }
 });
-router.get('/profile/:userId', authMiddleware, async (req, res) => {
+router.get("/profile/:userId", authMiddleware, async (req, res) => {
   try {
     const { userId } = req.params;
 
     const receptionist = await User.findById(userId);
 
     if (!receptionist) {
-      return res.status(404).json({ success: false, message: 'Receptionist not found' });
+      return res
+        .status(404)
+        .json({ success: false, message: "Receptionist not found" });
     }
 
     res.status(200).json({ success: true, data: receptionist });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ success: false, message: 'An error occurred while fetching the receptionist profile' });
+    res.status(500).json({
+      success: false,
+      message: "An error occurred while fetching the receptionist profile",
+    });
   }
 });
-router.get('/doctorcount', async (req, res) => {
+router.get("/doctorcount", async (req, res) => {
   try {
     const count = await Doctor.countDocuments();
     res.json({ count });
   } catch (error) {
-    console.error('Error counting doctors:', error);
-    res.status(500).json({ error: 'Server error' });
+    console.error("Error counting doctors:", error);
+    res.status(500).json({ error: "Server error" });
   }
 });
-router.get('/appointmentcount', async (req, res) => {
+router.get("/appointmentcount", async (req, res) => {
   try {
     const count = await Appointment.countDocuments();
     res.json({ count });
   } catch (error) {
-    console.error('Error counting appointments:', error);
-    res.status(500).json({ error: 'Server error' });
+    console.error("Error counting appointments:", error);
+    res.status(500).json({ error: "Server error" });
   }
 });
-router.get('/usercount', async (req, res) => {
-  try{
+router.get("/usercount", async (req, res) => {
+  try {
     const count = await User.countDocuments();
     res.json({ count });
-
-  } catch (error){
-    console.error("Error counting Users:" , error);
-    res.status(500).json({ error: 'Server Error'});
+  } catch (error) {
+    console.error("Error counting Users:", error);
+    res.status(500).json({ error: "Server Error" });
   }
 });
-router.get('/petcount', async (req, res) => {
-  try{
+router.get("/petcount", async (req, res) => {
+  try {
     const count = await Pet.countDocuments();
     res.json({ count });
-
-  } catch(error){
-    console.error("Error Counting Pets:", error );  
-    res.status(500).json({ error : 'Server Error'}) ;
+  } catch (error) {
+    console.error("Error Counting Pets:", error);
+    res.status(500).json({ error: "Server Error" });
   }
-})
+});
 router.post(
   "/mark-all-notifications-as-seen",
   authMiddleware,
@@ -475,27 +501,40 @@ router.post("/delete-all-notifications", authMiddleware, async (req, res) => {
     });
   }
 });
-router.post('/assign-doctor-to-appointment', authMiddleware, async (req, res) => {
-  try {
-    const { appointmentId, doctorId } = req.body;
+router.post(
+  "/assign-doctor-to-appointment",
+  authMiddleware,
+  async (req, res) => {
+    try {
+      const { appointmentId, doctorId } = req.body;
 
-    // Find the appointment by ID and update the doctorId
-    const updatedAppointment = await Appointment.findByIdAndUpdate(
-      appointmentId,
-      { doctorId },
-      { new: true } // Return the updated appointment
-    );
+      // Find the appointment by ID and update the doctorId
+      const updatedAppointment = await Appointment.findByIdAndUpdate(
+        appointmentId,
+        { doctorId },
+        { new: true } // Return the updated appointment
+      );
 
-    if (!updatedAppointment) {
-      return res.status(404).json({ success: false, message: 'Appointment not found' });
+      if (!updatedAppointment) {
+        return res
+          .status(404)
+          .json({ success: false, message: "Appointment not found" });
+      }
+
+      res.status(200).json({
+        success: true,
+        message: "Doctor assigned successfully",
+        data: updatedAppointment,
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({
+        success: false,
+        message: "An error occurred while assigning the doctor",
+      });
     }
-
-    res.status(200).json({ success: true, message: 'Doctor assigned successfully', data: updatedAppointment });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: 'An error occurred while assigning the doctor' });
   }
-});
+);
 router.get("/get-all-approved-doctors", authMiddleware, async (req, res) => {
   try {
     const doctors = await Doctor.find({ status: "approved" });
@@ -556,9 +595,8 @@ router.post("/check-booking-avilability", authMiddleware, async (req, res) => {
       date,
       time: { $gte: fromTime, $lte: toTime },
     });
-   // console.log(appointments);
+    // console.log(appointments);
     if (appointments.length > 0) {
-      
       return res.status(200).send({
         message: "Appointments not available",
         success: false,
@@ -579,8 +617,6 @@ router.post("/check-booking-avilability", authMiddleware, async (req, res) => {
   }
 });
 
-
-
 router.get("/get-appointments-by-user-id", authMiddleware, async (req, res) => {
   try {
     const appointments = await Appointment.find({ userId: req.body.userId });
@@ -598,40 +634,39 @@ router.get("/get-appointments-by-user-id", authMiddleware, async (req, res) => {
     });
   }
 });
-router.get("/get-all-appointments", authMiddleware, async (req, res)=>{
-  try{
+router.get("/get-all-appointments", authMiddleware, async (req, res) => {
+  try {
     const appointmentList = await Appointment.find({});
-   // console.log(appointmentList);
+    // console.log(appointmentList);
     res.status(200).send({
       message: "Appointment List fetched successfully",
       success: true,
       data: appointmentList,
     });
-
-  }catch(error){
+  } catch (error) {
     console.log(error);
     res.status(500).send({
       message: "Error fetching All Appointments",
       success: false,
       error,
-    })
+    });
   }
 });
 
-router.get('/get-all-open-appointments', async (req, res) => {
+router.get("/get-all-open-appointments", async (req, res) => {
   try {
     const appointmentList = await OpenAppointment.find({})
-      .populate('doctor', 'name specialization') // Assuming 'doctor' field is a reference to User model
+      .populate("doctor", "name specialization") // Assuming 'doctor' field is a reference to User model
       .exec();
     res.status(200).send({
-      message: 'Appointment List fetched successfully',
+      message: "Appointment List fetched successfully",
       success: true,
       data: appointmentList,
     });
   } catch (error) {
     console.error(error);
     res.status(500).send({
-      message: 'Error fetching All Appointments',
+      message: "Error fetching All Appointments",
       success: false,
       error,
     });
@@ -639,80 +674,82 @@ router.get('/get-all-open-appointments', async (req, res) => {
 });
 
 router.get("/get-pets-by-userid", authMiddleware, async (req, res) => {
-    try {
-      const user = await User.findOne({ userId: req.body.userId });
-      const pets = await Pet.findOne({ userId: user._id });
-     // const appointments = await Appointment.find({ doctorId: doctor._id });
-      res.status(200).send({
-        message: "Pets fetched successfully",
-        success: true,
-        data: pets,
-      });
-    } catch (error) {
-      console.log(error);
-      res.status(500).send({
-        message: "Error fetching Pets",
-        success: false,
-        error,
-      });
-    }
+  try {
+    const user = await User.findOne({ userId: req.body.userId });
+    const pets = await Pet.findOne({ userId: user._id });
+    // const appointments = await Appointment.find({ doctorId: doctor._id });
+    res.status(200).send({
+      message: "Pets fetched successfully",
+      success: true,
+      data: pets,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      message: "Error fetching Pets",
+      success: false,
+      error,
+    });
   }
-);
+});
 
-router.get("/get-all-pet", authMiddleware, async(req, res) => {
-  try{
+router.get("/get-all-pet", authMiddleware, async (req, res) => {
+  try {
     const pets = await Pet.find({});
     res.status(200).send({
       message: "Pet List fetched successfully",
       success: true,
       data: pets,
-    })
-  }catch(error){
+    });
+  } catch (error) {
     console.log(error);
     res.status(500).send({
       message: "Failed to fetch PetList details.",
       success: false,
       error,
-    })
+    });
   }
-})
-router.get("/get-all-users", authMiddleware, async(req, res)=>{
-  try{
+});
+router.get("/get-all-users", authMiddleware, async (req, res) => {
+  try {
     const users = await User.find();
     //const users = await User.find({status:req.body.status});
     res.status(200).send({
       message: "Users list fetched succcessfully",
-      success :true,
+      success: true,
       data: users,
     });
-
-  }catch (error){
+  } catch (error) {
     console.log(error);
     res.status(500).send({
-      message:"Failed to fetch user's details.",
-      success:false,
+      message: "Failed to fetch user's details.",
+      success: false,
       error,
     });
   }
 });
-router.get('/api/user/:userId/pet/:petId/appointments', authMiddleware, async (req, res) => {
-  const { userId, petId } = req.params;
+router.get(
+  "/api/user/:userId/pet/:petId/appointments",
+  authMiddleware,
+  async (req, res) => {
+    const { userId, petId } = req.params;
 
-  try {
-    const appointments = await Appointment.find({ userId, petId });
-   // console.log(appointments);
-    res.status(200).json({
-      success: true,
-      data: appointments,
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      success: false,
-      message: 'An error occurred while fetching appointments.',
-    });
+    try {
+      const appointments = await Appointment.find({ userId, petId });
+      // console.log(appointments);
+      res.status(200).json({
+        success: true,
+        data: appointments,
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({
+        success: false,
+        message: "An error occurred while fetching appointments.",
+      });
+    }
   }
-});
+);
 router.get("/view-user/:id", async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
@@ -746,10 +783,9 @@ router.put("/edit-user/:id", async (req, res) => {
 
 // Delete user by ID
 router.delete("/delete-user/:id", async (req, res) => {
-
   try {
     const user = await User.findByIdAndDelete(req.params.id);
-   // console.log(user);
+    // console.log(user);
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
@@ -759,33 +795,46 @@ router.delete("/delete-user/:id", async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
-router.post("/cancel-appointment/:appointmentId", authMiddleware, async (req, res) => {
-  try {
-    const { appointmentId } = req.params;
+router.post(
+  "/cancel-appointment/:appointmentId",
+  authMiddleware,
+  async (req, res) => {
+    try {
+      const { appointmentId } = req.params;
 
-    // Find the appointment by appointmentId
-    const appointment = await Appointment.findById(appointmentId);
-   // console.log(appointment);
-    if (!appointment) {
-      return res.status(404).json({ success: false, message: "Appointment not found" });
+      // Find the appointment by appointmentId
+      const appointment = await Appointment.findById(appointmentId);
+      // console.log(appointment);
+      if (!appointment) {
+        return res
+          .status(404)
+          .json({ success: false, message: "Appointment not found" });
+      }
+
+      // Check if the appointment is already cancelled
+      if (appointment.status === "cancelled") {
+        return res.status(400).json({
+          success: false,
+          message: "Appointment is already cancelled",
+        });
+      }
+
+      // Update the appointment status to "cancelled"
+      appointment.status = "cancelled";
+      await appointment.save();
+
+      return res.json({
+        success: true,
+        message: "Appointment has been cancelled successfully",
+      });
+    } catch (error) {
+      console.error(error);
+      return res
+        .status(500)
+        .json({ success: false, message: "Internal server error" });
     }
-
-    // Check if the appointment is already cancelled
-    if (appointment.status === "cancelled") {
-      return res.status(400).json({ success: false, message: "Appointment is already cancelled" });
-    }
-
-    // Update the appointment status to "cancelled"
-    appointment.status = "cancelled";
-    await appointment.save();
-
-    return res.json({ success: true, message: "Appointment has been cancelled successfully" });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ success: false, message: "Internal server error" });
   }
-});
-
+);
 
 router.get("/get-pets-by-user-id", authMiddleware, async (req, res) => {
   try {
@@ -804,14 +853,15 @@ router.get("/get-pets-by-user-id", authMiddleware, async (req, res) => {
     });
   }
 });
-router.post('/user-book-appointment', authMiddleware, async (req, res) => {
+router.post("/user-book-appointment", authMiddleware, async (req, res) => {
   try {
     const newAppointment = new UserappModel({
-      module:req.body.module,
+      module: req.body.module,
       userId: req.body.userId,
       doctorId: req.body.doctorId,
       service: req.body.service,
       breed: req.body.breed,
+      age: req.body.age,
       date: req.body.date,
       time: req.body.time,
       pet: req.body.pet,
@@ -823,120 +873,145 @@ router.post('/user-book-appointment', authMiddleware, async (req, res) => {
     });
 
     const savedAppointment = await newAppointment.save();
-    res.json({ success: true, message: 'Appointment booked successfully', data: savedAppointment });
+    res.json({
+      success: true,
+      message: "Appointment booked successfully",
+      data: savedAppointment,
+    });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ success: false, message: 'Error booking appointment' });
+    console.log(error);
+    res
+      .status(500)
+      .json({ success: false, message: "Error booking appointment" });
   }
 });
 router.get("/subservices", authMiddleware, async (req, res) => {
   try {
-    const subservices = await packModel.find({ serviceType: 'Mobile Veterinary' }, "subService price");
-  //  console.log(subservices);
+    const subservices = await packModel.find(
+      { serviceType: "Mobile Veterinary" },
+      "subService price"
+    );
+    //  console.log(subservices);
     res.json({ success: true, data: subservices });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ success: false, error: "Failed to fetch sub-services" });
+    res
+      .status(500)
+      .json({ success: false, error: "Failed to fetch sub-services" });
   }
 });
 router.get("/subservices1", authMiddleware, async (req, res) => {
   try {
-    const subservices = await packModel.find({ serviceType: 'Mobile Grooming' }, "subService price");
+    const subservices = await packModel.find(
+      { serviceType: "Mobile Grooming" },
+      "subService price"
+    );
     console.log(subservices);
     res.json({ success: true, data: subservices });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ success: false, error: "Failed to fetch sub-services" });
+    res
+      .status(500)
+      .json({ success: false, error: "Failed to fetch sub-services" });
   }
 });
-router.get('/appointments/grooming', authMiddleware, async (req, res) => {
+router.get("/appointments/grooming", authMiddleware, async (req, res) => {
   try {
-   // const moduleType = req.params.module;
-    
+    // const moduleType = req.params.module;
+
     // Fetch appointments for the specified module
-    const appointments = await UserappModel.find({ module: 'grooming' });
-    
+    const appointments = await UserappModel.find({ module: "grooming" });
+
     // If appointments are found, you can fetch user details only
-    const populatedAppointments = await Promise.all(appointments.map(async (appointment) => {
-      const userId = appointment.userId;
+    const populatedAppointments = await Promise.all(
+      appointments.map(async (appointment) => {
+        const userId = appointment.userId;
 
-      // Assuming you have a User model for user details
-      const user = await User.findOne({ _id: userId });
-   //   console.log("user:", user);
+        // Assuming you have a User model for user details
+        const user = await User.findOne({ _id: userId });
+        //   console.log("user:", user);
 
-      return {
-        ...appointment.toObject(),
-        user,
-      };
-    }));
-    
+        return {
+          ...appointment.toObject(),
+          user,
+        };
+      })
+    );
+
     console.log("populated Appointments:", populatedAppointments);
     res.json({ success: true, data: populatedAppointments });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Internal Server Error' });
+    res.status(500).json({ message: "Internal Server Error" });
   }
 });
-router.get('/appointments/veterinary', authMiddleware, async (req, res) => {
+router.get("/appointments/veterinary", authMiddleware, async (req, res) => {
   try {
-   // const moduleType = req.params.module;
-    
-    // Fetch appointments for the specified module
-    const appointments = await UserappModel.find({ module: 'veterinary' });
-    
-    // If appointments are found, you can fetch user details only
-    const populatedAppointments = await Promise.all(appointments.map(async (appointment) => {
-      const userId = appointment.userId;
-      const doctorId = appointment.doctorId;
-      // Assuming you have a User model for user details
-      const user = await User.findOne({ _id: userId });
-      const doctor = await Doctor.findOne({ _id: doctorId });
-     // console.log("user:", user);
+    // const moduleType = req.params.module;
 
-      return {
-        ...appointment.toObject(),
-        user,
-        doctor
-      };
-    }));
-    
+    // Fetch appointments for the specified module
+    const appointments = await UserappModel.find({ module: "veterinary" });
+    console.log('appointments', appointments)
+
+    // If appointments are found, you can fetch user details only
+    const populatedAppointments = await Promise.all(
+      appointments.map(async (appointment) => {
+        const userId = appointment.userId;
+        const doctorId = appointment.doctorId;
+        // Assuming you have a User model for user details
+        const user = await User.findOne({ _id: userId });
+       const doctor = await Doctor.findOne({ _id: doctorId });
+        // console.log("user:", user);
+
+        return {
+          ...appointment.toObject(),
+          user,
+          doctor,
+        };
+      })
+    );
+
     console.log("populated Appointments:", populatedAppointments);
     res.json({ success: true, data: populatedAppointments });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Internal Server Error' });
+    res.status(500).json({ message: "Internal Server Error" });
   }
 });
-router.get('/appointments/mobvet', authMiddleware, async (req, res) => {
+router.get("/appointments/mobvet", authMiddleware, async (req, res) => {
   try {
-   // const moduleType = req.params.module;
-    
-    // Fetch appointments for the specified module
-    const appointments = await UserappModel.find({ module: 'mobile_veterinary' });
-    
-    // If appointments are found, you can fetch user details only
-    const populatedAppointments = await Promise.all(appointments.map(async (appointment) => {
-      const userId = appointment.userId;
-    //  const doctorId = appointment.doctorId;
-      // Assuming you have a User model for user details
-      const user = await User.findOne({ _id: userId });
-   //   const doctor = await Doctor.findOne({ _id: doctorId });
-    //  console.log("user:", user);
+    // const moduleType = req.params.module;
 
-      return {
-        ...appointment.toObject(),
-        user,
-      //  doctor
-      };
-    }));
-    
+    // Fetch appointments for the specified module
+    const appointments = await UserappModel.find({
+      module: "mobile_veterinary",
+    });
+
+    // If appointments are found, you can fetch user details only
+    const populatedAppointments = await Promise.all(
+      appointments.map(async (appointment) => {
+        const userId = appointment.userId;
+        //  const doctorId = appointment.doctorId;
+        // Assuming you have a User model for user details
+        const user = await User.findOne({ _id: userId });
+        //   const doctor = await Doctor.findOne({ _id: doctorId });
+        //  console.log("user:", user);
+
+        return {
+          ...appointment.toObject(),
+          user,
+          //  doctor
+        };
+      })
+    );
+
     console.log("populated Appointments:", populatedAppointments);
     res.json({ success: true, data: populatedAppointments });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Internal Server Error' });
+    res.status(500).json({ message: "Internal Server Error" });
   }
 });
-
 
 module.exports = router;

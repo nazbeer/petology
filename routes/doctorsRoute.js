@@ -165,7 +165,7 @@ router.get('/user/:userId/pet/:petId/appointments', authMiddleware, async (req, 
 
   try {
     const appointments = await Appointment.find({ userId, petId });
-    console.log(appointments);
+    // console.log(appointments);
     res.status(200).json({
       success: true,
       data: appointments,
@@ -183,6 +183,8 @@ router.get(
   "/get-openappointments-by-doctor-id",
  authMiddleware,
   async (req, res) => {
+    
+
     try {
       const doctor = await Doctor.findOne({ userId: req.body.userId });
       const appointments = await OpenAppointment.find({ doctorId: doctor._id });
@@ -277,7 +279,7 @@ router.get("/get-appointment-by-id/:id", authMiddleware, async (req, res) => {
       .populate("users")
       .populate("petlists")
       .exec();
-      console.log(appointment);
+      // console.log(appointment);
     res.json({ success: true, data: appointment });
   } catch (error) {
     res.status(500).json({ success: false, message: "Error fetching appointment" });
@@ -335,12 +337,13 @@ router.get('/appointments/veterinary', authMiddleware, async (req, res) => {
     
     // Fetch appointments for the specified module
     const appointments = await UserappModel.find({ module: 'veterinary' });
-    console.log('vdt:',appointments);
+    // console.log('vdt:',appointments);
     // If appointments are found, you can fetch user details only
     const populatedAppointments = await Promise.all(appointments.map(async (appointment) => {
       const userId = appointment.userId;
       const doctorId = appointment.doctorId;
       // Assuming you have a User model for user details
+      // console.log('ids', userId, doctorId)
       const user = await User.findOne({ _id: userId });
       const doctor = await Doctor.findOne({ _id: doctorId });
     //  console.log("user:", user);
@@ -352,7 +355,7 @@ router.get('/appointments/veterinary', authMiddleware, async (req, res) => {
       };
     }));
     
-    console.log("populated Appointments:", populatedAppointments);
+    // console.log("populated Appointments:", populatedAppointments);
     res.json({ success: true, data: populatedAppointments });
   } catch (error) {
     console.error(error);
@@ -365,7 +368,7 @@ router.get('/get-appointment-by-id/:id', authMiddleware, async (req, res) => {
 
     // Fetch the appointment by ID from the database
     const appointment = await UserappModel.findById(appointmentId);
-    console.log(appointment);
+    // console.log(appointment);
     if (!appointment) {
       return res.status(404).json({ success: false, error: 'Appointment not found' });
     }
