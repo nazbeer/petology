@@ -119,9 +119,6 @@ const PrescriptionForm = ({ selectedAppointmentId, onClose, appointmentData }) =
         <DatePicker style={{ width: "100%" }} />
       </Form.Item>
 
-      <Form.Item label="Next Appointment Time" name="ntime">
-        <TimePicker style={{ width: "100%" }} format="HH:mm" showNow={false} />
-      </Form.Item>
 
       <Form.Item>
         <Button type="primary" htmlType="submit">
