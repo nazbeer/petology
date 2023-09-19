@@ -215,6 +215,7 @@ function MobVeti() {
     if (openDate && date) {
       console.log(date?.format("YYYY-MM-DD"));
       newAppointment.date = date?.format("YYYY-MM-DD");
+      newAppointment.followUp = true
       console.log(newAppointment);
       try {
         const response = await axios.post(
@@ -319,12 +320,12 @@ function MobVeti() {
 
             <Form.Item>
               <Radio.Group name="radiogroup" defaultValue={1}>
-                <Radio value={1} onChange={handleFollow}>
-                  Follow Up
-                </Radio>
-                <Radio value={2} onChange={handleNext}>
+                <Radio value={1} onChange={handleNext}>
                   {" "}
                   New Appointment
+                </Radio>
+                <Radio value={2} onChange={handleFollow}>
+                  Follow Up
                 </Radio>
               </Radio.Group>
             </Form.Item>
