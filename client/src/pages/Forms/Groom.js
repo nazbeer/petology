@@ -9,6 +9,7 @@ const Groom = () => {
     age: "",
     service: "",
     pet: "",
+    petName: "",
     size: "",
     breed: "",
     date: "",
@@ -141,6 +142,17 @@ const Groom = () => {
                   id="Age"
                   name="Age"
                   value={service.age}
+                  onChange={handleChange}
+                />
+              </div>
+              <div className="mb-2">
+                <label htmlFor="PetName">Pet Name:</label>
+                <input
+                  className="form-control"
+                  type="text"
+                  id="PetName"
+                  name="PetName"
+                  value={service.petName}
                   onChange={handleChange}
                 />
               </div>

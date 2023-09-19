@@ -865,6 +865,7 @@ router.post("/user-book-appointment", authMiddleware, async (req, res) => {
       date: req.body.date,
       time: req.body.time,
       pet: req.body.pet,
+      petName: req.body.petName,
       size: req.body.size,
       lng: req.body.lng,
       lat: req.body.lat,

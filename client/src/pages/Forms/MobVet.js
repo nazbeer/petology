@@ -17,6 +17,7 @@ const MobVet = () => {
     module: "mobile_veterinary",
     service: "",
     pet: "",
+    petName: "",
     age: "",
     size: "",
     breed: "",
@@ -193,6 +194,18 @@ const MobVet = () => {
                   id="Age"
                   name="Age"
                   value={service.age}
+                  onChange={handleChange}
+                />
+              </div>
+
+              <div className="mb-2">
+                <label htmlFor="PetName">Pet Name:</label>
+                <input
+                  className="form-control"
+                  type="text"
+                  id="PetName"
+                  name="PetName"
+                  value={service.petName}
                   onChange={handleChange}
                 />
               </div>
