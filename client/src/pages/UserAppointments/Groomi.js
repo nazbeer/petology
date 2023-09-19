@@ -125,7 +125,7 @@ function Groomi() {
           >
             {cancelledAppointments.includes(record._id)
               ? 'Cancelled'
-              : 'Cancel Appointment'}
+              : 'Cancel'}
           </button>
         ),
       },

@@ -134,7 +134,7 @@ function MobGroomi() {
         >
           {cancelledAppointments.includes(record._id)
             ? 'Cancelled'
-            : 'Cancel Appointment'}
+            : 'Cancel'}
         </button>
       ),
     },

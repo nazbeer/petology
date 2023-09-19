@@ -86,7 +86,7 @@ function DoctorAppointments() {
     {
       title: "Phone",
       dataIndex: "phoneNumber",
-      render: (text, record) => <span>{record.doctor.phoneNumber}</span>,
+      render: (text, record) => <span>{record.doctor?.phoneNumber}</span>,
     },
     {
       title:"Pet",
@@ -217,7 +217,7 @@ function DoctorAppointments() {
       dataIndex:"mobile",
       render:(text, record)=> (
       <span>
-        {record.mobile}
+        {record?.mobile}
         </span>
         )
     },

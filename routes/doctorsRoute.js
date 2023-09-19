@@ -430,4 +430,52 @@ router.get("/get-appointment-by-id/:id", authMiddleware, async (req, res) => {
     res.status(500).json({ success: false, error: error.message });
   }
 });
+
+router.post("/get-prescription-by-id", authMiddleware, async (req, res) => {
+  try {
+    console.log(req.body.id);
+    const appointmentId = req.body.id;
+
+    // Fetch the prescription by ID from the database
+    const prescription = await Prescription.findOne({
+      appointmentId: appointmentId,
+    });
+    const user = await User.findById(prescription.userId);
+    const doctor = await Doctor.findById(prescription.doctorId);
+    const appointment = await UserappModel.findById(prescription.appointmentId);
+
+    const info = {
+      userName: user?.name,
+      doctorName: `${doctor.firstName} ${doctor.lastName}`,
+    };
+    // console.log("user data appointment", user);
+    // prescription.name = user?.name;
+    console.log(prescription.appointmentId);
+    if (!prescription) {
+      return res
+        .status(404)
+        .json({ success: false, error: "Prescription not found" });
+    }
+    const data = {
+      appointmentData: appointment,
+      id: prescription._id,
+      appointmentId: appointment?.customId,
+      userName: user?.name,
+      doctorName: `${doctor?.firstName} ${doctor?.lastName}`,
+      pet: appointment?.pet,
+      prescription: prescription?.prescription,
+      description: prescription?.description,
+      ndate: prescription?.ndate,
+      createdAt: prescription?.createdAt,
+      updatedAt: prescription?.updatedAt,
+    };
+    console.log(data);
+    res.json({ success: true, data: data });
+  } catch (error) {
+    console.log(error);
+    res
+      .status(500)
+      .send({ message: "Error getting Prescription", success: false, error });
+  }
+});
 module.exports = router;
