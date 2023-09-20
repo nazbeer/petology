@@ -7,6 +7,7 @@ const mobAppointment = require("../models/mobgroomappModel");
 const PetList = require("../models/petModel");
 const Service = require('../models/serviceModel');
 const authMiddleware = require("../middlewares/authMiddleware");
+const UserappModel = require("../models/userappModel");
 //const { default: Appointments } = require("../client/src/pages/Appointments");
 //const { default: Appointments } = require("../client/src/pages/Appointments");
 
@@ -112,7 +113,7 @@ router.post('/assign-doctor-to-appointment', authMiddleware, async (req, res) =>
     const { appointmentId, doctorId } = req.body;
 
     // Find the appointment by ID and update the doctorId
-    const updatedAppointment = await Appointment.findByIdAndUpdate(
+    const updatedAppointment = await UserappModel.findByIdAndUpdate(
       appointmentId,
       { doctorId },
       { new: true } // Return the updated appointment
@@ -138,7 +139,7 @@ router.post('/assign-doctor-to-appointment', authMiddleware, async (req, res) =>
 
 router.get('/get-all-appointments', authMiddleware, async (req, res) => {
   try {
-    const appointmentList = await Appointment.find({})
+    const appointmentList = await UserappModel.find({})
      // .populate('doctors', 'name') // Assuming 'doctor' field is a reference to User model
      // .populate('petlists', 'name') // Assuming 'pet' field is a reference to Pet model
       .exec();
@@ -161,7 +162,7 @@ router.get('/get-all-appointments', authMiddleware, async (req, res) => {
 
 router.get('/get-all-mob-appointments', authMiddleware, async (req, res) => {
     try {
-      const appointmentList = await mobAppointment.find({})
+      const appointmentList = await UserappModel.find({})
        // .populate('doctors', 'name') // Assuming 'doctor' field is a reference to User model
        // .populate('petlists', 'name') // Assuming 'pet' field is a reference to Pet model
         .exec();
@@ -284,7 +285,7 @@ router.post('/change-appointment-status/:id', authMiddleware, async (req, res) =
     const { id } = req.params;
     const { status } = req.body;
 
-    const updatedAppointment = await Appointment.findByIdAndUpdate(
+    const updatedAppointment = await UserappModel.findByIdAndUpdate(
       id,
       { status }, // Update the status field
       { new: true } // Return the updated appointment

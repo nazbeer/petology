@@ -82,7 +82,7 @@ function GroomerAppointments() {
   const columns = [
     {
       title: "Id",
-      dataIndex: "_id",
+      dataIndex: "customId",
     },
     {
       title: "Client",
@@ -161,7 +161,7 @@ function GroomerAppointments() {
   const mobcolumns = [
     {
       title: "Id",
-      dataIndex: "_id",
+      dataIndex: "customId",
     },
     {
       title: "Client",

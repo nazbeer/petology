@@ -77,7 +77,7 @@ function MobGroomi() {
       dataIndex: "name",
       render: (text, record) => (
         <span>
-          Dr. {record.doctor.firstName} {record.doctor.lastName}
+          Dr. {record?.doctor?.firstName} {record?.doctor?.lastName}
         </span>
       ),
     },

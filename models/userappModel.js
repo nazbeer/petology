@@ -1,50 +1,54 @@
 // mainApp.js
 
-const mongoose = require('mongoose');
-const autoIncrement = require('mongoose-auto-increment');
-const CounterModel = require('./CounterModel');
+const mongoose = require("mongoose");
+const autoIncrement = require("mongoose-auto-increment");
+const CounterModel = require("./CounterModel");
 
 // Initialize Mongoose and the auto-increment plugin
 
 autoIncrement.initialize(mongoose.connection);
 
-const appointmentSchema = new mongoose.Schema({
-  userId: { type: String, required: true },
-  doctor: { type: String, required: true, default: 'Any' },
-  doctorId: { type: String, required: false},
-  age: { type: String, required: false},
-  module: { type: String, required: false },
-  service: { type: String, required: true },
-  breed: { type: String, required: false },
-  date: { type: Date, required: true },
-  time: { type: String, required: true },
-  pet: { type: String, required: true },
-  petName: { type: String, required: false },
-  size: { type: String, required: true },
-  lat: { type: String, required: true, default: 'null' },
-  lng: { type: String, required: true, default: 'null' },
-  status: { type: String, default: "approved" },
-  customId: { type: String, required: false, unique: true },
-}, {
-  timestamps: true,
-});
+const appointmentSchema = new mongoose.Schema(
+  {
+    userId: { type: String, required: true },
+    doctor: { type: String, required: true, default: "Any" },
+    doctorId: { type: String, required: false },
+    age: { type: String, required: false },
+    module: { type: String, required: false },
+    service: { type: String, required: true },
+    breed: { type: String, required: false },
+    date: { type: Date, required: true },
+    time: { type: String, required: true },
+    pet: { type: String, required: true },
+    petName: { type: String, required: false },
+    size: { type: String, required: true },
+    lat: { type: String, required: true, default: "null" },
+    lng: { type: String, required: true, default: "null" },
+    isWalkin: { type: Boolean, required: false, default: false },
+    status: { type: String, default: "approved" },
+    customId: { type: String, required: false, unique: true },
+  },
+  {
+    timestamps: true,
+  }
+);
 
 // Middleware to generate and assign the custom ID
-appointmentSchema.pre('save', async function (next) {
+appointmentSchema.pre("save", async function (next) {
   try {
     const moduleType = this.module; // Get the module type (veterinary, grooming, etc.)
     let moduleNumber = 0;
     switch (this.module) {
-      case 'veterinary':
+      case "veterinary":
         moduleNumber = 1;
         break;
-      case 'grooming':
+      case "grooming":
         moduleNumber = 2;
         break;
-      case 'mobile_veterinary':
+      case "mobile_veterinary":
         moduleNumber = 3;
         break;
-      case 'mobile_grooming':
+      case "mobile_grooming":
         moduleNumber = 4;
         break;
       default:
@@ -61,8 +65,11 @@ appointmentSchema.pre('save', async function (next) {
 
     // Increment the counter and format the custom ID
     counter.lastId++;
-    const formattedCounter = counter.lastId.toString().padStart(6, '0');
-    const formattedDate = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+    const formattedCounter = counter.lastId.toString().padStart(6, "0");
+    const formattedDate = new Date()
+      .toISOString()
+      .slice(0, 10)
+      .replace(/-/g, "");
 
     this.customId = `${formattedDate}-${moduleNumber}${formattedCounter}`;
 
@@ -77,12 +84,12 @@ appointmentSchema.pre('save', async function (next) {
 
 // Apply the auto-increment plugin to the UserappModel
 appointmentSchema.plugin(autoIncrement.plugin, {
-  model: 'UserAppointment',
-  field: 'id', // The field to increment (can be any field name)
+  model: "UserAppointment",
+  field: "id", // The field to increment (can be any field name)
   startAt: 1, // The starting ID value
   incrementBy: 1, // The increment value
 });
 
-const UserappModel = mongoose.model('UserAppointment', appointmentSchema);
+const UserappModel = mongoose.model("UserAppointment", appointmentSchema);
 
 module.exports = UserappModel;

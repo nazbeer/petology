@@ -8,6 +8,7 @@ module.exports = async (req, res, next) => {
 
 
     jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+      console.log('2', err)
       if (err) {
         return res.status(401).send({
           message: "Auth failed",
@@ -19,7 +20,9 @@ module.exports = async (req, res, next) => {
       }
     });
   } catch (error) {
+    console.log('1', error)
     return res.status(401).send({
+      
       message: "Auth failed",
       success: false,
     });
