@@ -35,6 +35,7 @@ const Vet = () => {
     doctorId: "",
     service: "",
     breed: "",
+    petName: "",
     age: "",
     date: "",
     time: "",
@@ -95,18 +96,22 @@ const Vet = () => {
     e.preventDefault();
 
     try {
-      const response = await axios.post('/api/user/user-book-appointment', service, {
+      const response = await axios.post(
+        "/api/user/user-book-appointment",
+        service,
+        {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
-        });
+        }
+      );
 
       if (response.data.success) {
         toast.success(response.data.message);
         // Do something else, like navigating to another page
       }
     } catch (error) {
-      console.log(error)
+      console.log(error);
       toast.error("Error in booking appointment.");
     }
   };
@@ -134,7 +139,7 @@ const Vet = () => {
                 </select>
               </div>
 
-              {service.pet === 'Dog' && (
+              {service.pet === "Dog" && (
                 <div className="mb-2">
                   <label htmlFor="size">Choose Size: </label>
                   <select
@@ -166,6 +171,18 @@ const Vet = () => {
                   value={service.age}
                   onChange={handleChange}
                 />
+
+                <div className="mb-2">
+                  <label htmlFor="PetName">Pet Name:</label>
+                  <input
+                    className="form-control"
+                    type="text"
+                    id="PetName"
+                    name="PetName"
+                    value={service.petName}
+                    onChange={handleChange}
+                  />
+                </div>
               </div>
               <div className="mb-2">
                 <label htmlFor="service">Choose Service: </label>

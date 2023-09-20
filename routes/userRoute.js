@@ -865,14 +865,62 @@ router.post("/user-book-appointment", authMiddleware, async (req, res) => {
       date: req.body.date,
       time: req.body.time,
       pet: req.body.pet,
+      petName: req.body.petName,
       size: req.body.size,
       lng: req.body.lng,
       lat: req.body.lat,
 
       // Add other fields if needed
     });
+    const followUp = req.body.followUp;
 
     const savedAppointment = await newAppointment.save();
+
+
+    if (followUp) {
+      const user = await User.findOne({ _id: req?.body?.userId });
+      const doctor = await Doctor.findOne({ _id: req?.body?.doctorId });
+
+      const transporter = nodemailer.createTransport({
+        host: "mailslurp.mx",
+        port: 2587,
+        auth: {
+          user: "3XuAF86a05YLhLwO2vYB3oykQflir7J1",
+          pass: "y05g7jL61VapbV2eFOrCqrd2FVNJeWrB",
+        },
+      });
+      const mailOptions = {
+        from: "6598040e-ceb7-44ae-a975-e1630c4856e4@mailslurp.com",
+        to: user?.email,
+        subject: "Follow-Up Appointment",
+        html: `
+        <html>
+          <body>
+            <p>Hello ${user?.name},</p>
+            <p>Thank you for scheduling your follow up Appointment for your ${req?.body?.pet} ${req?.body?.petName} </p>
+            <p>Please click the following link to activate your account:</p>
+            <p>The given below are the details for your appointment</p>
+            ${
+              doctor
+                ? `<p>Doctor Name ${doctor?.firstName} ${doctor?.lastName}</p>`
+                : ``
+            }
+            <p>Appointment Date: ${req?.body?.date}</p>
+          </body>
+        </html>
+      `,
+      };
+
+      transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+          console.log("Error sending email:", error);
+        } else {
+          console.log("Email sent:", info.response);
+        }
+      });
+    }
+
+
     res.json({
       success: true,
       message: "Appointment booked successfully",
@@ -952,7 +1000,7 @@ router.get("/appointments/veterinary", authMiddleware, async (req, res) => {
 
     // Fetch appointments for the specified module
     const appointments = await UserappModel.find({ module: "veterinary" });
-    console.log('appointments', appointments)
+    console.log("appointments", appointments);
 
     // If appointments are found, you can fetch user details only
     const populatedAppointments = await Promise.all(
@@ -961,7 +1009,7 @@ router.get("/appointments/veterinary", authMiddleware, async (req, res) => {
         const doctorId = appointment.doctorId;
         // Assuming you have a User model for user details
         const user = await User.findOne({ _id: userId });
-       const doctor = await Doctor.findOne({ _id: doctorId });
+        const doctor = await Doctor.findOne({ _id: doctorId });
         // console.log("user:", user);
 
         return {
@@ -986,6 +1034,41 @@ router.get("/appointments/mobvet", authMiddleware, async (req, res) => {
     // Fetch appointments for the specified module
     const appointments = await UserappModel.find({
       module: "mobile_veterinary",
+    });
+
+    // If appointments are found, you can fetch user details only
+    const populatedAppointments = await Promise.all(
+      appointments.map(async (appointment) => {
+        const userId = appointment.userId;
+        //  const doctorId = appointment.doctorId;
+        // Assuming you have a User model for user details
+        const user = await User.findOne({ _id: userId });
+        //   const doctor = await Doctor.findOne({ _id: doctorId });
+        //  console.log("user:", user);
+
+        return {
+          ...appointment.toObject(),
+          user,
+          //  doctor
+        };
+      })
+    );
+
+    console.log("populated Appointments:", populatedAppointments);
+    res.json({ success: true, data: populatedAppointments });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
+router.get("/appointments/mobgroom", authMiddleware, async (req, res) => {
+  try {
+    // const moduleType = req.params.module;
+
+    // Fetch appointments for the specified module
+    const appointments = await UserappModel.find({
+      module: "mobile_grooming",
     });
 
     // If appointments are found, you can fetch user details only
