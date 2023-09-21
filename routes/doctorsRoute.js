@@ -64,7 +64,7 @@ router.get(
   async (req, res) => {
     try {
       const doctor = await Doctor.findOne({ userId: req.body.userId });
-      const appointments = await Appointment.find({ doctorId: doctor._id });
+      const appointments = await UserappModel.find({ doctorId: doctor._id });
       // console.log(doctor);
       //     console.log(appointments);
       res.status(200).send({
@@ -86,7 +86,7 @@ router.get(
 router.post("/change-appointment-status", authMiddleware, async (req, res) => {
   try {
     const { appointmentId, status } = req.body;
-    const appointment = await Appointment.findByIdAndUpdate(appointmentId, {
+    const appointment = await UserappModel.findByIdAndUpdate(appointmentId, {
       status,
     });
 
@@ -167,7 +167,7 @@ router.get(
     const { userId, petId } = req.params;
 
     try {
-      const appointments = await Appointment.find({ userId, petId });
+      const appointments = await UserappModel.find({ userId, petId });
       // console.log(appointments);
       res.status(200).json({
         success: true,
@@ -211,7 +211,7 @@ router.get(
 router.get("/get-all-users/:id", authMiddleware, async (req, res) => {
   try {
     console.log(req.params.id);
-    const appointment = await Appointment.findOne({
+    const appointment = await UserappModel.findOne({
       appointmentId: req.params.id,
     });
     const users = await User.findById({ userId: appointment.userId });
@@ -276,7 +276,7 @@ router.get("/doctors/:id", authMiddleware, async (req, res) => {
 });
 router.get("/get-appointment-by-id/:id", authMiddleware, async (req, res) => {
   try {
-    const appointment = await Appointment.findById(req.params._id)
+    const appointment = await UserappModel.findById(req.params._id)
       .populate("users")
       .populate("petlists")
       .exec();

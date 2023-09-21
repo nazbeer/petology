@@ -13,6 +13,7 @@ const nodemailer = require("nodemailer");
 const UserappModel = require("../models/userappModel");
 const packModel = require("../models/packModel");
 const crypto = require("crypto");
+const mongoose = require("mongoose");
 
 router.post("/register", async (req, res) => {
   try {
@@ -509,7 +510,7 @@ router.post(
       const { appointmentId, doctorId } = req.body;
 
       // Find the appointment by ID and update the doctorId
-      const updatedAppointment = await Appointment.findByIdAndUpdate(
+      const updatedAppointment = await UserappModel.findByIdAndUpdate(
         appointmentId,
         { doctorId },
         { new: true } // Return the updated appointment
@@ -619,7 +620,7 @@ router.post("/check-booking-avilability", authMiddleware, async (req, res) => {
 
 router.get("/get-appointments-by-user-id", authMiddleware, async (req, res) => {
   try {
-    const appointments = await Appointment.find({ userId: req.body.userId });
+    const appointments = await UserappModel.find({ userId: req.body.userId });
     res.status(200).send({
       message: "Appointments fetched successfully",
       success: true,
@@ -636,12 +637,50 @@ router.get("/get-appointments-by-user-id", authMiddleware, async (req, res) => {
 });
 router.get("/get-all-appointments", authMiddleware, async (req, res) => {
   try {
-    const appointmentList = await Appointment.find({});
+    const appointmentList = await UserappModel.find({});
     // console.log(appointmentList);
+    const userId = appointmentList.map((item) => item.userId);
+    const doctorId = appointmentList.map((item) => item.doctorId);
+    const users = await User.find(
+      { _id: { $in: userId } },
+      { name: 1, _id: 1 }
+    );
+    const doctors = await Doctor.find(
+      { _id: { $in: doctorId } },
+      { firstName: 1, lastName: 1, _id: 1, specialization: 1, status:1 }
+    );
+
+    const combinedData = appointmentList.map((item1) => {
+      const user = users.find((item2) => {
+        const objectId = mongoose.Types.ObjectId(item1.userId);
+        console.log(objectId);
+
+        item2._id.equals(item1.userId);
+        console.log(item2._id.equals(item1.userId));
+        return item2;
+      });
+
+      const doctor = doctors.find((item3) => {
+        const objectId = mongoose.Types.ObjectId(item1.doctorId);
+        console.log(objectId);
+
+        item3._id.equals(item1.doctorId);
+        console.log(item3._id.equals(item1.doctorId));
+        return item3;
+      });
+
+      return {
+        // Combine data from both tables here as needed
+        appointment: item1,
+        user: user,
+        doctor: doctor,
+      };
+    });
+
     res.status(200).send({
       message: "Appointment List fetched successfully",
       success: true,
-      data: appointmentList,
+      data: combinedData,
     });
   } catch (error) {
     console.log(error);
@@ -652,7 +691,6 @@ router.get("/get-all-appointments", authMiddleware, async (req, res) => {
     });
   }
 });
-
 router.get("/get-all-open-appointments", async (req, res) => {
   try {
     const appointmentList = await OpenAppointment.find({})
@@ -735,7 +773,7 @@ router.get(
     const { userId, petId } = req.params;
 
     try {
-      const appointments = await Appointment.find({ userId, petId });
+      const appointments = await UserappModel.find({ userId, petId });
       // console.log(appointments);
       res.status(200).json({
         success: true,
@@ -803,7 +841,7 @@ router.post(
       const { appointmentId } = req.params;
 
       // Find the appointment by appointmentId
-      const appointment = await Appointment.findById(appointmentId);
+      const appointment = await UserappModel.findById(appointmentId);
       // console.log(appointment);
       if (!appointment) {
         return res
@@ -876,7 +914,6 @@ router.post("/user-book-appointment", authMiddleware, async (req, res) => {
 
     const savedAppointment = await newAppointment.save();
 
-
     if (followUp) {
       const user = await User.findOne({ _id: req?.body?.userId });
       const doctor = await Doctor.findOne({ _id: req?.body?.doctorId });
@@ -897,8 +934,9 @@ router.post("/user-book-appointment", authMiddleware, async (req, res) => {
         <html>
           <body>
             <p>Hello ${user?.name},</p>
-            <p>Thank you for scheduling your follow up Appointment for your ${req?.body?.pet} ${req?.body?.petName} </p>
-            <p>Please click the following link to activate your account:</p>
+            <p>Thank you for scheduling your follow up Appointment for your ${
+              req?.body?.pet
+            } ${req?.body?.petName} </p>
             <p>The given below are the details for your appointment</p>
             ${
               doctor
@@ -919,7 +957,6 @@ router.post("/user-book-appointment", authMiddleware, async (req, res) => {
         }
       });
     }
-
 
     res.json({
       success: true,

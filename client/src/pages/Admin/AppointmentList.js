@@ -90,7 +90,7 @@ function Appointmentlist(doctorId) {
         },
       }
       );
-    //  console.log('response',response.data.data);
+     console.log('response',response.data.data);
       if (response.data.success) {
         setDoctors(response.data.data);
       }
@@ -119,7 +119,7 @@ function Appointmentlist(doctorId) {
       const response = await axios.post(
         "/api/admin/assign-doctor-to-appointment",
         {
-          appointmentId: selectedAppointment._id,
+          appointmentId: selectedAppointment?._id,
           doctorId: selectedDoctor,
         },
         {
@@ -149,6 +149,7 @@ function Appointmentlist(doctorId) {
       });
 
       if (response.data.success) {
+        console.log(response.data.data)
         setAppointments(response.data.data);
       }
     } catch (error) {
@@ -195,9 +196,9 @@ function Appointmentlist(doctorId) {
     // Fetch doctor details based on selected appointment
     const fetchDoctorDetails = async () => {
       try {
-        if (selectedAppointment && selectedAppointment.doctorInfo) {
+        if (selectedAppointment && selectedAppointment?.doctor) {
           const response = await axios.get(
-            `/api/admin/doctordetails/${selectedAppointment.doctorInfo._id}`
+            `/api/admin/doctordetails/${selectedAppointment?.doctor?._id}`
           );
           console.log(response);
           if (response.data.success) {
@@ -241,7 +242,7 @@ function Appointmentlist(doctorId) {
       dataIndex  :'date',
       render:(text, record)=>(
         <span>
-          {moment(record.date).format('LL')}
+          {moment(record?.date).format('LL')}
         </span>
       ),
       responsive: ["xs", "md", "sm","lg"],
@@ -251,7 +252,7 @@ function Appointmentlist(doctorId) {
       dataIndex:"time",
       render:(text, record)=> (
         <span>
-          {record.time}
+          {record?.time}
         </span>
       ),
       responsive: ["xs", "md","sm", "lg"],
@@ -260,7 +261,7 @@ function Appointmentlist(doctorId) {
       title:"Parent Name",
       dataIndex:"parentName",
       render :(text, record)=>(
-        <span>{record.firstname} {record.lastname}</span>
+        <span>{record?.firstname} {record?.lastname}</span>
       ),
       responsive: ["xs", "md","sm", "lg"],
     },
@@ -268,7 +269,7 @@ function Appointmentlist(doctorId) {
       title:'Mobile',
       dataIndex:'mobile',
       render:(text,record)=>(
-        <span>{record.mobile}</span>
+        <span>{record?.mobile}</span>
       ),
       responsive: ["xs", "md","sm", "lg"],
     },
@@ -276,7 +277,7 @@ function Appointmentlist(doctorId) {
       title:'Email Address',
       dataIndex: 'email',
       render:(text, record)=>(
-        <span>{record.email}</span>
+        <span>{record?.email}</span>
       ),
       responsive: ["xs", "md","sm", "lg"],
     },
@@ -285,7 +286,7 @@ function Appointmentlist(doctorId) {
       title:'Status',
       dataIndex:"status",
       render:(text, record)=>(
-        <span className="text-capitalize">{record.status}</span>
+        <span className="text-capitalize">{record?.status}</span>
       ),
            responsive: ["xs", "md","sm", "lg"],
     },
@@ -294,7 +295,7 @@ function Appointmentlist(doctorId) {
       dataIndex: "actions",
       render: (text, record) => (
         <div className="d-flex justify-content-evenly align-items-center gap-3">
-          {record.status === "pending" || record.status === "Pending" || record.status === "blocked" ? (
+          {record?.status === "pending" || record?.status === "Pending" || record?.status === "blocked" ? (
             <button
               type="button"
               className="btn btn-warning btn-sm text-capitalize"
@@ -335,7 +336,7 @@ function Appointmentlist(doctorId) {
       dataIndex: "parentname",
       render: (text, record) => (
         <span>
-          {record.userInfo.name}
+          {record?.user?.name}
         </span>
       ),
       responsive: ["xs", "md", "sm","lg"],
@@ -345,7 +346,7 @@ function Appointmentlist(doctorId) {
       dataIndex: "name",
       render: (text, record) => (
         <span>
-          {record.doctorInfo.name || record.doctorInfo.firstName + " " + record.doctorInfo.lastName}
+          {record?.doctor?.firstName} {record?.doctor?.lastName}
         </span>
       ),
       responsive: ["xs", "md", "sm","lg"],
@@ -364,7 +365,7 @@ function Appointmentlist(doctorId) {
       dataIndex: "specialization",
       render: (text, record) => (
         <span className="text-capitalize">
-          {record.doctorInfo.specialization}
+          {record?.doctor?.specialization}
         </span>
       ),
       responsive: ["xs", "md", "sm","lg"],
@@ -374,7 +375,7 @@ function Appointmentlist(doctorId) {
       dataIndex: "date",
       render:(text, record)=>(
         <span>
-          {moment(record.date).format('LL')}
+          {moment(record?.date).format('LL')}
         </span>
       ),
       responsive: ["xs", "md", "sm","lg"],
@@ -384,7 +385,7 @@ function Appointmentlist(doctorId) {
       dataIndex: "time",
       render:(text, record)=>(
         <span>
-          {moment(record.time).format('LTS')}
+          {moment(record?.time).format('LTS')}
         </span>
       ),
       responsive: ["xs", "md", "sm","lg"],
@@ -393,7 +394,7 @@ function Appointmentlist(doctorId) {
     title: "Status",
     dataIndex: "status",
     render:(text, record) =>(
-      <span className="text-capitalize">{record.status}</span>
+      <span className="text-capitalize">{record?.doctor?.status}</span>
     ),
     responsive: ["xs", "md", "sm","lg"],
    },
@@ -403,7 +404,7 @@ function Appointmentlist(doctorId) {
         dataIndex: "actions",
         render: (text, record) => (
           <div className="d-flex justify-content-evenly align-items-center gap-3">
-            {record.status === "pending" || record.status === "Pending" || record.status === "blocked" ? (
+            {record.status === "pending" || record?.status === "Pending" || record?.status === "blocked" ? (
               <button
                 type="button"
                 className="btn btn-warning btn-sm text-capitalize"
@@ -466,7 +467,7 @@ function Appointmentlist(doctorId) {
             <div className="col-md-12 ">
            <div className="d-lg-flex justify-content-between align-items-center gap-4 mb-3" >
             <label className="text-left">Parent Name: </label> 
-            <span className="text-right">{selectedAppointment && selectedAppointment.userInfo.firstName}</span>
+            <span className="text-right">{selectedAppointment && selectedAppointment?.user?.firstName}</span>
             </div> 
             <div className="d-lg-flex justify-content-between align-items-center gap-4 mb-3" >
             <label className="text-left">Assign Doctor: </label> 
@@ -474,7 +475,7 @@ function Appointmentlist(doctorId) {
               <option>--Select Doctor--</option>
               {selectedAppointment && doctors.map((doctoro) => (
                 <option key={doctoro._id} value={doctoro._id}>
-                  Dr. {doctoro.firstName} {doctoro.lastName}
+                  Dr. {doctoro?.firstName} {doctoro?.lastName}
                 </option>
               ))}
               
@@ -482,7 +483,7 @@ function Appointmentlist(doctorId) {
             </div> 
             <div className="d-lg-flex justify-content-between align-items-center gap-4  " >
             <label className="text-left">Doctor Specialization: </label> 
-            <span className="text-right">{selectedAppointment && selectedAppointment.doctorInfo.specialization}</span>
+            <span className="text-right">{selectedAppointment && selectedAppointment?.doctor?.specialization}</span>
             </div> 
            </div>
           

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 import { showLoading, hideLoading } from "../../redux/alertsSlice";
 import { toast } from "react-hot-toast";
@@ -21,6 +22,7 @@ function Veti() {
   const [newAppointment, setnewAppointments] = useState({});
 
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const handleNext = () => {
     setOpenDate(false);
@@ -128,7 +130,7 @@ function Veti() {
       dataIndex: "name",
       render: (text, record) => (
         <span>
-          Dr. {record.doctor.firstName} {record.doctor.lastName}
+          Dr. {record?.doctor?.firstName} {record?.doctor?.lastName}
         </span>
       ),
     },
@@ -136,21 +138,21 @@ function Veti() {
       title: "Service",
       dataIndex: "service",
       render: (text, record) => (
-        <span className="text-capitalize">{record.service}</span>
+        <span className="text-capitalize">{record?.service}</span>
       ),
     },
     {
       title: "Client",
       dataIndex: "name",
       render: (text, record) => (
-        <span className="text-capitalize">{record.user.name}</span>
+        <span className="text-capitalize">{record?.user?.name}</span>
       ),
     },
     {
       title: "Mobile",
       dataIndex: "mobile",
       render: (text, record) => (
-        <span className="text-capitalize">{record.user.mobile}</span>
+        <span className="text-capitalize">{record?.user?.mobile}</span>
       ),
     },
     {
@@ -158,7 +160,7 @@ function Veti() {
       dataIndex: "pet",
       render: (text, record) => (
         <span className="text-capitalize">
-          {record.pet} - {record.size} - {record.breed}
+          {record.pet} - {record.size} - {record?.breed}
         </span>
       ),
     },
@@ -167,7 +169,7 @@ function Veti() {
       dataIndex: "timing",
       render: (text, record) => (
         <span className="text-capitalize">
-          {moment(record.date).format("D MMM, YYYY")}| {record.time}{" "}
+          {moment(record.date).format("D MMM, YYYY")}| {record?.time}{" "}
         </span>
       ),
     },
@@ -175,7 +177,21 @@ function Veti() {
       title: "Status",
       dataIndex: "status",
       render: (text, record) => (
-        <span className="text-capitalize">{record.status}</span>
+        <span className="text-capitalize">{record?.status}</span>
+      ),
+    },
+    {
+      title: "Prescription",
+      dataIndex: "prescriptions",
+      render: (text, record) => (
+        <div>
+          <button
+            className="btn btn-danger btn-sm ms-2"
+            onClick={() => showPrescriptionModal(record?._id)}
+          >
+            View
+          </button>
+        </div>
       ),
     },
     {
@@ -185,18 +201,12 @@ function Veti() {
         <div>
           <button
             className="btn btn-danger btn-sm"
-            onClick={() => cancelAppointment(record._id)}
-            disabled={cancelledAppointments.includes(record._id)}
+            onClick={() => cancelAppointment(record?._id)}
+            disabled={cancelledAppointments.includes(record?._id)}
           >
-            {cancelledAppointments.includes(record._id)
+            {cancelledAppointments.includes(record?._id)
               ? "Cancelled"
               : "Cancel"}
-          </button>
-          <button
-            className="btn btn-danger btn-sm ms-2"
-            onClick={() => showPrescriptionModal(record._id)}
-          >
-            View
           </button>
         </div>
       ),
@@ -218,7 +228,7 @@ function Veti() {
     if (openDate && date) {
       console.log(date?.format("YYYY-MM-DD"));
       newAppointment.date = date?.format("YYYY-MM-DD");
-      newAppointment['followUp'] = true
+      newAppointment["followUp"] = true;
       console.log(newAppointment);
       try {
         const response = await axios.post(
@@ -240,6 +250,7 @@ function Veti() {
       }
     } else {
       setDate("");
+      navigate("/user/booking");
     }
   };
 
@@ -255,7 +266,7 @@ function Veti() {
       </div>
 
       <hr />
-      <Table columns={columns} dataSource={appointments.data} />
+      <Table columns={columns} dataSource={appointments?.data} />
       <Modal
         title="View Prescription"
         open={showModal}
@@ -270,46 +281,57 @@ function Veti() {
             layout="vertical"
             width={800}
           >
-            <Form.Item label="Appointment ID" name="appointmentId">
-              <Input disabled />
-            </Form.Item>
-
-            <Form.Item
-              label="User"
-              name="userName"
-              rules={[{ required: true }]}
-            >
-              <Input disabled />
-            </Form.Item>
-
-            <Form.Item label="Doctor" name="doctorName">
-              <Input disabled />
-            </Form.Item>
-
-            <Form.Item label="Pet" name="pet">
-              <Input value="Dog" disabled />
-            </Form.Item>
-
+            <div className="row">
+              <div className="col">
+                <Form.Item label="Appointment ID" name="appointmentId">
+                  <Input disabled />
+                </Form.Item>
+              </div>
+              <div className="col">
+                <Form.Item
+                  label="User"
+                  name="userName"
+                  rules={[{ required: true }]}
+                >
+                  <Input disabled />
+                </Form.Item>
+              </div>
+            </div>
+            <div className="row">
+              <div className="col">
+                <Form.Item label="Doctor" name="doctorName">
+                  <Input disabled />
+                </Form.Item>
+              </div>
+              <div className="col">
+                <Form.Item label="Pet" name="pet">
+                  <Input value="Dog" disabled />
+                </Form.Item>
+              </div>
+            </div>
             <Form.Item label="Pet" name="petId" hidden>
               <Input disabled />
             </Form.Item>
-
-            <Form.Item
-              label="Prescription"
-              name="prescription"
-              rules={[{ required: true }]}
-            >
-              <Input.TextArea rows={4} />
-            </Form.Item>
-
-            <Form.Item
-              label="Description"
-              name="description"
-              rules={[{ required: true }]}
-            >
-              <Input.TextArea rows={4} />
-            </Form.Item>
-
+            <div className="row">
+              <div className="col">
+                <Form.Item
+                  label="Prescription"
+                  name="prescription"
+                  rules={[{ required: true }]}
+                >
+                  <Input.TextArea disabled />
+                </Form.Item>
+              </div>
+              <div className="col">
+                <Form.Item
+                  label="Description"
+                  name="description"
+                  rules={[{ required: true }]}
+                >
+                  <Input.TextArea disabled />
+                </Form.Item>
+              </div>
+            </div>
             <Form.Item>
               <Radio.Group name="radiogroup" defaultValue={1}>
                 <Radio value={1} onChange={handleNext}>
@@ -322,7 +344,7 @@ function Veti() {
               </Radio.Group>
             </Form.Item>
 
-            {openDate && (
+            {openDate ? (
               <div>
                 <Form.Item label="Next Appointment Date" name="ndate">
                   <DatePicker
@@ -342,6 +364,12 @@ function Veti() {
                   </Button>
                 </Form.Item>
               </div>
+            ) : (
+              <Form.Item>
+                <Button type="primary" htmlType="submit">
+                  Book Now
+                </Button>
+              </Form.Item>
             )}
           </Form>
         </div>

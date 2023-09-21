@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 import { showLoading, hideLoading } from "../../redux/alertsSlice";
 import { toast } from "react-hot-toast";
@@ -21,6 +22,7 @@ function MobVeti() {
   const [newAppointment, setnewAppointments] = useState({});
 
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const handleNext = () => {
     setOpenDate(false);
@@ -134,7 +136,7 @@ function MobVeti() {
       dataIndex: "name",
       render: (text, record) => (
         <span>
-          Dr. {record.doctor.firstName} {record.doctor.lastName}
+          Dr. {record?.doctor?.firstName} {record?.doctor?.lastName}
         </span>
       ),
     },
@@ -185,6 +187,20 @@ function MobVeti() {
       ),
     },
     {
+      title: "Prescription",
+      dataIndex: "prescriptions",
+      render: (text, record) => (
+        <div>
+          <button
+            className="btn btn-danger btn-sm ms-2"
+            onClick={() => showPrescriptionModal(record._id)}
+          >
+            View
+          </button>
+        </div>
+      ),
+    },
+    {
       title: "Actions",
       dataIndex: "actions",
       render: (text, record) => (
@@ -198,13 +214,6 @@ function MobVeti() {
               ? "Cancelled"
               : "Cancel"}
           </button>
-
-          <button
-            className="btn btn-danger btn-sm ms-2"
-            onClick={() => showPrescriptionModal(record._id)}
-          >
-            View
-          </button>
         </div>
       ),
     },
@@ -215,7 +224,7 @@ function MobVeti() {
     if (openDate && date) {
       console.log(date?.format("YYYY-MM-DD"));
       newAppointment.date = date?.format("YYYY-MM-DD");
-      newAppointment.followUp = true
+      newAppointment.followUp = true;
       console.log(newAppointment);
       try {
         const response = await axios.post(
@@ -237,6 +246,7 @@ function MobVeti() {
       }
     } else {
       setDate("");
+      navigate("/user/booking");
     }
   };
 
@@ -262,7 +272,7 @@ function MobVeti() {
       </div>
 
       <hr />
-      <Table columns={columns} dataSource={appointments.data} />
+      <Table columns={columns} dataSource={appointments?.data} />
 
       <Modal
         title="View Prescription"
@@ -272,52 +282,63 @@ function MobVeti() {
         width={700}
       >
         <div className="col-md-12 ">
-          <Form
+        <Form
             form={form}
             onFinish={handleSubmit}
             layout="vertical"
             width={800}
           >
-            <Form.Item label="Appointment ID" name="appointmentId">
-              <Input disabled />
-            </Form.Item>
-
-            <Form.Item
-              label="User"
-              name="userName"
-              rules={[{ required: true }]}
-            >
-              <Input disabled />
-            </Form.Item>
-
-            <Form.Item label="Doctor" name="doctorName">
-              <Input disabled />
-            </Form.Item>
-
-            <Form.Item label="Pet" name="pet">
-              <Input value="Dog" disabled />
-            </Form.Item>
-
+            <div className="row">
+              <div className="col">
+                <Form.Item label="Appointment ID" name="appointmentId">
+                  <Input disabled />
+                </Form.Item>
+              </div>
+              <div className="col">
+                <Form.Item
+                  label="User"
+                  name="userName"
+                  rules={[{ required: true }]}
+                >
+                  <Input disabled />
+                </Form.Item>
+              </div>
+            </div>
+            <div className="row">
+              <div className="col">
+                <Form.Item label="Doctor" name="doctorName">
+                  <Input disabled />
+                </Form.Item>
+              </div>
+              <div className="col">
+                <Form.Item label="Pet" name="pet">
+                  <Input value="Dog" disabled />
+                </Form.Item>
+              </div>
+            </div>
             <Form.Item label="Pet" name="petId" hidden>
               <Input disabled />
             </Form.Item>
-
-            <Form.Item
-              label="Prescription"
-              name="prescription"
-              rules={[{ required: true }]}
-            >
-              <Input.TextArea rows={4} />
-            </Form.Item>
-
-            <Form.Item
-              label="Description"
-              name="description"
-              rules={[{ required: true }]}
-            >
-              <Input.TextArea rows={4} />
-            </Form.Item>
-
+            <div className="row">
+              <div className="col">
+                <Form.Item
+                  label="Prescription"
+                  name="prescription"
+                  rules={[{ required: true }]}
+                >
+                  <Input.TextArea disabled />
+                </Form.Item>
+              </div>
+              <div className="col">
+                <Form.Item
+                  label="Description"
+                  name="description"
+                  rules={[{ required: true }]}
+                >
+                  <Input.TextArea disabled />
+                </Form.Item>
+              </div>
+            </div>
             <Form.Item>
               <Radio.Group name="radiogroup" defaultValue={1}>
                 <Radio value={1} onChange={handleNext}>
@@ -330,7 +351,7 @@ function MobVeti() {
               </Radio.Group>
             </Form.Item>
 
-            {openDate && (
+            {openDate ? (
               <div>
                 <Form.Item label="Next Appointment Date" name="ndate">
                   <DatePicker
@@ -350,6 +371,12 @@ function MobVeti() {
                   </Button>
                 </Form.Item>
               </div>
+            ) : (
+              <Form.Item>
+                <Button type="primary" htmlType="submit">
+                  Book Now
+                </Button>
+              </Form.Item>
             )}
           </Form>
         </div>

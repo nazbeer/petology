@@ -3,7 +3,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import { Button } from "antd";
-import 'bootstrap/dist/css/bootstrap.css';
+import "bootstrap/dist/css/bootstrap.css";
 import { Toaster } from "react-hot-toast";
 import Home from "./pages/Home";
 import { useSelector } from "react-redux";
@@ -22,29 +22,29 @@ import DoctorAppointments from "./pages/Doctor/DoctorAppointments";
 import Petlist from "./pages/Admin/PetList";
 import AddPet from "./pages/Admin/AddPet";
 import AdminProfile from "./pages/Admin/AdminProfile";
-import Grooming from './pages/Home/Grooming';
+import Grooming from "./pages/Home/Grooming";
 import MobileGrooming from "./pages/Home/MobileGrooming";
 import Veterinary from "./pages/Home/Veterinary";
 import MobileVet from "./pages/Home/MobileVet";
 import AddPrescription from "./pages/Doctor/AddPrescription";
-import UserHome from './pages/UserHome';
-import DoctorHome from './pages/DoctorHome';
-import AdminHome from './pages/AdminHome';
+import UserHome from "./pages/UserHome";
+import DoctorHome from "./pages/DoctorHome";
+import AdminHome from "./pages/AdminHome";
 import BreakTime from "./pages/Admin/BreakTime";
 import ServiceList from "./pages/Admin/ServiceList";
 import GroomerAppointments from "./pages/Groomer/GroomerAppointments";
 import GroomerHome from "./pages/GroomerHome";
 import ReceptionHome from "./pages/ReceptionHome";
 import RecProfile from "./pages/Reception/Profile";
-import RecPetlist from './pages/Reception/PetList';
-import RecServiceList from './pages/Reception/ServiceList';
-import RecAddService from './pages/Reception/AddService';
-import RecAddPet from './pages/Reception/AddPet';
-import RecUserslist from './pages/Reception/Userslist';
-import RecDoctorsList from './pages/Reception/DoctorsList';
+import RecPetlist from "./pages/Reception/PetList";
+import RecServiceList from "./pages/Reception/ServiceList";
+import RecAddService from "./pages/Reception/AddService";
+import RecAddPet from "./pages/Reception/AddPet";
+import RecUserslist from "./pages/Reception/Userslist";
+import RecDoctorsList from "./pages/Reception/DoctorsList";
 //import RecGroomersList from './pages/Reception/GroomersList';
-import RecAppointmentList from './pages/Reception/AppointmentList';
-import RecBreakTime from './pages/Reception/BreakTime';
+import RecAppointmentList from "./pages/Reception/AppointmentList";
+import RecBreakTime from "./pages/Reception/BreakTime";
 //import AddService from "./pages/Admin/AddService";
 import GroomingList from "./pages/Admin/GroomingList";
 import AddPack from "./pages/Admin/AddPack";
@@ -55,17 +55,18 @@ import UserPetList from "./pages/Pets";
 import DoctorList from "./pages/DoctorList";
 import BookDoctor from "./pages/BookDoctor";
 import UploadHistory from "./pages/Admin/UploadHistory";
-import BookingNow from './pages/BookNow';
+import BookingNow from "./pages/BookNow";
 //import SignIn from "./pages/SignIn";
 import UserAppointments from "./pages/UserAppointments";
 import MobLogin from "./pages/MobLogin";
 import ActivationPage from "./pages/ActivationPage";
+import WalkInBooking from "./pages/Reception/WalkInBooking";
+import WalkInBookingAdmin from "./pages/Admin/WalkInBookingAdmin";
 
 function App() {
   const { loading } = useSelector((state) => state.alerts);
   return (
     <BrowserRouter>
-   
       {loading && (
         <div className="spinner-parent">
           <div className="spinner-border" role="status"></div>
@@ -81,7 +82,7 @@ function App() {
             </PublicRoute>
           }
         />
-         <Route
+        <Route
           path="/otp-login"
           element={
             <PublicRoute>
@@ -89,7 +90,7 @@ function App() {
             </PublicRoute>
           }
         />
-         <Route
+        <Route
           path="/activate/:token"
           element={
             <PublicRoute>
@@ -97,7 +98,7 @@ function App() {
             </PublicRoute>
           }
         />
-          {/* <Route
+        {/* <Route
           path="/signin"
           element={
             <PublicRoute>
@@ -122,47 +123,53 @@ function App() {
             </ProtectedRoute>
           }
         />
-             
-          <Route
+
+        <Route
           path="/doctor"
           element={
             <ProtectedRoute>
               <DoctorHome />
             </ProtectedRoute>
           }
-          
         />
         {/* <Route
         path='/'
         element={<PublicRoute><Veterinary/></PublicRoute>}
         /> */}
         <Route
-        path='/grooming'
-        element={<PublicRoute>
-          <Grooming/>
-          </PublicRoute>}
-        />
-         <Route
-        path='/mobilegrooming'
-        element={<PublicRoute>
-          <MobileGrooming/>
-          </PublicRoute>}
-        />
-         <Route
-        path='/veterinary'
-        element={<PublicRoute>
-          <Veterinary/>
-          </PublicRoute>}
-        />
-      
-           <Route
-        path='/mobilevet'
-        element={<PublicRoute>
-          <MobileVet/>
-          </PublicRoute>}
+          path="/grooming"
+          element={
+            <PublicRoute>
+              <Grooming />
+            </PublicRoute>
+          }
         />
         <Route
-        
+          path="/mobilegrooming"
+          element={
+            <PublicRoute>
+              <MobileGrooming />
+            </PublicRoute>
+          }
+        />
+        <Route
+          path="/veterinary"
+          element={
+            <PublicRoute>
+              <Veterinary />
+            </PublicRoute>
+          }
+        />
+
+        <Route
+          path="/mobilevet"
+          element={
+            <PublicRoute>
+              <MobileVet />
+            </PublicRoute>
+          }
+        />
+        <Route
           path="/apply-doctor"
           element={
             <ProtectedRoute>
@@ -182,42 +189,53 @@ function App() {
           path="/admin/petlist"
           element={
             <ProtectedRoute>
-              <Petlist/>
+              <Petlist />
             </ProtectedRoute>
           }
-          />
-          <Route
+        />
+        <Route
           path="/admin/uploadhistory"
           element={
             <ProtectedRoute>
-              <UploadHistory/>
+              <UploadHistory />
             </ProtectedRoute>
-          }/>
-           <Route
+          }
+        />
+        <Route
           path="/admin/addservices"
           element={
             <ProtectedRoute>
-              <AddPack/>
+              <AddPack />
             </ProtectedRoute>
           }
-          />
-          <Route 
+        />
+
+        <Route
+          path="/admin/walkin"
+          element={
+            <ProtectedRoute>
+              <WalkInBookingAdmin />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
           path="/admin/servicelist"
           element={
             <ProtectedRoute>
-              <ServiceList/>
+              <ServiceList />
             </ProtectedRoute>
           }
-          />
-          <Route
+        />
+        <Route
           path="/admin/addpet"
           element={
             <ProtectedRoute>
-              <AddPet/>
+              <AddPet />
             </ProtectedRoute>
           }
-          />
-            
+        />
+
         <Route
           path="/admin/userslist"
           element={
@@ -227,7 +245,6 @@ function App() {
           }
         />
         <Route
-          
           path="/admin/apply-doctor"
           element={
             <ProtectedRoute>
@@ -251,7 +268,7 @@ function App() {
             </ProtectedRoute>
           }
         />
-           <Route
+        <Route
           path="/admin/groominglist"
           element={
             <ProtectedRoute>
@@ -259,23 +276,23 @@ function App() {
             </ProtectedRoute>
           }
         />
-          <Route
+        <Route
           path="/admin/mobilegroominglist"
           element={
             <ProtectedRoute>
-              <MobileGroomingList/>
+              <MobileGroomingList />
             </ProtectedRoute>
           }
         />
-          <Route
+        <Route
           path="/admin/mobilevetlist"
           element={
             <ProtectedRoute>
-              <MobileVetList/>
+              <MobileVetList />
             </ProtectedRoute>
           }
         />
-         <Route
+        <Route
           path="/admin/breaktime"
           element={
             <ProtectedRoute>
@@ -283,7 +300,7 @@ function App() {
             </ProtectedRoute>
           }
         />
-         <Route
+        <Route
           path="/admin/profile/:userId"
           element={
             <ProtectedRoute>
@@ -292,8 +309,12 @@ function App() {
           }
         />
         <Route
-        path="/doctor/prescriptions"
-        element={<ProtectedRoute><Prescription /></ProtectedRoute>}
+          path="/doctor/prescriptions"
+          element={
+            <ProtectedRoute>
+              <Prescription />
+            </ProtectedRoute>
+          }
         />
         <Route
           path="/doctor/profile/:userId"
@@ -304,54 +325,54 @@ function App() {
           }
         />
         <Route
-        path="/reception/profile/:userId"
-        element={
-          <ProtectedRoute>
-            <RecProfile/>
-          </ProtectedRoute>
-        }
+          path="/reception/profile/:userId"
+          element={
+            <ProtectedRoute>
+              <RecProfile />
+            </ProtectedRoute>
+          }
         />
-         <Route
+        <Route
           path="/reception"
           element={
             <ProtectedRoute>
-                <ReceptionHome/>
+              <ReceptionHome />
             </ProtectedRoute>
           }
         />
-      <Route
+        <Route
           path="/reception/petlist"
           element={
             <ProtectedRoute>
-              <RecPetlist/>
+              <RecPetlist />
             </ProtectedRoute>
           }
-          />
-           <Route
+        />
+        <Route
           path="/reception/addservices"
           element={
             <ProtectedRoute>
-              <RecAddService/>
+              <RecAddService />
             </ProtectedRoute>
           }
-          />
-          <Route 
+        />
+        <Route
           path="/reception/servicelist"
           element={
             <ProtectedRoute>
-              <RecServiceList/>
+              <RecServiceList />
             </ProtectedRoute>
           }
-          />
-          <Route
+        />
+        <Route
           path="/reception/addpet"
           element={
             <ProtectedRoute>
-              <RecAddPet/>
+              <RecAddPet />
             </ProtectedRoute>
           }
-          />
-            
+        />
+
         <Route
           path="/reception/userslist"
           element={
@@ -377,7 +398,15 @@ function App() {
             </ProtectedRoute>
           }
         />
-         <Route
+        <Route
+          path="/reception/walkin"
+          element={
+            <ProtectedRoute>
+              <WalkInBooking />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/reception/breaktime"
           element={
             <ProtectedRoute>
@@ -385,12 +414,12 @@ function App() {
             </ProtectedRoute>
           }
         />
-      
+
         <Route
           path="/doctor/profile/:userId"
           element={
             <ProtectedRoute>
-              <Profile/>
+              <Profile />
             </ProtectedRoute>
           }
         />
@@ -415,11 +444,10 @@ function App() {
           path="/groomer"
           element={
             <ProtectedRoute>
-              <GroomerHome/>
+              <GroomerHome />
             </ProtectedRoute>
-          
           }
-          />
+        />
         <Route
           path="/groomer/appointments"
           element={
@@ -453,62 +481,65 @@ function App() {
               <UserHome />
             </ProtectedRoute>
           }
-          
         />
-        <Route 
+        <Route
           path="/"
           element={
             <ProtectedRoute>
-              <Home/>
+              <Home />
             </ProtectedRoute>
           }
-          />
+        />
         <Route
-        path="/user/booking"
-        element={<ProtectedRoute><BookingNow/></ProtectedRoute>}
+          path="/user/booking"
+          element={
+            <ProtectedRoute>
+              <BookingNow />
+            </ProtectedRoute>
+          }
         />
         <Route
           path="/user/addpet"
           element={
             <ProtectedRoute>
-              <AddPet/>
+              <AddPet />
             </ProtectedRoute>
           }
-          />
-          
-          <Route
+        />
+
+        <Route
           path="/user/userappointments"
           element={
             <ProtectedRoute>
-              <UserAppointments/>
+              <UserAppointments />
             </ProtectedRoute>
           }
-          />
-           <Route
+        />
+        <Route
           path="/user/doctors"
           element={
             <ProtectedRoute>
-              <DoctorList/>
+              <DoctorList />
             </ProtectedRoute>
           }
-          />
-            <Route
+        />
+        <Route
           path="/user/bookdoctor/:doctorId"
           element={
             <ProtectedRoute>
-              <BookDoctor/>
+              <BookDoctor />
             </ProtectedRoute>
           }
-          />
-           <Route
+        />
+        <Route
           path="/user/pets"
           element={
             <ProtectedRoute>
-              <UserPetList/>
+              <UserPetList />
             </ProtectedRoute>
           }
-          />
-            <Route
+        />
+        <Route
           path="/user/appointmentlist"
           element={
             <ProtectedRoute>

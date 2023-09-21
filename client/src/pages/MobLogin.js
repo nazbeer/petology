@@ -67,7 +67,6 @@ const MobLogin = () => {
       dispatch(hideLoading());
 
       if (response.data.success) {
-        // toast.success(response.data.message);
         localStorage.setItem("token", response.data.data);
 
         const decodedToken = jwt_decode(response.data.data);
@@ -92,7 +91,7 @@ const MobLogin = () => {
     } catch (error) {
       console.log(JSON.stringify(error));
       dispatch(hideLoading());
-      toast.error("Something went wrong");
+      // toast.error("Something went wrong");
     }
   };
 
@@ -145,7 +144,7 @@ const MobLogin = () => {
   return (
     <section className="flex items-center justify-center h-screen">
       <div>
-        <Toaster toastOptions={{ duration: 4000 }} />
+        {/* <Toaster toastOptions={{ duration: 4000 }} /> */}
 
         {user ? (
           // Check the type of user and navigate accordingly

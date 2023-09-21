@@ -23,7 +23,6 @@ function GroomerAppointments() {
         }
       );
       dispatch(hideLoading());
-      console.log(response.data.data);
       if (response.data.success) {
         setAppointments(response.data.data);
         console.log(response.data.data);
@@ -46,7 +45,6 @@ function GroomerAppointments() {
         }
       );
       dispatch(hideLoading());
-      console.log(response.data.data);
       if (response.data.success) {
         setmobAppointments(response.data.data);
         console.log(response.data.data);
@@ -82,35 +80,36 @@ function GroomerAppointments() {
   const columns = [
     {
       title: "Id",
-      dataIndex: "_id",
+      dataIndex: "customId",
+      render: (text, record) => <span className="text-capitalize">{record?.appointment?.customId}</span>,
     },
     {
       title: "Client",
       dataIndex: "name",
-      render: (text, record) => <span className="text-capitalize">{record.firstname} {record.lastname}</span>,
+      render: (text, record) => <span className="text-capitalize">{record?.user?.name}</span>,
     },
     {
       title: "Phone",
       dataIndex: "phoneNumber",
-      render: (text, record) => <span>{record.mobile}</span>,
+      render: (text, record) => <span>{record?.user?.mobile}</span>,
     },
     {
       title: "Email",
       dataIndex: "email",
-      render: (text, record) => <span>{record.email}</span>,
+      render: (text, record) => <span>{record?.user?.email}</span>,
     },
     {
       title: "Services Needed",
       dataIndex: "service",
-      render: (text, record) => <span>{record.service}</span>,
+      render: (text, record) => <span>{record?.appointment?.service}</span>,
     },
     {
       title: "Date & Time",
       dataIndex: "createdAt",
       render: (text, record) => (
         <span>
-          {moment(record.date).format("DD-MM-YYYY")}{" | "}
-         {record.time}
+          {moment(record?.appointment?.date).format("DD-MM-YYYY")}{" | "}
+         {record?.appointment?.time}
         </span>
       ),
     },
@@ -118,7 +117,7 @@ function GroomerAppointments() {
       title: "Status",
       dataIndex: "status",
       render:(text, record)=>(
-        <span className="text-capitalize">{record.status}</span>
+        <span className="text-capitalize">{record?.appointment?.status}</span>
       )
     },
     {
@@ -126,7 +125,7 @@ function GroomerAppointments() {
       dataIndex: "actions",
       render: (text, record) => (
         <div className="d-flex">
-          {record.status === "pending" && (
+          {record?.appointment?.status === "pending" && (
             <div className="d-flex">
               <h1
                 className="anchor px-2"
@@ -142,7 +141,7 @@ function GroomerAppointments() {
               </h1>
             </div>
           )}
-          {record.status === "approved" && (
+          {record?.appointment?.status === "approved" && (
             <div className="d-flex">
               <h1
                 className="anchor px-2"
@@ -161,33 +160,35 @@ function GroomerAppointments() {
   const mobcolumns = [
     {
       title: "Id",
-      dataIndex: "_id",
+      dataIndex: "customId",
+      render: (text, record) => <span className="text-capitalize">{record?.appointment?.customId}</span>,
+
     },
     {
       title: "Client",
       dataIndex: "name",
-      render: (text, record) => <span className="text-capitalize">{record.firstname} {record.lastname}</span>,
+      render: (text, record) => <span className="text-capitalize">{record?.user?.name}</span>,
     },
     {
       title: "Phone",
       dataIndex: "phoneNumber",
-      render: (text, record) => <span>{record.mobile}</span>,
+      render: (text, record) => <span>{record?.user?.mobile}</span>,
     },
     {
       title: "Email",
       dataIndex: "email",
-      render: (text, record) => <span>{record.email}</span>,
+      render: (text, record) => <span>{record?.user?.email}</span>,
     },
     {
       title: "Services Needed",
       dataIndex: "service",
-      render: (text, record) => <span>{record.service}</span>,
+      render: (text, record) => <span>{record?.appointment?.service}</span>,
     },
 
     {
       title: "Location",
       dataIndex: "location",
-      render: (text, record) => <span>Latitude: {record.lat} <br/>Longitude: {record.lng}</span>,
+      render: (text, record) => <span>Latitude: {record?.appointment?.lat} <br/>Longitude: {record?.appointment?.lng}</span>,
     },
     
     {
@@ -195,8 +196,8 @@ function GroomerAppointments() {
       dataIndex: "createdAt",
       render: (text, record) => (
         <span>
-          {moment(record.date).format("DD-MM-YYYY")}{" | "}
-         {record.time}
+          {moment(record?.appointment?.date).format("DD-MM-YYYY")}{" | "}
+         {record?.appointment?.time}
         </span>
       ),
     },
@@ -204,7 +205,7 @@ function GroomerAppointments() {
       title: "Status",
       dataIndex: "status",
       render:(text, record)=>(
-        <span className="text-capitalize">{record.status}</span>
+        <span className="text-capitalize">{record?.appointment?.status}</span>
       )
     },
     {
@@ -212,7 +213,7 @@ function GroomerAppointments() {
       dataIndex: "actions",
       render: (text, record) => (
         <div className="d-flex">
-          {record.status === "pending" && (
+          {record?.appointment?.status === "pending" && (
             <div className="d-flex">
               <h1
                 className="anchor px-2"
@@ -228,7 +229,7 @@ function GroomerAppointments() {
               </h1>
             </div>
           )}
-          {record.status === "approved" && (
+          {record?.appointment?.status === "approved" && (
             <div className="d-flex">
               <h1
                 className="anchor px-2"

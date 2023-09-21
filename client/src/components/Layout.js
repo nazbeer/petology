@@ -21,7 +21,7 @@ function Layout({ children }) {
       path: "/user/userappointments",
       icon: "ri-file-list-line",
     },
-    
+
     // {
     //   name: "Doctors",
     //   path: "/user/doctors",
@@ -32,16 +32,16 @@ function Layout({ children }) {
       path: "/user/booking",
       icon: "ri-hospital-line",
     },
-    
+
     // {
     //   name:"Add Pets",
     //   path:"/user/addpet",
     //   icon:'ri-bear-smile-line'
     // },
     {
-      name:"Pets",
-      path:"/user/pets",
-      icon:'ri-bear-smile-line'
+      name: "Pets",
+      path: "/user/pets",
+      icon: "ri-bear-smile-line",
     },
   ];
   const receptionMenu = [
@@ -56,6 +56,11 @@ function Layout({ children }) {
       icon: "ri-user-star-line",
     },
     {
+      name: "WalkIn Booking",
+      path: "/reception/walkin",
+      icon: "ri-user-star-line",
+    },
+    {
       name: "Users",
       path: "/reception/userslist",
       icon: "ri-user-line",
@@ -66,9 +71,9 @@ function Layout({ children }) {
       icon: "ri-user-star-line",
     },
     {
-      name:"Pets",
-      path:"/reception/petlist",
-      icon:'ri-bear-smile-line'
+      name: "Pets",
+      path: "/reception/petlist",
+      icon: "ri-bear-smile-line",
     },
     // {
     //   name:"Add Pets",
@@ -76,9 +81,9 @@ function Layout({ children }) {
     //   icon:'ri-bear-smile-line'
     // },
     {
-      name:"Break Time",
-      path:"/reception/breaktime",
-      icon: 'ri-time-line',
+      name: "Break Time",
+      path: "/reception/breaktime",
+      icon: "ri-time-line",
     },
     // {
     //   name:"Add Service",
@@ -86,16 +91,15 @@ function Layout({ children }) {
     //   icon:'ri-bear-smile-line'
     // },
     {
-      name:"Services List",
-      path:"/reception/servicelist",
-      icon:'ri-booklet-fill',
+      name: "Services List",
+      path: "/reception/servicelist",
+      icon: "ri-booklet-fill",
     },
     // {
     //   name: "Profile",
     //   path: `/reception/profile/${user?._id}`,
     //   icon: "ri-user-line",
     // },
-
   ];
   const groomerMenu = [
     {
@@ -118,7 +122,6 @@ function Layout({ children }) {
     //   path: `/groomer/profile/${user?._id}`,
     //   icon: "ri-user-line",
     // },
-
   ];
   const doctorMenu = [
     {
@@ -137,9 +140,9 @@ function Layout({ children }) {
     //   icon: "ri-file-list-line",
     // },
     {
-      name:"Prescriptions",
-      path:"/doctor/prescriptions",
-      icon:"ri-file-list-3-line"
+      name: "Prescriptions",
+      path: "/doctor/prescriptions",
+      icon: "ri-file-list-3-line",
     },
     // {
     //   name: "Profile",
@@ -147,7 +150,7 @@ function Layout({ children }) {
     //   icon: "ri-user-line",
     // },
   ];
-  
+
   const adminMenu = [
     {
       name: "Home",
@@ -157,6 +160,11 @@ function Layout({ children }) {
     {
       name: "Appointments",
       path: "/admin/appointmentlist",
+      icon: "ri-user-star-line",
+    },
+    {
+      name: "WalkIn Booking",
+      path: "/admin/walkin",
       icon: "ri-user-star-line",
     },
     {
@@ -170,14 +178,14 @@ function Layout({ children }) {
       icon: "ri-user-star-line",
     },
     {
-      name:"Upload History",
-      path:"/admin/uploadhistory",
-      icon:"ri-survey-line",
+      name: "Upload History",
+      path: "/admin/uploadhistory",
+      icon: "ri-survey-line",
     },
     {
-      name:"Pets",
-      path:"/admin/petlist",
-      icon:'ri-bear-smile-line'
+      name: "Pets",
+      path: "/admin/petlist",
+      icon: "ri-bear-smile-line",
     },
     // {
     //   name:"Add Pets",
@@ -195,9 +203,9 @@ function Layout({ children }) {
     //   icon:'ri-bear-smile-line'
     // },
     {
-      name:"Services",
-      path:"/admin/addservices",
-      icon:'ri-booklet-fill',
+      name: "Services",
+      path: "/admin/addservices",
+      icon: "ri-booklet-fill",
     },
     // {
     //   name: "Profile",
@@ -206,14 +214,36 @@ function Layout({ children }) {
     // },
   ];
 
-  const menuToBeRendered = user?.isAdmin ? adminMenu : user?.isDoctor ? doctorMenu :  user?.isUser ? userMenu : user?.isNurse ? receptionMenu : user?.isGroomer ? groomerMenu : userMenu;
-  const role = user?.isAdmin ? "Admin" : user?.isDoctor ? "Doctor" : user?.isUser ? "User" : user?.isNurse ? "Reception" :  user?.isGroomer ? "Groomer" :"User";
+  const menuToBeRendered = user?.isAdmin
+    ? adminMenu
+    : user?.isDoctor
+    ? doctorMenu
+    : user?.isUser
+    ? userMenu
+    : user?.isNurse
+    ? receptionMenu
+    : user?.isGroomer
+    ? groomerMenu
+    : userMenu;
+  const role = user?.isAdmin
+    ? "Admin"
+    : user?.isDoctor
+    ? "Doctor"
+    : user?.isUser
+    ? "User"
+    : user?.isNurse
+    ? "Reception"
+    : user?.isGroomer
+    ? "Groomer"
+    : "User";
   return (
     <div className="main">
       <div className="d-flex layout">
         <div className="sidebar">
           <div className="sidebar-header">
-            <h1 className="logo text-center pt-2"><img src={logo} alt="Petolog" width="50%"/></h1>
+            <h1 className="logo text-center pt-2">
+              <img src={logo} alt="Petolog" width="50%" />
+            </h1>
             <h1 className="role pt-2 text-center">{role} Dashboard</h1>
           </div>
 
@@ -226,16 +256,16 @@ function Layout({ children }) {
                     isActive && "active-menu-item"
                   }`}
                 >
-                <Tooltip title={menu.name}>
-                  <Link to={menu.path}>
-                    <i className={menu.icon}></i>
-                  </Link>
-                </Tooltip>
-                {!collapsed && (
                   <Tooltip title={menu.name}>
-                    <Link to={menu.path}>{menu.name}</Link>
+                    <Link to={menu.path}>
+                      <i className={menu.icon}></i>
+                    </Link>
                   </Tooltip>
-                )}
+                  {!collapsed && (
+                    <Tooltip title={menu.name}>
+                      <Link to={menu.path}>{menu.name}</Link>
+                    </Tooltip>
+                  )}
                 </div>
               );
             })}
