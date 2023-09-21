@@ -72,15 +72,15 @@ function MobGroomi() {
       title: "ID",
       dataIndex: "customId",
     },
-    {
-      title: "Doctor",
-      dataIndex: "name",
-      render: (text, record) => (
-        <span>
-          Dr. {record?.doctor?.firstName} {record?.doctor?.lastName}
-        </span>
-      ),
-    },
+    // {
+    //   title: "Doctor",
+    //   dataIndex: "name",
+    //   render: (text, record) => (
+    //     <span>
+    //       Dr. {record?.doctor?.firstName} {record?.doctor?.lastName}
+    //     </span>
+    //   ),
+    // },
     {
       title: "Service",
       dataIndex: "service",
