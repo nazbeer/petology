@@ -647,7 +647,7 @@ router.get("/get-all-appointments", authMiddleware, async (req, res) => {
     );
     const doctors = await Doctor.find(
       { _id: { $in: doctorId } },
-      { firstName: 1, lastName: 1, _id: 1, specialization: 1, status:1 }
+      { firstName: 1, lastName: 1, _id: 1, specialization: 1, status: 1 }
     );
 
     const combinedData = appointmentList.map((item1) => {
@@ -1131,6 +1131,99 @@ router.get("/appointments/mobgroom", authMiddleware, async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
+router.post("/change-password", authMiddleware, async (req, res) => {
+  try {
+    const { id, currentpass, newpass, username } = req.body;
+
+    // Find the user either by email
+    const user = await User.findById(id);
+
+    if (!user) {
+      return res
+        .status(404)
+        .send({ message: "User does not exist", success: false });
+    }
+
+    const isMatch = await bcrypt.compare(currentpass, user.password);
+
+    if (!isMatch) {
+      return res
+        .status(404)
+        .send({ message: "Password is incorrect", success: false });
+    }
+
+    const password = newpass;
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    user.username = username;
+
+    user.password = hashedPassword;
+
+    await user.save();
+
+    res
+      .status(200)
+      .send({ message: "Password Change Successfully", success: true });
+  } catch (error) {
+    console.log(error);
+    res
+      .status(500)
+      .send({ message: "Error in Changing Password", success: false, error });
+  }
+});
+
+router.post("/update-profile", authMiddleware, async (req, res) => {
+  try {
+    const { data, doctor } = req.body;
+
+    const { userId, username, name, email, mobile } = data;
+    const { specialization, shift, website, experience, feePerCunsultation } =
+      doctor;
+
+    // Find the user either by email
+    const user = await User.findById(userId);
+
+    const doctors = await Doctor.findOne({ userId: userId });
+
+    if (!user) {
+      return res
+        .status(404)
+        .send({ message: "User does not exist", success: false });
+    }
+
+    if (!doctors) {
+      return res
+        .status(404)
+        .send({ message: "Doctor does not exist", success: false });
+    }
+
+    if (username) user.username = username;
+    if (name) user.name = name;
+    if (email) user.email = email;
+    if (mobile) user.mobile = mobile;
+
+    await user.save();
+
+    if (specialization) doctors.specialization = specialization;
+    if (shift) doctors.shift = shift;
+    if (feePerCunsultation) doctors.feePerCunsultation = feePerCunsultation;
+    if (experience) doctors.experience = experience;
+    if (website) doctors.website = website;
+
+    await doctors.save();
+
+    res
+      .status(200)
+      .send({ message: "Profile Updated Successfully", success: true });
+  } catch (error) {
+    console.log(error);
+    res
+      .status(500)
+      .send({ message: "Error in Updating Profile", success: false, error });
   }
 });
 

@@ -15,7 +15,6 @@ import Notifications from "./pages/Notifications";
 import Userslist from "./pages/Admin/Userslist";
 import DoctorsList from "./pages/Admin/DoctorsList";
 import AppointmentList from "./pages/Admin/AppointmentList";
-import Profile from "./pages/Doctor/Profile";
 import BookAppointment from "./pages/BookAppointment";
 import Appointments from "./pages/Appointments";
 import DoctorAppointments from "./pages/Doctor/DoctorAppointments";
@@ -62,6 +61,7 @@ import MobLogin from "./pages/MobLogin";
 import ActivationPage from "./pages/ActivationPage";
 import WalkInBooking from "./pages/Reception/WalkInBooking";
 import WalkInBookingAdmin from "./pages/Admin/WalkInBookingAdmin";
+import Profile from "./components/Profile";
 
 function App() {
   const { loading } = useSelector((state) => state.alerts);
@@ -317,7 +317,7 @@ function App() {
           }
         />
         <Route
-          path="/doctor/profile/:userId"
+          path="/doctor/profile/"
           element={
             <ProtectedRoute>
               <Profile />
@@ -325,10 +325,19 @@ function App() {
           }
         />
         <Route
-          path="/reception/profile/:userId"
+          path="/reception/profile/"
           element={
             <ProtectedRoute>
               <RecProfile />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/profile/"
+          element={
+            <ProtectedRoute>
+              <Profile />
             </ProtectedRoute>
           }
         />
