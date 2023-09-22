@@ -64,6 +64,8 @@ import WalkInBookingAdmin from "./pages/Admin/WalkInBookingAdmin";
 import Profile from "./components/Profile";
 import PaymentSuccessful from "./components/paymentSuccessful";
 import PaymentDecline from "./components/PaymentDecline";
+import NotFound from "./components/NotFound";
+import Payments from "./components/Payments";
 
 function App() {
   const { loading } = useSelector((state) => state.alerts);
@@ -647,6 +649,39 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/user/payment"
+          element={
+            <ProtectedRoute>
+              <Payments />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/payment"
+          element={
+            <ProtectedRoute>
+              <Payments />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/reception/payment"
+          element={
+            <ProtectedRoute>
+              <Payments />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="*"
+          element={
+            <ProtectedRoute>
+              <NotFound />
+            </ProtectedRoute>
+          }
+        ></Route>
       </Routes>
     </BrowserRouter>
   );

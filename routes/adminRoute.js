@@ -14,6 +14,7 @@ const MobileVetApp = require("../models/mobvetappModel");
 const HistoryModel = require("../models/historyModel");
 const DoctorLeave = require("../models/doctorLeaveModel");
 const UserappModel = require("../models/userappModel");
+const Paymentmodel = require("../models/Paymentmodel");
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, "uploads/"); // Directory where files will be stored
@@ -110,21 +111,17 @@ router.post(
         { new: true }
       );
 
-      res
-        .status(200)
-        .json({
-          success: true,
-          message: "Doctor assigned successfully",
-          data: updatedAppointment,
-        });
+      res.status(200).json({
+        success: true,
+        message: "Doctor assigned successfully",
+        data: updatedAppointment,
+      });
     } catch (error) {
       console.error(error);
-      res
-        .status(500)
-        .json({
-          success: false,
-          message: "An error occurred while assigning the doctor",
-        });
+      res.status(500).json({
+        success: false,
+        message: "An error occurred while assigning the doctor",
+      });
     }
   }
 );
@@ -178,13 +175,11 @@ router.get(
       });
     } catch (error) {
       console.error("Error in getting all grooming appointments");
-      res
-        .status(500)
-        .send({
-          message: "Error Fetching Grooming Appointment list",
-          success: false,
-          error,
-        });
+      res.status(500).send({
+        message: "Error Fetching Grooming Appointment list",
+        success: false,
+        error,
+      });
     }
   }
 );
@@ -342,12 +337,10 @@ router.post("/set-break-time", async (req, res) => {
     })
     .catch((errr) => {
       console.log(errr);
-      return res
-        .status(500)
-        .json({
-          success: false,
-          message: "An error occurred while adding Break Time",
-        });
+      return res.status(500).json({
+        success: false,
+        message: "An error occurred while adding Break Time",
+      });
     });
   return;
 });
@@ -479,21 +472,17 @@ router.post(
           .json({ success: false, message: "Appointment not found" });
       }
 
-      res
-        .status(200)
-        .json({
-          success: true,
-          message: "Appointment status changed successfully",
-          data: updatedAppointment,
-        });
+      res.status(200).json({
+        success: true,
+        message: "Appointment status changed successfully",
+        data: updatedAppointment,
+      });
     } catch (error) {
       console.error(error);
-      res
-        .status(500)
-        .json({
-          success: false,
-          message: "An error occurred while changing appointment status",
-        });
+      res.status(500).json({
+        success: false,
+        message: "An error occurred while changing appointment status",
+      });
     }
   }
 );
@@ -515,21 +504,17 @@ router.post("/change-open-appointment-status/:id", async (req, res) => {
         .json({ success: false, message: "Appointment not found" });
     }
 
-    res
-      .status(200)
-      .json({
-        success: true,
-        message: "Appointment status changed successfully",
-        data: updatedAppointment,
-      });
+    res.status(200).json({
+      success: true,
+      message: "Appointment status changed successfully",
+      data: updatedAppointment,
+    });
   } catch (error) {
     console.error(error);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "An error occurred while changing appointment status",
-      });
+    res.status(500).json({
+      success: false,
+      message: "An error occurred while changing appointment status",
+    });
   }
 });
 
@@ -805,13 +790,11 @@ router.put("/edit-pet/:id", async (req, res) => {
       return res.status(404).json({ success: false, message: "Pet not found" });
     }
 
-    res
-      .status(200)
-      .json({
-        success: true,
-        message: "Pet updated successfully",
-        data: result,
-      });
+    res.status(200).json({
+      success: true,
+      message: "Pet updated successfully",
+      data: result,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: "Internal server error" });
@@ -877,20 +860,16 @@ router.post(
         await historyRecord.save();
       }
 
-      res
-        .status(200)
-        .json({
-          success: true,
-          message: "Files uploaded and saved successfully",
-        });
+      res.status(200).json({
+        success: true,
+        message: "Files uploaded and saved successfully",
+      });
     } catch (error) {
       console.error("Error uploading and processing files:", error);
-      res
-        .status(500)
-        .json({
-          success: false,
-          message: "Error uploading and processing files",
-        });
+      res.status(500).json({
+        success: false,
+        message: "Error uploading and processing files",
+      });
     }
   }
 );
@@ -952,13 +931,11 @@ router.get("/get-all-vet-packs", authMiddleware, async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    res
-      .status(500)
-      .send({
-        message: "Error Fetching Veterinary Pack list",
-        success: false,
-        error,
-      });
+    res.status(500).send({
+      message: "Error Fetching Veterinary Pack list",
+      success: false,
+      error,
+    });
   }
 });
 
@@ -973,13 +950,63 @@ router.get("/get-all-groom-packs", authMiddleware, async (req, res) => {
     });
   } catch (error) {
     console.error("Error in getting all Grooming packs");
+    res.status(500).send({
+      message: "Error Fetching Grooming Pack list",
+      success: false,
+      error,
+    });
+  }
+});
+
+router.get("/get-all-pay", authMiddleware, async (req, res) => {
+  try {
+    const payments = await Paymentmodel.find({});
+    const userID = payments.map((item) => item.userId);
+    const appointmentId = payments.map((item) => item.appointmentId);
+    const users = await User.find(
+      { _id: { $in: userID } },
+      { name: 1, _id: 1, email: 1, mobile: 1 }
+    );
+    const appointments = await UserappModel.find(
+      { _id: { $in: appointmentId } },
+      { customId: 1 }
+    );
+
+    // Create an empty result array
+    const combinedList = [];
+
+    // Loop through list1 and add objects from list2 and list3 based on commonField
+    payments.forEach((obj1) => {
+      // Find matching objects in list2 based on commonField
+      const matchingObj2 = users.find(
+        (obj2) => obj2._id.toString() === obj1.userId
+      );
+
+      // Find matching objects in list3 based on commonField
+      const matchingObj3 = appointments.find(
+        (obj3) => obj3._id.toString() === obj1.appointmentId
+      );
+      console.log(matchingObj2);
+      // Combine the objects into a new object and push it to the result array
+      combinedList.push({
+        payment: obj1,
+        user: matchingObj2, // Use {} as a default in case there is no match
+        appointment: matchingObj3, // Use {} as a default in case there is no match
+      });
+    });
+
+    console.log(combinedList);
+
+    res.status(200).send({
+      message: "Payment Fetched Successfully",
+      success: true,
+      data: combinedList,
+    });
+  } catch (error) {
+    console.log(error);
     res
       .status(500)
-      .send({
-        message: "Error Fetching Grooming Pack list",
-        success: false,
-        error,
-      });
+      .send({ message: "Error in Fetching Payment", success: false, error });
   }
 });
 module.exports = router;

@@ -33,6 +33,12 @@ function Layout({ children }) {
       icon: "ri-hospital-line",
     },
 
+    {
+      name: "Payments",
+      path: "/user/payment",
+      icon: "ri-hospital-line",
+    },
+
     // {
     //   name:"Add Pets",
     //   path:"/user/addpet",
@@ -59,6 +65,11 @@ function Layout({ children }) {
       name: "WalkIn Booking",
       path: "/reception/walkin",
       icon: "ri-user-star-line",
+    },
+    {
+      name: "Payments",
+      path: "/reception/payment",
+      icon: "ri-hospital-line",
     },
     {
       name: "Users",
@@ -166,6 +177,11 @@ function Layout({ children }) {
       name: "WalkIn Booking",
       path: "/admin/walkin",
       icon: "ri-user-star-line",
+    },
+    {
+      name: "Payments",
+      path: "/admin/payment",
+      icon: "ri-hospital-line",
     },
     {
       name: "Users",
@@ -304,7 +320,7 @@ function Layout({ children }) {
                 <i className="ri-notification-line header-action-icon px-3"></i>
               </Badge>
 
-              <Link className="anchor text-decoration-none mx-2" to='/profile/'>
+              <Link className="anchor text-decoration-none mx-2" to="/profile/">
                 {user?.name}
               </Link>
             </div>

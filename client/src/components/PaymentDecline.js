@@ -7,11 +7,14 @@ import logo from "../images/logo-petology.png";
 
 import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
 import { Document, Page, pdfjs } from "react-pdf";
+import opentype from "opentype.js";
+import * as fontkit from "fontkit";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
 
 function PaymentDecline() {
   const { state } = useLocation();
+  const [font, setFonts] = useState("");
   const [watermarkImage, setWatermarkImage] = useState(null);
   const [crossImage, setCrossImage] = useState(null);
 
@@ -30,7 +33,7 @@ function PaymentDecline() {
     },
     {
       label: "Amount Paid",
-      value: state?.appointments?.doctor?.feePerCunsultation  || 80 + " AED",
+      value: state?.appointments?.doctor?.feePerCunsultation || 80 + " AED",
       fontSize: 19,
       fontStyle: "bold",
       margin: 15,
@@ -47,36 +50,6 @@ function PaymentDecline() {
   const img = new Image();
   img.src = logo;
   console.log(img.height);
-
-  //     // Add image watermark
-  //     const img = new Image();
-  //     img.src = logo;
-  //     console.log(img)
-  //     const imgWidth = 100;
-  //     const imgHeight = (img.height * imgWidth) / img.width;
-  //     doc.addImage(logo, "PNG", 20, 20, imgWidth, imgHeight);
-
-  //     // Add heading
-  //     doc.setFontSize(18);
-  //     doc.text("Heading on Top of Page", 20, 150);
-
-  //     // Add image
-  //     doc.addImage(success, "PNG", 20, 170, 100, 100);
-
-  //     // Add text fields
-  //     textFields.forEach((field, index) => {
-  //       const yPosition = 300 + index * 20;
-  //       doc.setFontSize(field.fontSize);
-  //       doc.setFont(field.fontStyle);
-  //       doc.text(`${field.label} ${field.value}`, 20, yPosition);
-  //     });
-
-  //     doc.save(`${state?.appointments?.savedAppointment?._id}.pdf`);
-  //   };
-
-  // const handleWatermarkChange = (e) => {
-  //     setWatermarkImage(e.target.files[0]);
-  //   };
 
   useEffect(() => {
     const loadImage = async () => {
@@ -99,20 +72,25 @@ function PaymentDecline() {
     };
     loadImage();
     loadImage1();
+
+    async function customFont() {
+      // Load your custom font file
+      const fontData = await fetch(
+        "../fonts/Outfit/static/Outfit-Regular.ttf"
+      ).then((res) => res.arrayBuffer());
+      const font = await opentype.parse(fontData);
+      setFonts(font);
+    }
+    customFont();
   }, []);
 
-  const createWatermarkedPDF = async () => {
-    // if (!watermarkImage) {
-    //   alert('Please select a watermark image.');
-    //   return;
-    // }
-
+  const createPDF = async () => {
     try {
       const pdfDoc = await PDFDocument.create();
-      const timesRomanFont = await pdfDoc.embedFont(StandardFonts.TimesRoman);
-
+      pdfDoc.registerFontkit(fontkit);
+      const customFont = await pdfDoc.embedFont(font.toArrayBuffer());
       const page = pdfDoc.addPage();
-      page.setFont(timesRomanFont);
+      page.setFont(customFont);
 
       const image = await pdfDoc.embedPng(await watermarkImage.arrayBuffer());
       const image1 = await pdfDoc.embedPng(await crossImage.arrayBuffer());
@@ -120,8 +98,8 @@ function PaymentDecline() {
       // Calculate the center coordinates
       const pageWidth = page.getWidth();
       const pageHeight = page.getHeight();
-      const imageWidth = 200; // Adjust the image width as needed
-      const imageHeight = 150; // Adjust the image height as needed
+      const imageWidth = 400; // Adjust the image width as needed
+      const imageHeight = 400; // Adjust the image height as needed
       const centerX = (pageWidth - imageWidth) / 2;
       const centerY = (pageHeight - imageHeight) / 2;
 
@@ -131,20 +109,20 @@ function PaymentDecline() {
         y: centerY,
         width: imageWidth,
         height: imageHeight,
-        opacity: 0.5, // Adjust the opacity as needed
+        opacity: 0.3, // Adjust the opacity as needed
       };
 
       page.drawImage(image, watermarkOptions);
 
       page.drawText("Payment Decline", {
-        x: centerX, // Adjust the X position as needed
+        x: centerX + 90, // Adjust the X position as needed
         y: pageHeight - 100, // Adjust the Y position as needed
         size: 30,
         color: rgb(1, 0, 0),
       });
 
       const successOptions = {
-        x: centerX + 60,
+        x: centerX + 160,
         y: pageHeight - 180,
         width: 60,
         height: 60,
@@ -271,10 +249,7 @@ function PaymentDecline() {
             <div className="d-flex justify-content-center align-items-center  mt-4">
               <div className="row ">
                 <div className="col">
-                  <button
-                    onClick={createWatermarkedPDF}
-                    className="btn btn-success"
-                  >
+                  <button onClick={createPDF} className="btn btn-success">
                     Print
                   </button>
                 </div>
