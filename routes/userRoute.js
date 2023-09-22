@@ -958,10 +958,12 @@ router.post("/user-book-appointment", authMiddleware, async (req, res) => {
       });
     }
 
+    const doctor = await Doctor.findOne({ _id: req.body.doctorId });
+
     res.json({
       success: true,
       message: "Appointment booked successfully",
-      data: savedAppointment,
+      data: { savedAppointment, doctor },
     });
   } catch (error) {
     console.error(error);

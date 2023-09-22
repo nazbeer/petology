@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
 import axios from "axios";
 import "antd/dist/antd.css";
 import { toast } from "react-hot-toast";
 const Groom = () => {
+  const navigate = useNavigate();
   const [service, setService] = useState({
     module: "grooming",
     doctorId: "",
@@ -70,6 +73,10 @@ const Groom = () => {
       //console.log('service saved successfully:', response.data);
       if (response.data.success) {
         toast.success(response.data.message);
+        const appointments = response?.data?.data;
+        navigate("/user/payment-successful", {
+          state: {service, appointments },
+        });
         //navigate('/appointments');
       }
       // Do something with the response, like showing a success message

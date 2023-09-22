@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 import axios from "axios";
 import { toast } from "react-hot-toast";
@@ -10,6 +11,7 @@ import Footer from "../../frontend_components/Footer";
 import Layout from "../../components/Layout";
 
 const WalkInBookingAdmin = () => {
+  const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const [doctorList, setDoctorList] = useState([]);
@@ -139,6 +141,11 @@ const WalkInBookingAdmin = () => {
 
       if (response.data.success) {
         toast.success(response.data.message);
+        const appointments = response?.data?.data;
+
+        navigate("/user/payment-successful", {
+          state: { service, appointments },
+        });
         // Do something else, like navigating to another page
       }
     } catch (error) {

@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+
 import axios from "axios";
 import { toast } from "react-hot-toast";
 import bootstrap from "react-bootstrap";
@@ -11,6 +13,8 @@ import {
 const MobVet = () => {
   const [autocomplete, setAutocomplete] = useState(null);
   const [location1, setLocation] = useState({ lat: 25.2048, lng: 55.2708 });
+
+  const navigate = useNavigate();
 
   const [service, setService] = useState({
     doctor: "Any",
@@ -119,6 +123,10 @@ const MobVet = () => {
       console.log("New appointment successfully saved:", response.data.data);
       if (response.data.success) {
         toast.success(response.data.message);
+        const appointments = response?.data?.data;
+        navigate("/user/payment-successful", {
+          state: {service, appointments },
+        });
         //navigate('/appointments');
       }
       // Do something with the response, like showing a success message

@@ -394,10 +394,11 @@ router.post("/user-book-appointment", authMiddleware, async (req, res) => {
       }
     });
 
+
     res.json({
       success: true,
       message: "Appointment booked successfully",
-      data: savedAppointment,
+      data: { savedAppointment, doctor },
     });
   } catch (error) {
     console.error(error);

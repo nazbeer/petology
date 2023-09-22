@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { toast } from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 import "antd/dist/antd.css";
 
@@ -11,7 +12,9 @@ import "bootstrap-datepicker/dist/css/bootstrap-datepicker3.min.css"; // Import 
 import "bootstrap-datepicker";
 
 const Vet = () => {
+  const navigate = useNavigate();
   const [doctorList, setDoctorList] = useState([]);
+  const [doctor, setDoctor] = useState({});
   useEffect(() => {
     axios
       .get("/api/user/get-all-approved-doctors", {
@@ -94,6 +97,7 @@ const Vet = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log(service?.doctorId);
 
     try {
       const response = await axios.post(
@@ -108,6 +112,13 @@ const Vet = () => {
 
       if (response.data.success) {
         toast.success(response.data.message);
+        console.log(response?.data?.data);
+        const appointments = response?.data?.data;
+
+        navigate("/user/payment-successful", {
+          state: { service, appointments },
+        });
+
         // Do something else, like navigating to another page
       }
     } catch (error) {

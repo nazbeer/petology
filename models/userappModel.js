@@ -21,7 +21,7 @@ const appointmentSchema = new mongoose.Schema(
     time: { type: String, required: true },
     pet: { type: String, required: true },
     petName: { type: String, required: false },
-    size: { type: String, required: true },
+    size: { type: String, required: false },
     lat: { type: String, required: true, default: "null" },
     lng: { type: String, required: true, default: "null" },
     isWalkin: { type: Boolean, required: false, default: false },
