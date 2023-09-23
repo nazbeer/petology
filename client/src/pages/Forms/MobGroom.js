@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+
 import axios from "axios";
 import { toast } from "react-hot-toast";
 import bootstrap from "react-bootstrap";
@@ -14,6 +16,8 @@ const MobGroom = () => {
   const [subservices, setSubservices] = useState([]);
 
   const [location, setLocation] = useState({ lat: 25.2048, lng: 55.2708 });
+
+  const navigate = useNavigate();
   const [service, setService] = useState({
     module: "mobile_grooming",
     doctor: null,
@@ -123,6 +127,10 @@ const MobGroom = () => {
       );
       if (response.data.success) {
         toast.success(response.data.message);
+        const appointments = response?.data?.data;
+        navigate("/user/payment-successful", {
+          state: {service, appointments },
+        });
         //navigate('/appointments');
       }
       // Do something with the response, like showing a success message

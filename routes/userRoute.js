@@ -12,8 +12,10 @@ const OpenAppointment = require("../models/openAppointmentModel");
 const nodemailer = require("nodemailer");
 const UserappModel = require("../models/userappModel");
 const packModel = require("../models/packModel");
+
 const crypto = require("crypto");
 const mongoose = require("mongoose");
+const Paymentmodel = require("../models/Paymentmodel");
 
 router.post("/register", async (req, res) => {
   try {
@@ -647,40 +649,62 @@ router.get("/get-all-appointments", authMiddleware, async (req, res) => {
     );
     const doctors = await Doctor.find(
       { _id: { $in: doctorId } },
-      { firstName: 1, lastName: 1, _id: 1, specialization: 1, status:1 }
+      { firstName: 1, lastName: 1, _id: 1, specialization: 1, status: 1 }
     );
 
-    const combinedData = appointmentList.map((item1) => {
-      const user = users.find((item2) => {
-        const objectId = mongoose.Types.ObjectId(item1.userId);
-        console.log(objectId);
+    const combinedList = [];
 
-        item2._id.equals(item1.userId);
-        console.log(item2._id.equals(item1.userId));
-        return item2;
+    // Loop through list1 and add objects from list2 and list3 based on commonField
+    appointmentList.forEach((obj1) => {
+      // Find matching objects in list2 based on commonField
+      const matchingObj2 = users.find(
+        (obj2) => obj2._id.toString() === obj1.userId
+      );
+
+      // Find matching objects in list3 based on commonField
+      const matchingObj3 = doctors.find(
+        (obj3) => obj3._id.toString() === obj1.doctorId
+      );
+      console.log(matchingObj2);
+      // Combine the objects into a new object and push it to the result array
+      combinedList.push({
+        appointment: obj1,
+        user: matchingObj2, // Use {} as a default in case there is no match
+        doctor: matchingObj3, // Use {} as a default in case there is no match
       });
-
-      const doctor = doctors.find((item3) => {
-        const objectId = mongoose.Types.ObjectId(item1.doctorId);
-        console.log(objectId);
-
-        item3._id.equals(item1.doctorId);
-        console.log(item3._id.equals(item1.doctorId));
-        return item3;
-      });
-
-      return {
-        // Combine data from both tables here as needed
-        appointment: item1,
-        user: user,
-        doctor: doctor,
-      };
     });
+
+    // const combinedData = appointmentList.map((item1) => {
+    //   const user = users.find((item2) => {
+    //     const objectId = mongoose.Types.ObjectId(item1.userId);
+    //     console.log(objectId);
+
+    //     item2._id.equals(item1.userId);
+    //     console.log(item2._id.equals(item1.userId));
+    //     return item2;
+    //   });
+
+    //   const doctor = doctors.find((item3) => {
+    //     const objectId = mongoose.Types.ObjectId(item1.doctorId);
+    //     console.log(objectId);
+
+    //     item3._id.equals(item1.doctorId);
+    //     console.log(item3._id.equals(item1.doctorId));
+    //     return item3;
+    //   });
+
+    //   return {
+    //     // Combine data from both tables here as needed
+    //     appointment: item1,
+    //     user: user,
+    //     doctor: doctor,
+    //   };
+    // });
 
     res.status(200).send({
       message: "Appointment List fetched successfully",
       success: true,
-      data: combinedData,
+      data: combinedList,
     });
   } catch (error) {
     console.log(error);
@@ -958,10 +982,12 @@ router.post("/user-book-appointment", authMiddleware, async (req, res) => {
       });
     }
 
+    const doctor = await Doctor.findOne({ _id: req.body.doctorId });
+
     res.json({
       success: true,
       message: "Appointment booked successfully",
-      data: savedAppointment,
+      data: { savedAppointment, doctor },
     });
   } catch (error) {
     console.error(error);
@@ -1131,6 +1157,191 @@ router.get("/appointments/mobgroom", authMiddleware, async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
+router.post("/change-password", authMiddleware, async (req, res) => {
+  try {
+    const { id, currentpass, newpass, username } = req.body;
+
+    // Find the user either by email
+    const user = await User.findById(id);
+
+    if (!user) {
+      return res
+        .status(404)
+        .send({ message: "User does not exist", success: false });
+    }
+
+    const isMatch = await bcrypt.compare(currentpass, user.password);
+
+    if (!isMatch) {
+      return res
+        .status(404)
+        .send({ message: "Password is incorrect", success: false });
+    }
+
+    const password = newpass;
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    user.username = username;
+
+    user.password = hashedPassword;
+
+    await user.save();
+
+    res
+      .status(200)
+      .send({ message: "Password Change Successfully", success: true });
+  } catch (error) {
+    console.log(error);
+    res
+      .status(500)
+      .send({ message: "Error in Changing Password", success: false, error });
+  }
+});
+
+router.post("/update-profile", authMiddleware, async (req, res) => {
+  try {
+    const { data, doctor } = req.body;
+
+    const { userId, username, name, email, mobile } = data;
+    const { specialization, shift, website, experience, feePerCunsultation } =
+      doctor;
+
+    // Find the user either by email
+    const user = await User.findById(userId);
+
+    const doctors = await Doctor.findOne({ userId: userId });
+
+    if (!user) {
+      return res
+        .status(404)
+        .send({ message: "User does not exist", success: false });
+    }
+
+    if (!doctors) {
+      return res
+        .status(404)
+        .send({ message: "Doctor does not exist", success: false });
+    }
+
+    if (username) user.username = username;
+    if (name) user.name = name;
+    if (email) user.email = email;
+    if (mobile) user.mobile = mobile;
+
+    await user.save();
+
+    if (specialization) doctors.specialization = specialization;
+    if (shift) doctors.shift = shift;
+    if (feePerCunsultation) doctors.feePerCunsultation = feePerCunsultation;
+    if (experience) doctors.experience = experience;
+    if (website) doctors.website = website;
+
+    await doctors.save();
+
+    res
+      .status(200)
+      .send({ message: "Profile Updated Successfully", success: true });
+  } catch (error) {
+    console.log(error);
+    res
+      .status(500)
+      .send({ message: "Error in Updating Profile", success: false, error });
+  }
+});
+
+router.post("/pay", authMiddleware, async (req, res) => {
+  try {
+    const { userId, appointmentId, amount, status } = req.body;
+
+    // Find the user either by email
+    const user = await User.findById(userId);
+    console.log(user);
+
+    const appointment = await UserappModel.findById(appointmentId);
+    console.log(appointment);
+
+    if (!user) {
+      return res
+        .status(404)
+        .send({ message: "User does not exist", success: false });
+    }
+
+    if (!appointment) {
+      return res
+        .status(404)
+        .send({ message: "Appointment does not exist", success: false });
+    }
+
+    const payment = new Paymentmodel({ userId, appointmentId, amount, status });
+
+    await payment.save();
+
+    res
+      .status(200)
+      .send({ message: "Payment Created Successfully", success: true });
+  } catch (error) {
+    console.log(error);
+    res
+      .status(500)
+      .send({ message: "Error in Creating Payment", success: false, error });
+  }
+});
+
+
+
+router.get("/get-all-pay-by-userid", authMiddleware, async (req, res) => {
+  try {
+    const payments = await Paymentmodel.find({ userId: req.body.userId });
+    const userID = payments.map((item) => item.userId);
+    const appointmentId = payments.map((item) => item.appointmentId);
+    const users = await User.find(
+      { _id: { $in: userID } },
+      { name: 1, _id: 1, email: 1, mobile: 1 }
+    );
+    const appointments = await UserappModel.find(
+      { _id: { $in: appointmentId } },
+      { customId: 1 }
+    );
+
+    // Create an empty result array
+    const combinedList = [];
+
+    // Loop through list1 and add objects from list2 and list3 based on commonField
+    payments.forEach((obj1) => {
+      // Find matching objects in list2 based on commonField
+      const matchingObj2 = users.find(
+        (obj2) => obj2._id.toString() === obj1.userId
+      );
+
+      // Find matching objects in list3 based on commonField
+      const matchingObj3 = appointments.find(
+        (obj3) => obj3._id.toString() === obj1.appointmentId
+      );
+      console.log(matchingObj2);
+      // Combine the objects into a new object and push it to the result array
+      combinedList.push({
+        payment: obj1,
+        user: matchingObj2, // Use {} as a default in case there is no match
+        appointment: matchingObj3, // Use {} as a default in case there is no match
+      });
+    });
+
+    console.log(combinedList);
+
+    res.status(200).send({
+      message: "Payment Fetched Successfully",
+      success: true,
+      data: combinedList,
+    });
+  } catch (error) {
+    console.log(error);
+    res
+      .status(500)
+      .send({ message: "Error in Fetching Payment", success: false, error });
   }
 });
 

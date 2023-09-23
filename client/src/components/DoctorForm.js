@@ -113,7 +113,7 @@ function DoctorForm({ onFinish, initivalValues }) {
             name="feePerCunsultation"
         
           >
-            <Input placeholder="Consultation Fee" type="number" disabled />
+            <Input placeholder="Consultation Fee" type="number" defaultValue={80} />
           </Form.Item>
         </Col>
     

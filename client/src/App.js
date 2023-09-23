@@ -15,7 +15,6 @@ import Notifications from "./pages/Notifications";
 import Userslist from "./pages/Admin/Userslist";
 import DoctorsList from "./pages/Admin/DoctorsList";
 import AppointmentList from "./pages/Admin/AppointmentList";
-import Profile from "./pages/Doctor/Profile";
 import BookAppointment from "./pages/BookAppointment";
 import Appointments from "./pages/Appointments";
 import DoctorAppointments from "./pages/Doctor/DoctorAppointments";
@@ -62,6 +61,11 @@ import MobLogin from "./pages/MobLogin";
 import ActivationPage from "./pages/ActivationPage";
 import WalkInBooking from "./pages/Reception/WalkInBooking";
 import WalkInBookingAdmin from "./pages/Admin/WalkInBookingAdmin";
+import Profile from "./components/Profile";
+import PaymentSuccessful from "./components/paymentSuccessful";
+import PaymentDecline from "./components/PaymentDecline";
+import NotFound from "./components/NotFound";
+import Payments from "./components/Payments";
 
 function App() {
   const { loading } = useSelector((state) => state.alerts);
@@ -317,7 +321,7 @@ function App() {
           }
         />
         <Route
-          path="/doctor/profile/:userId"
+          path="/doctor/profile/"
           element={
             <ProtectedRoute>
               <Profile />
@@ -325,10 +329,108 @@ function App() {
           }
         />
         <Route
-          path="/reception/profile/:userId"
+          path="/reception/profile/"
           element={
             <ProtectedRoute>
               <RecProfile />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/profile/"
+          element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/user/payment-successful"
+          element={
+            <ProtectedRoute>
+              <PaymentSuccessful />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/user/payment-decline"
+          element={
+            <ProtectedRoute>
+              <PaymentDecline />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/payment-successful"
+          element={
+            <ProtectedRoute>
+              <PaymentSuccessful />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/payment-decline"
+          element={
+            <ProtectedRoute>
+              <PaymentDecline />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/doctor/payment-successful"
+          element={
+            <ProtectedRoute>
+              <PaymentSuccessful />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/doctor/payment-decline"
+          element={
+            <ProtectedRoute>
+              <PaymentDecline />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/reception/payment-successful"
+          element={
+            <ProtectedRoute>
+              <PaymentSuccessful />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/reception/payment-decline"
+          element={
+            <ProtectedRoute>
+              <PaymentDecline />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/groomer/payment-successful"
+          element={
+            <ProtectedRoute>
+              <PaymentSuccessful />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/groomer/payment-decline"
+          element={
+            <ProtectedRoute>
+              <PaymentDecline />
             </ProtectedRoute>
           }
         />
@@ -547,6 +649,39 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/user/payment"
+          element={
+            <ProtectedRoute>
+              <Payments />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/payment"
+          element={
+            <ProtectedRoute>
+              <Payments />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/reception/payment"
+          element={
+            <ProtectedRoute>
+              <Payments />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="*"
+          element={
+            <ProtectedRoute>
+              <NotFound />
+            </ProtectedRoute>
+          }
+        ></Route>
       </Routes>
     </BrowserRouter>
   );
