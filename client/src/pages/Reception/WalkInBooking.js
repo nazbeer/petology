@@ -9,12 +9,45 @@ import { showLoading, hideLoading } from "../../redux/alertsSlice";
 import Header from "../../frontend_components/Header";
 import Footer from "../../frontend_components/Footer";
 import Layout from "../../components/Layout";
+import OfficeTimeCalculate from "../../components/OfficeTimeCalculate";
 
 const WalkInBooking = () => {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const [doctorList, setDoctorList] = useState([]);
+
+  const [time, setTime] = useState([]);
+
+  const getOfficeTime = () => {
+    axios
+      .post(
+        "/api/admin/get-offie-time",
+        { module: "vet" },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      )
+      .then((response) => {
+        console.log(
+          response?.data?.data?.starttime,
+          response?.data?.data?.endtime,
+          response?.data?.data?.break
+        );
+        const data = OfficeTimeCalculate(
+          response?.data?.data?.starttime,
+          response?.data?.data?.endtime,
+          response?.data?.data?.break,
+          30
+        );
+
+        setTime(data);
+      })
+      .catch((error) => console.error(error));
+    getOfficeTime();
+  };
   useEffect(() => {
     axios
       .get("http://localhost:5000/api/open/get-all-approved-doctors", {
@@ -393,15 +426,19 @@ const WalkInBooking = () => {
                     </div>
                     <div className="mb-2">
                       <label htmlFor="time">Time:</label>
-                      <input
+
+                      <select
                         className="form-control"
-                        type="time"
                         id="time"
                         name="time"
-                        value={service.time}
                         onChange={handleChange}
-                        required
-                      />
+                      >
+                        {time.map((option, index) => (
+                          <option key={index} value={option}>
+                            {option}
+                          </option>
+                        ))}
+                      </select>
                     </div>
                   </div>
                 </div>

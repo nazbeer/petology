@@ -10,7 +10,9 @@ import {
   LoadScript,
   Autocomplete,
 } from "@react-google-maps/api";
+import OfficeTimeCalculate from "../../components/OfficeTimeCalculate";
 const MobGroom = () => {
+  const [time, setTime] = useState([]);
   const [autocomplete, setAutocomplete] = useState(null);
 
   const [subservices, setSubservices] = useState([]);
@@ -37,6 +39,35 @@ const MobGroom = () => {
     lat: "",
     lng: "",
   });
+
+  const getOfficeTime = () => {
+    axios
+      .post(
+        "/api/admin/get-offie-time",
+        { module: "groom" },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      )
+      .then((response) => {
+        console.log(
+          response?.data?.data?.starttime,
+          response?.data?.data?.endtime,
+          response?.data?.data?.break
+        );
+        const data = OfficeTimeCalculate(
+          response?.data?.data?.starttime,
+          response?.data?.data?.endtime,
+          response?.data?.data?.break,
+          60
+        );
+
+        setTime(data);
+      })
+      .catch((error) => console.error(error));
+  };
 
   useEffect(() => {
     // Fetch sub-services from your Express.js API
@@ -82,6 +113,8 @@ const MobGroom = () => {
         });
       })
       .catch((error) => console.error(error));
+
+      getOfficeTime()
   }, []);
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -129,7 +162,7 @@ const MobGroom = () => {
         toast.success(response.data.message);
         const appointments = response?.data?.data;
         navigate("/user/payment-successful", {
-          state: {service, appointments },
+          state: { service, appointments },
         });
         //navigate('/appointments');
       }
@@ -174,7 +207,7 @@ const MobGroom = () => {
                   />
                 </div>
               )}
-              {service.pet === 'Dog' && (
+              {service.pet === "Dog" && (
                 <div className="mb-2">
                   <label htmlFor="size">Choose Size: </label>
                   <select
@@ -196,7 +229,7 @@ const MobGroom = () => {
                   </select>
                 </div>
               )}
-               <div className="mb-2">
+              <div className="mb-2">
                 <label htmlFor="Age">Age:</label>
                 <input
                   className="form-control"
@@ -230,10 +263,10 @@ const MobGroom = () => {
                 >
                   <option defaultValue="">Select Package...</option>
                   {subservices.length > 0 ? (
-                    
                     subservices.map((subservice, index) => (
                       <option key={index} value={subservice._id}>
-                        {subservice.subService} - Price: ({subservice.price} AED)
+                        {subservice.subService} - Price: ({subservice.price}{" "}
+                        AED)
                       </option>
                     ))
                   ) : (
@@ -267,15 +300,19 @@ const MobGroom = () => {
               </div>
               <div className="mb-2">
                 <label htmlFor="time">Time:</label>
-                <input
+
+                <select
                   className="form-control"
-                  type="time"
                   id="time"
                   name="time"
-                  value={service.time}
                   onChange={handleChange}
-                  required
-                />
+                >
+                  {time.map((option, index) => (
+                    <option key={index} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
               </div>
               <div className="mb-2">
                 <label htmlFor="firstname">First Name:</label>

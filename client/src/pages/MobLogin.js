@@ -163,7 +163,7 @@ const MobLogin = () => {
           <div className="w-80 flex flex-col gap-4 rounded-lg p-4">
             {showOTP ? (
               <>
-                <label htmlFor="otp" className="font-bold text-xl  text-center">
+                <label htmlFor="otp" className="font-bold text-xl  text-center me-3">
                   Enter your OTP
                 </label>
                 <input
@@ -175,14 +175,15 @@ const MobLogin = () => {
                 />
                 <button
                   onClick={onOTPVerify}
-                  className="btn btn-success mt-3 w-full flex gap-1 items-center justify-center py-2.5 text-white rounded"
+                  className="btn btn-success mt-3 w-full flex gap-1 items-center justify-center py-2.5 text-white rounded mb-3"
                 >
                   {loading && (
                     <CgSpinner size={20} className="mt-1 animate-spin" />
                   )}
                   <span>Verify OTP</span>
                 </button>
-                <Link to="/otp-login" className="text-dark mt-2 text-center">
+                <br />
+                <Link to="/otp-login" className="text-dark text-center">
                   Back to OTP Login
                 </Link>
               </>

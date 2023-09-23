@@ -8,6 +8,13 @@ import axios from "axios";
 import { Modal, Form, Input, DatePicker, Button, Table, Radio } from "antd";
 import moment from "moment";
 
+import { PDFDocument, rgb } from "pdf-lib";
+import { pdfjs } from "react-pdf";
+import opentype from "opentype.js";
+import * as fontkit from "fontkit";
+
+pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
+
 function Veti() {
   const [appointments, setAppointments] = useState([]);
   const [cancelledAppointments, setCancelledAppointments] = useState([]);
@@ -23,6 +30,32 @@ function Veti() {
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  const [font, setFonts] = useState("");
+  const [watermarkImage, setWatermarkImage] = useState(null);
+
+  useEffect(() => {
+    const loadImage = async () => {
+      try {
+        const response = await fetch("../logo-petology.png");
+        const blob = await response.blob();
+        setWatermarkImage(blob);
+      } catch (error) {
+        console.error("Error loading watermark image:", error);
+      }
+    };
+    loadImage();
+
+    async function customFont() {
+      // Load your custom font file
+      const fontprescription = await fetch(
+        "../fonts/Outfit/static/Outfit-Regular.ttf"
+      ).then((res) => res.arrayBuffer());
+      const font = await opentype.parse(fontprescription);
+      setFonts(font);
+    }
+    customFont();
+  }, []);
 
   const handleNext = () => {
     setOpenDate(false);
@@ -258,6 +291,111 @@ function Veti() {
     getAppointmentsData();
   }, []);
 
+  const createPDF = async () => {
+    try {
+      const textFields = [
+        {
+          label: "Appointment ID",
+          value: prescription?.appointmentId,
+          fontSize: 14,
+        },
+        {
+          label: "User Name",
+          value: prescription?.userName,
+          fontSize: 14,
+        },
+        {
+          label: "Doctor",
+          value: prescription?.doctorName,
+          fontSize: 14,
+        },
+        {
+          label: "Pet",
+          value: prescription?.pet,
+          fontSize: 14,
+        },
+        {
+          label: "Prescription",
+          value: prescription?.prescription,
+          fontSize: 14,
+        },
+
+        {
+          label: "Description",
+          value: prescription?.description,
+          fontSize: 14,
+        },
+      ];
+      const pdfDoc = await PDFDocument.create();
+      pdfDoc.registerFontkit(fontkit);
+      const customFont = await pdfDoc.embedFont(font.toArrayBuffer());
+      const page = pdfDoc.addPage();
+      page.setFont(customFont);
+
+      const image = await pdfDoc.embedPng(await watermarkImage.arrayBuffer());
+
+      // Calculate the center coordinates
+      const pageWidth = page.getWidth();
+      const pageHeight = page.getHeight();
+      const imageWidth = 400; // Adjust the image width as needed
+      const imageHeight = 400; // Adjust the image height as needed
+      const centerX = (pageWidth - imageWidth) / 2;
+      const centerY = (pageHeight - imageHeight) / 2;
+
+      // Define watermark position, size, and opacity
+      const watermarkOptions = {
+        x: centerX,
+        y: centerY,
+        width: imageWidth,
+        height: imageHeight,
+        opacity: 0.5, // Adjust the opacity as needed
+      };
+
+      page.drawImage(image, watermarkOptions);
+
+      page.drawText("Prescription Details", {
+        x: centerX + 70, // Adjust the X position as needed
+        y: pageHeight - 100, // Adjust the Y position as needed
+        size: 30,
+        color: rgb(0, 0.5, 0),
+      });
+
+      textFields.forEach((text, index) => {
+        const textY = pageHeight - 250 - index * 30; // Adjust Y position for each text
+        page.drawText(text?.label, {
+          x: 50, // Adjust the X position as needed
+          y: textY - (text?.margin ? text?.margin : 0),
+          size: text.fontSize,
+          color: rgb(0.5, 0.5, 0.5),
+        });
+
+        page.drawText(text?.value ? text?.value?.toString() : "", {
+          x: 400, // Adjust the X position as needed
+          y: textY - (text?.margin ? text?.margin : 0),
+          size: text.fontSize,
+          color: rgb(0, 0, 0),
+          right: 1,
+        });
+      });
+
+      const pdfBytes = await pdfDoc.save();
+
+      const blob = new Blob([pdfBytes], { type: "application/pdf" });
+      const url = URL.createObjectURL(blob);
+
+      // Create a temporary link element to trigger the download
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${prescription?.appointmentId}.pdf`;
+      a.click();
+
+      // Clean up
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Error creating watermark PDF:", error);
+    }
+  };
+
   return (
     <>
       <div className="d-lg-flex justify-align-between align-items-center">
@@ -266,7 +404,12 @@ function Veti() {
       </div>
 
       <hr />
-      <Table columns={columns} dataSource={appointments?.data} />
+      <Table
+        columns={columns}
+        dataSource={appointments?.data}
+        responsive={true}
+        scroll={{ x: true }}
+      />
       <Modal
         title="View Prescription"
         open={showModal}
@@ -333,15 +476,28 @@ function Veti() {
               </div>
             </div>
             <Form.Item>
-              <Radio.Group name="radiogroup" defaultValue={1}>
-                <Radio value={1} onChange={handleNext}>
-                  {" "}
-                  New Appointment
-                </Radio>
-                <Radio value={2} onChange={handleFollow}>
-                  Follow Up
-                </Radio>
-              </Radio.Group>
+              <div className="d-flex row">
+                <div className="col-11">
+                  <Radio.Group name="radiogroup" defaultValue={1}>
+                    <Radio value={1} onChange={handleNext}>
+                      {" "}
+                      New Appointment
+                    </Radio>
+                    <Radio value={2} onChange={handleFollow}>
+                      Follow Up
+                    </Radio>
+                  </Radio.Group>
+                </div>
+                <div className="col-1 " style={{ width: 29, height: 20 }}>
+                  <button
+                    type="button"
+                    className="btn btn-success btn-sm cusrsor-pointer"
+                    onClick={createPDF}
+                  >
+                    <i className="ri-download-line"></i>
+                  </button>
+                </div>
+              </div>
             </Form.Item>
 
             {openDate ? (
@@ -359,16 +515,16 @@ function Veti() {
                   />
                 </Form.Item>
                 <Form.Item>
-                  <Button type="primary" htmlType="submit">
+                  <button className="btn btn-success" type="submit">
                     Add Appointment
-                  </Button>
+                  </button>
                 </Form.Item>
               </div>
             ) : (
               <Form.Item>
-                <Button type="primary" htmlType="submit">
+                <button className="btn btn-success" type="submit">
                   Book Now
-                </Button>
+                </button>
               </Form.Item>
             )}
           </Form>

@@ -4,8 +4,10 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "antd/dist/antd.css";
 import { toast } from "react-hot-toast";
+import OfficeTimeCalculate from "../../components/OfficeTimeCalculate";
 const Groom = () => {
   const navigate = useNavigate();
+  const [time, setTime] = useState([]);
   const [service, setService] = useState({
     module: "grooming",
     doctorId: "",
@@ -23,6 +25,35 @@ const Groom = () => {
     mobile: "",
     userId: "",
   });
+
+  const getOfficeTime = () => {
+    axios
+      .post(
+        "/api/admin/get-offie-time",
+        { module: "groom" },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      )
+      .then((response) => {
+        console.log(
+          response?.data?.data?.starttime,
+          response?.data?.data?.endtime,
+          response?.data?.data?.break
+        );
+        const data = OfficeTimeCalculate(
+          response?.data?.data?.starttime,
+          response?.data?.data?.endtime,
+          response?.data?.data?.break,
+          60
+        );
+
+        setTime(data);
+      })
+      .catch((error) => console.error(error));
+  };
   useEffect(() => {
     // Fetch user details
     const userId = localStorage.getItem("userId"); // Get user ID from localStorage
@@ -48,6 +79,8 @@ const Groom = () => {
         });
       })
       .catch((error) => console.error(error));
+
+      getOfficeTime()
   }, []);
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -75,7 +108,7 @@ const Groom = () => {
         toast.success(response.data.message);
         const appointments = response?.data?.data;
         navigate("/user/payment-successful", {
-          state: {service, appointments },
+          state: { service, appointments },
         });
         //navigate('/appointments');
       }
@@ -119,7 +152,7 @@ const Groom = () => {
                   <option value="Other">Other</option>
                 </select>
               </div>
-              {service.pet === 'Dog' && (
+              {service.pet === "Dog" && (
                 <div className="mb-2">
                   <label htmlFor="size">Choose Size: </label>
                   <select
@@ -141,7 +174,7 @@ const Groom = () => {
                   </select>
                 </div>
               )}
-               <div className="mb-2">
+              <div className="mb-2">
                 <label htmlFor="Age">Age:</label>
                 <input
                   className="form-control"
@@ -254,15 +287,19 @@ const Groom = () => {
               </div>
               <div className="mb-2">
                 <label htmlFor="time">Time:</label>
-                <input
+
+                <select
                   className="form-control"
-                  type="time"
                   id="time"
                   name="time"
-                  value={service.time}
                   onChange={handleChange}
-                  required
-                />
+                >
+                  {time.map((option, index) => (
+                    <option key={index} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
           </div>

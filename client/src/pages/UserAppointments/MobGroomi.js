@@ -27,13 +27,13 @@ function MobGroomi() {
       );
       console.log(response);
       dispatch(hideLoading());
-    
+
       if (response.data.success) {
         toast.success(response.data.message);
         setCancelledAppointments((prevAppointments) => [
-            ...prevAppointments,
-            appointmentId,
-          ]);
+          ...prevAppointments,
+          appointmentId,
+        ]);
         getAppointmentsData();
       } else {
         toast.error(response.data.message);
@@ -66,7 +66,6 @@ function MobGroomi() {
     getAppointmentsData();
   }, []);
 
-
   const columns = [
     {
       title: "ID",
@@ -89,31 +88,35 @@ function MobGroomi() {
       ),
     },
     {
-      title:"Client",
-      dataIndex:"name",
+      title: "Client",
+      dataIndex: "name",
       render: (text, record) => (
         <span className="text-capitalize">{record.user.name}</span>
       ),
     },
     {
-      title:"Mobile",
-      dataIndex:"mobile",
+      title: "Mobile",
+      dataIndex: "mobile",
       render: (text, record) => (
         <span className="text-capitalize">{record.user.mobile}</span>
       ),
     },
     {
-      title:"Pet",
-      dataIndex:"pet",
+      title: "Pet",
+      dataIndex: "pet",
       render: (text, record) => (
-        <span className="text-capitalize">{record.pet} - {record.size} - {record.breed}</span>
+        <span className="text-capitalize">
+          {record.pet} - {record.size} - {record.breed}
+        </span>
       ),
     },
     {
-      title:"Date & Time",
-      dataIndex:"timing",
+      title: "Date & Time",
+      dataIndex: "timing",
       render: (text, record) => (
-        <span className="text-capitalize">{moment(record.date).format('D MMM, YYYY')}| {record.time} </span>
+        <span className="text-capitalize">
+          {moment(record.date).format("D MMM, YYYY")}| {record.time}{" "}
+        </span>
       ),
     },
     {
@@ -124,40 +127,39 @@ function MobGroomi() {
       ),
     },
     {
-      title: 'Actions',
-      dataIndex: 'actions',
+      title: "Actions",
+      dataIndex: "actions",
       render: (text, record) => (
         <button
           className="btn btn-danger btn-sm"
           onClick={() => cancelAppointment(record._id)}
           disabled={cancelledAppointments.includes(record._id)}
         >
-          {cancelledAppointments.includes(record._id)
-            ? 'Cancelled'
-            : 'Cancel'}
+          {cancelledAppointments.includes(record._id) ? "Cancelled" : "Cancel"}
         </button>
       ),
     },
   ];
-  
 
-  
   useEffect(() => {
-   
     getAppointmentsData();
   }, []);
 
   return (
     <>
       <div className="d-lg-flex justify-align-between align-items-center">
-      <h4 className="page-title">My Appointments</h4>
-      {/* <Input placeholder="Search"/> */}
+        <h4 className="page-title">My Appointments</h4>
+        {/* <Input placeholder="Search"/> */}
       </div>
-     
+
       <hr />
-      <Table columns={columns} dataSource={appointments.data} />
-     
-      </>
+      <Table
+        columns={columns}
+        dataSource={appointments.data}
+        responsive={true}
+        scroll={{ x: true }}
+      />
+    </>
   );
 }
 
