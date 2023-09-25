@@ -298,8 +298,10 @@ function Layout({ children }) {
             <div
               className={`d-flex menu-item `}
               onClick={() => {
-                localStorage.clear();
+                localStorage.clear('token');
+                localStorage.clear('userId');
                 navigate("/login");
+                window.location.reload()
               }}
             >
               <i className="ri-logout-circle-line"></i>

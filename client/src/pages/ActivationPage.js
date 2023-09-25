@@ -17,7 +17,7 @@ const ActivationPage = () => {
 
     // Send a request to your server to activate the email
     axios
-      .get(`/api/activate?token=${token}`)
+      .get(`/api/user/activate/${token}`)
       .then((response) => {
         console.log(response);
         if (response.data === "Activation successful") {

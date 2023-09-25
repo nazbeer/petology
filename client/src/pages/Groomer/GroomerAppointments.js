@@ -14,20 +14,16 @@ function GroomerAppointments() {
   const getAppointmentsData = async () => {
     try {
       dispatch(showLoading());
-      const response = await axios.get(
-        "/api/groomer/get-all-appointments",
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
+      const response = await axios.get("/api/groomer/get-all-appointments", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
       dispatch(hideLoading());
       if (response.data.success) {
         setAppointments(response.data.data);
         console.log(response.data.data);
       }
-
     } catch (error) {
       dispatch(hideLoading());
     }
@@ -49,7 +45,6 @@ function GroomerAppointments() {
         setmobAppointments(response.data.data);
         console.log(response.data.data);
       }
-
     } catch (error) {
       dispatch(hideLoading());
     }
@@ -60,7 +55,7 @@ function GroomerAppointments() {
       dispatch(showLoading());
       const response = await axios.post(
         "/api/doctor/change-appointment-status",
-        { appointmentId : record._id, status: status },
+        { appointmentId: record._id, status: status },
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -81,12 +76,16 @@ function GroomerAppointments() {
     {
       title: "Id",
       dataIndex: "customId",
-      render: (text, record) => <span className="text-capitalize">{record?.appointment?.customId}</span>,
+      render: (text, record) => (
+        <span className="text-capitalize">{record?.appointment?.customId}</span>
+      ),
     },
     {
       title: "Client",
       dataIndex: "name",
-      render: (text, record) => <span className="text-capitalize">{record?.user?.name}</span>,
+      render: (text, record) => (
+        <span className="text-capitalize">{record?.user?.name}</span>
+      ),
     },
     {
       title: "Phone",
@@ -108,17 +107,18 @@ function GroomerAppointments() {
       dataIndex: "createdAt",
       render: (text, record) => (
         <span>
-          {moment(record?.appointment?.date).format("DD-MM-YYYY")}{" | "}
-         {record?.appointment?.time}
+          {moment(record?.appointment?.date).format("DD-MM-YYYY")}
+          {" | "}
+          {record?.appointment?.time}
         </span>
       ),
     },
     {
       title: "Status",
       dataIndex: "status",
-      render:(text, record)=>(
+      render: (text, record) => (
         <span className="text-capitalize">{record?.appointment?.status}</span>
-      )
+      ),
     },
     {
       title: "Actions",
@@ -154,20 +154,22 @@ function GroomerAppointments() {
         </div>
       ),
     },
-    
-    
   ];
+
   const mobcolumns = [
     {
       title: "Id",
       dataIndex: "customId",
-      render: (text, record) => <span className="text-capitalize">{record?.appointment?.customId}</span>,
-
+      render: (text, record) => (
+        <span className="text-capitalize">{record?.appointment?.customId}</span>
+      ),
     },
     {
       title: "Client",
       dataIndex: "name",
-      render: (text, record) => <span className="text-capitalize">{record?.user?.name}</span>,
+      render: (text, record) => (
+        <span className="text-capitalize">{record?.user?.name}</span>
+      ),
     },
     {
       title: "Phone",
@@ -188,25 +190,37 @@ function GroomerAppointments() {
     {
       title: "Location",
       dataIndex: "location",
-      render: (text, record) => <span>Latitude: {record?.appointment?.lat} <br/>Longitude: {record?.appointment?.lng}</span>,
+      render: (text, record) => (
+        <span
+        style={{cursor: 'pointer'}}
+          onClick={() => {
+            const mapUrl = `https://www.google.com/maps?q=${record?.appointment?.lat},${record?.appointment?.lng}`;
+            window.open(mapUrl, "_blank");
+          }}
+        >
+          Latitude: {record?.appointment?.lat} <br />
+          Longitude: {record?.appointment?.lng}
+        </span>
+      ),
     },
-    
+
     {
       title: "Date & Time",
       dataIndex: "createdAt",
       render: (text, record) => (
         <span>
-          {moment(record?.appointment?.date).format("DD-MM-YYYY")}{" | "}
-         {record?.appointment?.time}
+          {moment(record?.appointment?.date).format("DD-MM-YYYY")}
+          {" | "}
+          {record?.appointment?.time}
         </span>
       ),
     },
     {
       title: "Status",
       dataIndex: "status",
-      render:(text, record)=>(
+      render: (text, record) => (
         <span className="text-capitalize">{record?.appointment?.status}</span>
-      )
+      ),
     },
     {
       title: "Actions",
@@ -242,8 +256,6 @@ function GroomerAppointments() {
         </div>
       ),
     },
-    
-    
   ];
   useEffect(() => {
     getAppointmentsData();
@@ -254,7 +266,6 @@ function GroomerAppointments() {
       <h6 className="page-header">Mobile Grooming Appointments</h6>
       <hr />
       <Table columns={mobcolumns} dataSource={mobappointments} />
- 
 
       <h6 className="page-header">Grooming Appointments</h6>
       <hr />
