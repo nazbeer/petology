@@ -2,9 +2,9 @@ const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema(
   {
-    username:{
-      type:String,
-      required:true
+    username: {
+      type: String,
+      required: true,
     },
 
     name: {
@@ -15,9 +15,13 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    mobile:{
+    mobile: {
       type: String,
-      required:true
+      required: true,
+    },
+    activationToken: {
+      type: String,
+      required: false,
     },
     password: {
       type: String,
@@ -35,13 +39,13 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
-    isGroomer:{
-      type:Boolean,
-      default:false,
+    isGroomer: {
+      type: Boolean,
+      default: false,
     },
-    isNurse:{
-      type:Boolean,
-      default:false,
+    isNurse: {
+      type: Boolean,
+      default: false,
     },
     seenNotifications: {
       type: Array,
@@ -51,9 +55,9 @@ const userSchema = new mongoose.Schema(
       type: Array,
       default: [],
     },
-    status:{
-      type:String,
-      default:"pending"
+    status: {
+      type: String,
+      default: "pending",
     },
     otp: String,
     otpExpires: Date,

@@ -58,6 +58,8 @@ router.post("/register", async (req, res) => {
     await newUser.save();
     const activationLink = `http://localhost:3000/activate/${activationToken}`;
 
+    console.log(activationLink);
+
     const transporter = nodemailer.createTransport({
       host: "mailslurp.mx",
       port: 2587,
@@ -102,10 +104,11 @@ router.post("/register", async (req, res) => {
   }
 });
 router.get("/activate/:token", async (req, res) => {
-  const { token } = req.query;
+  const { token } = req.params;
   console.log(token);
   // Find the user by the activation token
   const user = await User.findOne({ activationToken: token });
+  console.log(user);
 
   if (!user) {
     return res.status(400).send("Invalid activation token");
@@ -117,7 +120,9 @@ router.get("/activate/:token", async (req, res) => {
   await user.save();
 
   // Redirect or send a success message
-  return res.redirect("/login"); // Redirect to the login page or send a success message
+  res
+    .status(200)
+    .send({ message: "User activated successfully", success: true }); // Redirect to the login page or send a success message
 });
 
 router.post("/register-old", async (req, res) => {
@@ -429,7 +434,7 @@ router.get("/doctorcount", async (req, res) => {
 });
 router.get("/appointmentcount", async (req, res) => {
   try {
-    const count = await Appointment.countDocuments();
+    const count = await UserappModel.countDocuments();
     res.json({ count });
   } catch (error) {
     console.error("Error counting appointments:", error);
@@ -950,6 +955,7 @@ router.post("/user-book-appointment", authMiddleware, async (req, res) => {
           pass: "y05g7jL61VapbV2eFOrCqrd2FVNJeWrB",
         },
       });
+      console.log(user?.email);
       const mailOptions = {
         from: "6598040e-ceb7-44ae-a975-e1630c4856e4@mailslurp.com",
         to: user?.email,
@@ -1290,8 +1296,6 @@ router.post("/pay", authMiddleware, async (req, res) => {
       .send({ message: "Error in Creating Payment", success: false, error });
   }
 });
-
-
 
 router.get("/get-all-pay-by-userid", authMiddleware, async (req, res) => {
   try {
