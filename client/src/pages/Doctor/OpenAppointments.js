@@ -13,11 +13,14 @@ function OpenAppointments() {
   const getopenAppointmentsData = async () => {
     try {
       dispatch(showLoading());
-      const response = await axios.get("/api/open/get-appointments-by-user-id", {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
+      const response = await axios.get(
+        "/api/open/get-appointments-by-user-id",
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
       dispatch(hideLoading());
       if (response.data.success) {
         setopenAppointments(response.data.data);
@@ -28,26 +31,18 @@ function OpenAppointments() {
   };
   const columns = [
     {
-        title: "Id",
-        dataIndex: "_id",
+      title: "Id",
+      dataIndex: "_id",
     },
     {
       title: "Doctor",
       dataIndex: "name",
-      render: (text, record) => (
-        <span>
-          {record.doctorInfo.name}
-        </span>
-      ),
+      render: (text, record) => <span>{record.doctorInfo.name}</span>,
     },
     {
       title: "Specialization",
       dataIndex: "specialization",
-      render: (text, record) => (
-        <span>
-          {record.doctorInfo.specialization} 
-        </span>
-      ),
+      render: (text, record) => <span>{record.doctorInfo.specialization}</span>,
     },
     // {
     //   title: "Date & Time",
@@ -59,18 +54,25 @@ function OpenAppointments() {
     //   ),
     // },
     {
-        title: "Status",
-        dataIndex: "status",
-    }
+      title: "Status",
+      dataIndex: "status",
+    },
   ];
   useEffect(() => {
     getopenAppointmentsData();
   }, []);
-  return  <Layout>
-  <h4 className="page-title">My Appointments</h4>
-  <hr />
-  <Table columns={columns} dataSource={openappointments} />
-</Layout>
+  return (
+    <Layout>
+      <h4 className="page-title">My Appointments</h4>
+      <hr />
+      <Table
+        columns={columns}
+        dataSource={openappointments}
+        responsive={true}
+        scroll={{ x: true }}
+      />
+    </Layout>
+  );
 }
 
 export default OpenAppointments;
