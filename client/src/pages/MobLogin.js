@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { CgSpinner } from "react-icons/cg";
 import firebase from "firebase";
 import { Link, useNavigate } from "react-router-dom";
@@ -14,15 +14,41 @@ import { hideLoading, showLoading } from "../redux/alertsSlice";
 import { useDispatch } from "react-redux";
 
 const MobLogin = () => {
+  const [seconds, setSeconds] = useState(30);
   const [otp, setOtp] = useState("");
   const [ph, setPh] = useState("");
   const [loading, setLoading] = useState(false);
+  const [final, setfinal] = useState("");
   const [showOTP, setShowOTP] = useState(false);
   const [user, setUser] = useState(null);
+  const [isRunning, setIsRunning] = useState(false);
+
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  function onCaptchVerify() {
+  useEffect(() => {
+    let timer;
+
+    if (isRunning && seconds > 0) {
+      timer = setInterval(() => {
+        setSeconds(seconds - 1);
+      }, 1000);
+    } else if (seconds === 0) {
+      // Timeout logic here, e.g., redirect or perform an action
+      clearInterval(timer);
+      // Replace the following line with your page-changing logic
+      window.location.href = '/login'; // Example: Redirect to a new page
+    }
+
+    // Cleanup the timer when the component unmounts
+    return () => clearInterval(timer);
+  }, [isRunning, seconds]);
+
+ 
+
+  function onSignup() {
+    setLoading(true);
+    // const appVerifier = onCaptchVerify();
     let verify = new firebase.auth.RecaptchaVerifier("recaptcha-container", {
       size: "invisible",
       callback: (response) => {
@@ -30,25 +56,21 @@ const MobLogin = () => {
       },
     });
 
-    return verify;
-  }
-
-  function onSignup() {
-    setLoading(true);
-    const appVerifier = onCaptchVerify();
-
     // const appVerifier = window.recaptchaVerifier;
 
     const formatPh = "+" + ph;
+    console.log(formatPh);
 
     auth
-      .signInWithPhoneNumber(formatPh, appVerifier)
+      .signInWithPhoneNumber(formatPh, verify)
       .then((confirmationResult) => {
         console.log(confirmationResult);
-        window.confirmationResult = confirmationResult;
+        setfinal(confirmationResult);
+        // window.confirmationResult = confirmationResult;
         setLoading(false);
         setShowOTP(true);
         toast.success("OTP sent successfully!");
+        setIsRunning(true);
       })
       .catch((error) => {
         console.log(error);
@@ -111,8 +133,10 @@ const MobLogin = () => {
   // }
 
   function onOTPVerify() {
+    setIsRunning(false);
+    if (otp === null || final === null) return;
     setLoading(true);
-    window.confirmationResult
+    final
       .confirm(otp)
       .then(async (res) => {
         console.log(res);
@@ -163,7 +187,10 @@ const MobLogin = () => {
           <div className="w-80 flex flex-col gap-4 rounded-lg p-4">
             {showOTP ? (
               <>
-                <label htmlFor="otp" className="font-bold text-xl  text-center me-3">
+                <label
+                  htmlFor="otp"
+                  className="font-bold text-xl  text-center me-3"
+                >
                   Enter your OTP
                 </label>
                 <input
@@ -182,6 +209,8 @@ const MobLogin = () => {
                   )}
                   <span>Verify OTP</span>
                 </button>
+                <br />
+                <p>OTP Valid for {seconds} seconds</p>
                 <br />
                 <Link to="/otp-login" className="text-dark text-center">
                   Back to OTP Login
@@ -203,7 +232,6 @@ const MobLogin = () => {
                   onChange={setPh}
                   inputClass="text-left w-100"
                 />
-                <div id="recaptcha-container"></div>
 
                 <div className="text-center d-grid">
                   <button
@@ -217,6 +245,7 @@ const MobLogin = () => {
                       Send code via SMS
                     </span>
                   </button>
+                  <div id="recaptcha-container"></div>
                 </div>
               </>
             )}
