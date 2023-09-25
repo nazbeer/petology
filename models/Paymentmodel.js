@@ -7,7 +7,7 @@ const paymentSchema = new mongoose.Schema(
 
     amount: { type: Number, required: true },
 
-    status: { type: String, enum: ["success", "declined", "unpaid"], required: true },
+    status: { type: String, enum: ["success", "declined", "UNPAID"], required: true },
   },
   {
     timestamps: true,

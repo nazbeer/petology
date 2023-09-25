@@ -4,7 +4,7 @@ import { useDispatch } from "react-redux";
 
 import { showLoading, hideLoading } from "../redux/alertsSlice";
 import axios from "axios";
-import { Table, Button } from "antd";
+import { Table, Button, DatePicker } from "antd";
 import moment from "moment";
 
 import { PDFDocument, rgb } from "pdf-lib";
@@ -14,14 +14,32 @@ import { useSelector } from "react-redux";
 
 import * as XLSX from "xlsx";
 
+import JsPDF from "jspdf";
+import "jspdf-autotable";
+
 function Payments() {
+  const { RangePicker } = DatePicker;
+
   const [watermarkImage, setWatermarkImage] = useState(null);
   const [payments, setPayments] = useState([]);
   const [font, setFonts] = useState("");
 
+  const [filter, setFilter] = useState(true);
+
+  const [filterType, setFilterType] = useState("");
+  let [onlyDate, setOnlyDate] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [filteredData, setFilteredData] = useState([]);
+
   const { user } = useSelector((state) => state.user);
 
   const dispatch = useDispatch();
+
+  const handleFilterType = (event) => {
+    console.log(event.target.value);
+    setFilterType(event.target.value);
+  };
 
   const getPaymentData = async () => {
     try {
@@ -185,7 +203,7 @@ function Payments() {
   };
 
   useEffect(() => {
-    console.log(user?.isAdmin || user?.isNurse)
+    console.log(user?.isAdmin || user?.isNurse);
     if (user?.isAdmin || user?.isNurse) getPaymentData();
     else getPaymentDatabyuserId();
     const loadImage = async () => {
@@ -318,15 +336,181 @@ function Payments() {
       ),
     },
   ];
+
+  const handleFilter = () => {
+    onlyDate = new Date(onlyDate);
+    const startDateObj = new Date(startDate);
+    const endDateObj = new Date(endDate);
+
+    const filtered = payments.filter((item) => {
+      console.log(item);
+      const itemDate = new Date(item?.payment?.createdAt);
+      console.log(
+        onlyDate.toDateString(),
+        startDateObj.toDateString(),
+        endDateObj.toDateString(),
+        itemDate.toDateString()
+      );
+      if (filterType === "Date") {
+        return itemDate.toDateString() === onlyDate.toDateString();
+      } else {
+        // Date range filter
+        console.log(
+          itemDate.toDateString(),
+          startDateObj.toDateString(),
+          endDateObj.toDateString()
+        );
+
+        return (
+          itemDate.toDateString() >= startDateObj.toDateString() &&
+          itemDate.toDateString() <= endDateObj.toDateString()
+        );
+      }
+    });
+
+    console.log(filtered);
+
+    setFilteredData(filtered.length > 0 ? filtered : null);
+
+    console.log(filtered.length > 0 ? filtered : null);
+
+    setFilter(false);
+  };
+
+  const onChangeDate = (date, dateString) => {
+    setOnlyDate(moment(dateString).format("LL"));
+
+    console.log(moment(dateString).format("LL"));
+  };
+
+  const onChangeRange = (date, dateString) => {
+    setStartDate(moment(dateString[0]).format("LL"));
+    setEndDate(moment(dateString[1]).format("LL"));
+    console.log(
+      moment(dateString[0]).format("LL"),
+      moment(dateString[1]).format("LL")
+    );
+  };
+
+  const createPdfWithTable = async (data) => {
+    const doc = new JsPDF();
+    doc.setFontSize(30);
+    doc.text(80, 20, "Payments");
+
+    doc.setFontSize(20);
+
+    const headers = [
+      "Appointment ID",
+      "Date",
+      "Status",
+      "Name",
+      "Transaction ID",
+      "Amount",
+    ];
+    const datas = filteredData.map((item) => [
+      item?.appointment?.customId,
+
+      moment(item?.payment?.createdAt).format("LL"),
+      item?.appointment?.status,
+      item?.user?.name,
+
+      item?.payment?._id,
+      item?.payment?.amount,
+    ]);
+    console.log(datas);
+
+    doc.autoTable({
+      head: [headers],
+      body: datas,
+      theme: "striped",
+      margin: { top: 30 },
+    });
+
+    const pdfBytes = doc.save("payments.pdf");
+
+    const blob = new Blob([pdfBytes], { type: "application/pdf" });
+    const url = URL.createObjectURL(blob);
+
+    // Create a temporary link element to trigger the download
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "payments.pdf";
+    a.click();
+
+    // Clean up
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div>
       <Layout>
-        <Table
-          columns={columns}
-          dataSource={payments}
-          responsive={true}
-          scroll={{ x: true }}
-        />
+        <div className="row">
+          <div className="mb-2 col">
+            <select
+              className="form-control"
+              id="break"
+              name="break"
+              value={filterType}
+              onChange={handleFilterType}
+            >
+              <option defaultValue="">Select Filter...</option>
+              <option value="Date">Date</option>
+              <option value="Range">Range</option>
+              {/* <option value="Weekly">Weekly</option>
+              <option value="Montly">Montly</option> */}
+            </select>
+          </div>
+          {filterType === "Range" && (
+            <div className="mb-2 col">
+              <RangePicker onChange={onChangeRange} style={{ width: "100%" }} />
+            </div>
+          )}
+          {filterType === "Date" && (
+            <div className="mb-2 col">
+              <DatePicker
+                onChange={onChangeDate}
+                size="large"
+                style={{ width: "100%" }}
+              />
+            </div>
+          )}
+          <div className="mt-1 col">
+            <button
+              type="submit"
+              className="btn btn-success btn-sm me-3"
+              onClick={handleFilter}
+            >
+              Filter
+            </button>
+            <button
+              type="submit"
+              className="btn btn-success btn-sm"
+              onClick={createPdfWithTable}
+              disabled={filter}
+            >
+              Export to PDF
+            </button>
+          </div>
+        </div>
+        {filteredData !== null ? (
+          filteredData.length > 0 ? (
+            <Table
+              columns={columns}
+              dataSource={filteredData}
+              responsive={true}
+              scroll={{ x: true }}
+            />
+          ) : (
+            <Table
+              columns={columns}
+              dataSource={payments}
+              responsive={true}
+              scroll={{ x: true }}
+            />
+          )
+        ) : (
+          <div className="text-center m-5">No result found</div>
+        )}
       </Layout>
     </div>
   );
