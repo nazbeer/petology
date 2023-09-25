@@ -10,11 +10,44 @@ import "bootstrap/dist/css/bootstrap.min.css"; // Import Bootstrap CSS
 import "bootstrap/dist/js/bootstrap.bundle.min.js"; // Import Bootstrap JS
 import "bootstrap-datepicker/dist/css/bootstrap-datepicker3.min.css"; // Import Bootstrap Datepicker CSS
 import "bootstrap-datepicker";
+import OfficeTimeCalculate from "../../components/OfficeTimeCalculate";
 
 const Vet = () => {
   const navigate = useNavigate();
   const [doctorList, setDoctorList] = useState([]);
   const [doctor, setDoctor] = useState({});
+
+  const [time, setTime] = useState([]);
+
+  const getOfficeTime = () => {
+    axios
+      .post(
+        "/api/admin/get-offie-time",
+        { module: "vet" },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      )
+      .then((response) => {
+        console.log(
+          response?.data?.data?.starttime,
+          response?.data?.data?.endtime,
+          response?.data?.data?.break
+        );
+        const data = OfficeTimeCalculate(
+          response?.data?.data?.starttime,
+          response?.data?.data?.endtime,
+          response?.data?.data?.break,
+          30
+        );
+
+        setTime(data);
+      })
+      .catch((error) => console.error(error));
+  };
+
   useEffect(() => {
     axios
       .get("/api/user/get-all-approved-doctors", {
@@ -24,6 +57,9 @@ const Vet = () => {
       })
       .then((response) => setDoctorList(response.data.data))
       .catch((error) => console.error(error));
+
+    getOfficeTime();
+    console.log(time);
   }, []);
 
   // const [userDetails, setUserDetails] = useState({
@@ -304,16 +340,19 @@ const Vet = () => {
               </div>
               <div className="mb-2">
                 <label htmlFor="time">Time:</label>
-                <input
+
+                <select
                   className="form-control"
-                  type="time"
                   id="time"
                   name="time"
-                  pattern="^([01]?[0-9]|2[0-3]):[0-5][0-9]$"
-                  value={service.time}
                   onChange={handleChange}
-                  required
-                />
+                >
+                  {time.map((option, index) => (
+                    <option key={index} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
           </div>

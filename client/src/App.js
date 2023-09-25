@@ -66,6 +66,7 @@ import PaymentSuccessful from "./components/paymentSuccessful";
 import PaymentDecline from "./components/PaymentDecline";
 import NotFound from "./components/NotFound";
 import Payments from "./components/Payments";
+import OfficeTimmings from "./components/OfficeTimmings";
 
 function App() {
   const { loading } = useSelector((state) => state.alerts);
@@ -670,6 +671,22 @@ function App() {
           element={
             <ProtectedRoute>
               <Payments />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/office-timings"
+          element={
+            <ProtectedRoute>
+              <OfficeTimmings />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/reception/office-timings"
+          element={
+            <ProtectedRoute>
+              <OfficeTimmings />
             </ProtectedRoute>
           }
         />

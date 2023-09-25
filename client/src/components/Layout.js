@@ -106,6 +106,11 @@ function Layout({ children }) {
       path: "/reception/servicelist",
       icon: "ri-booklet-fill",
     },
+    {
+      name: "Office Timings",
+      path: "/admin/office-timings",
+      icon: "ri-booklet-fill",
+    },
     // {
     //   name: "Profile",
     //   path: `/reception/profile/${user?._id}`,
@@ -221,6 +226,11 @@ function Layout({ children }) {
     {
       name: "Services",
       path: "/admin/addservices",
+      icon: "ri-booklet-fill",
+    },
+    {
+      name: "Office Timings",
+      path: "/admin/office-timings",
       icon: "ri-booklet-fill",
     },
     // {

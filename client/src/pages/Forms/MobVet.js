@@ -10,7 +10,9 @@ import {
   LoadScript,
   Autocomplete,
 } from "@react-google-maps/api";
+import OfficeTimmings from "../../components/OfficeTimmings";
 const MobVet = () => {
+  const [time, setTime] = useState([]);
   const [autocomplete, setAutocomplete] = useState(null);
   const [location1, setLocation] = useState({ lat: 25.2048, lng: 55.2708 });
 
@@ -61,6 +63,35 @@ const MobVet = () => {
 
   const [subservice, setSubservices] = useState([]);
 
+  const getOfficeTime = () => {
+    axios
+      .post(
+        "/api/admin/get-offie-time",
+        { module: "vet" },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      )
+      .then((response) => {
+        console.log(
+          response?.data?.data?.starttime,
+          response?.data?.data?.endtime,
+          response?.data?.data?.break
+        );
+        const data = OfficeTimmings(
+          response?.data?.data?.starttime,
+          response?.data?.data?.endtime,
+          response?.data?.data?.break,
+          30
+        );
+
+        setTime(data);
+      })
+      .catch((error) => console.error(error));
+  };
+
   useEffect(() => {
     // Fetch sub-services from your Express.js API
 
@@ -104,6 +135,8 @@ const MobVet = () => {
         });
       })
       .catch((error) => console.error(error));
+
+      getOfficeTime()
   }, []);
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -125,7 +158,7 @@ const MobVet = () => {
         toast.success(response.data.message);
         const appointments = response?.data?.data;
         navigate("/user/payment-successful", {
-          state: {service, appointments },
+          state: { service, appointments },
         });
         //navigate('/appointments');
       }
@@ -172,7 +205,7 @@ const MobVet = () => {
                   <option value="Other">Other</option>
                 </select>
               </div>
-              {service.pet === 'Dog' && (
+              {service.pet === "Dog" && (
                 <div className="mb-2">
                   <label htmlFor="size">Choose Size: </label>
                   <select
@@ -194,7 +227,7 @@ const MobVet = () => {
                   </select>
                 </div>
               )}
-               <div className="mb-2">
+              <div className="mb-2">
                 <label htmlFor="Age">Age:</label>
                 <input
                   className="form-control"
@@ -264,15 +297,19 @@ const MobVet = () => {
               </div>
               <div className="mb-2">
                 <label htmlFor="time">Time:</label>
-                <input
+
+                <select
                   className="form-control"
-                  type="time"
                   id="time"
                   name="time"
-                  value={service.time}
                   onChange={handleChange}
-                  required
-                />
+                >
+                  {time.map((option, index) => (
+                    <option key={index} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
               </div>
               <div className="mb-2">
                 <label htmlFor="firstname">First Name:</label>

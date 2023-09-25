@@ -15,6 +15,7 @@ const HistoryModel = require("../models/historyModel");
 const DoctorLeave = require("../models/doctorLeaveModel");
 const UserappModel = require("../models/userappModel");
 const Paymentmodel = require("../models/Paymentmodel");
+const officetime = require("../models/OfficeTimeModel");
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, "uploads/"); // Directory where files will be stored
@@ -1007,6 +1008,52 @@ router.get("/get-all-pay", authMiddleware, async (req, res) => {
     res
       .status(500)
       .send({ message: "Error in Fetching Payment", success: false, error });
+  }
+});
+
+router.post("/offie-time", authMiddleware, async (req, res) => {
+  try {
+    const existingOfficeTime = await officetime.findOne({ module: req.body.module });
+    console.log(existingOfficeTime)
+    if (existingOfficeTime) {
+      existingOfficeTime.starttime = req.body.starttime;
+      existingOfficeTime.endtime = req.body.endtime;
+      existingOfficeTime.break = req.body.break;
+
+      await existingOfficeTime.save();
+    } else {
+      const time = new officetime(req.body);
+      await time.save();
+    }
+
+    res.status(200).send({
+      message: "Office Time Added Successfully",
+      success: true,
+      data: existingOfficeTime,
+    });
+  } catch (error) {
+    console.log(error);
+    res
+      .status(500)
+      .send({ message: "Error in Adding Office time", success: false, error });
+  }
+});
+
+router.post("/get-offie-time", authMiddleware, async (req, res) => {
+  try {
+    const OfficeTime = await officetime.findOne({ module: req.body.module });
+    console.log(OfficeTime)
+
+    res.status(200).send({
+      message: "Office Time Fetched Successfully",
+      success: true,
+      data: OfficeTime,
+    });
+  } catch (error) {
+    console.log(error);
+    res
+      .status(500)
+      .send({ message: "Error in Fetching Office time", success: false, error });
   }
 });
 module.exports = router;
