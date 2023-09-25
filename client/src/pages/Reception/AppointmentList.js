@@ -3,11 +3,15 @@ import { useDispatch } from "react-redux";
 import Layout from "../../components/Layout";
 import { showLoading, hideLoading } from "../../redux/alertsSlice";
 import axios from "axios";
-import { Table } from "antd";
+import { Table, DatePicker } from "antd";
 import { Button, Modal } from "react-bootstrap";
 import moment from "moment";
 import { toast } from "react-hot-toast";
 import { Link } from "react-router-dom";
+
+import JsPDF from "jspdf";
+import "jspdf-autotable";
+
 function Appointmentlist(doctorId) {
   const [appointments, setAppointments] = useState([]);
   const [openappointments, setOpenAppointments] = useState([]);
@@ -17,7 +21,23 @@ function Appointmentlist(doctorId) {
   const [showModal, setShowModal] = useState(false);
   const [pets, setPets] = useState([]);
 
+  const [filter, setFilter] = useState(true);
+
+  const [filterType, setFilterType] = useState("");
+  let [onlyDate, setOnlyDate] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [filteredData, setFilteredData] = useState([]);
+  const [filteredGuestData, setFilteredGuestData] = useState([]);
+
+  const { RangePicker } = DatePicker;
+
   const dispatch = useDispatch();
+
+  const handleFilterType = (event) => {
+    console.log(event.target.value);
+    setFilterType(event.target.value);
+  };
   const changeOpenAppointmentStatus = async (record, status) => {
     try {
       dispatch(showLoading());
@@ -93,7 +113,7 @@ function Appointmentlist(doctorId) {
           },
         }
       );
-      //  console.log('response',response.data.data);
+      console.log("response", response.data.data);
       if (response.data.success) {
         setDoctors(response.data.data);
       }
@@ -119,10 +139,11 @@ function Appointmentlist(doctorId) {
 
   const assignDoctorToAppointment = async () => {
     try {
+      console.log(selectedAppointment);
       const response = await axios.post(
         "/api/admin/assign-doctor-to-appointment",
         {
-          appointmentId: selectedAppointment._id,
+          appointmentId: selectedAppointment?.appointment?._id,
           doctorId: selectedDoctor,
         },
         {
@@ -151,6 +172,7 @@ function Appointmentlist(doctorId) {
       });
 
       if (response.data.success) {
+        console.log(response.data.data);
         setAppointments(response.data.data);
       }
     } catch (error) {
@@ -195,7 +217,7 @@ function Appointmentlist(doctorId) {
     // Fetch doctor details based on selected appointment
     const fetchDoctorDetails = async () => {
       try {
-        if (selectedAppointment && selectedAppointment.doctorInfo) {
+        if (selectedAppointment && selectedAppointment?.doctor) {
           const response = await axios.get(
             `/api/admin/doctordetails/${selectedAppointment?.doctor?._id}`
           );
@@ -253,7 +275,11 @@ function Appointmentlist(doctorId) {
     {
       title: "Parent Name",
       dataIndex: "parentName",
-      render: (text, record) => <span>{record?.user?.name}</span>,
+      render: (text, record) => (
+        <span>
+          {record?.firstname} {record?.lastname}
+        </span>
+      ),
       responsive: ["xs", "md", "sm", "lg"],
     },
     {
@@ -273,7 +299,7 @@ function Appointmentlist(doctorId) {
       title: "Status",
       dataIndex: "status",
       render: (text, record) => (
-        <span className="text-capitalize">{record?.doctor?.status}</span>
+        <span className="text-capitalize">{record?.status}</span>
       ),
       responsive: ["xs", "md", "sm", "lg"],
     },
@@ -282,9 +308,9 @@ function Appointmentlist(doctorId) {
       dataIndex: "actions",
       render: (text, record) => (
         <div className="d-flex justify-content-evenly align-items-center gap-3">
-          {record.status === "pending" ||
-          record?.doctor?.status === "Pending" ||
-          record?.doctor?.status === "blocked" ? (
+          {record?.status === "pending" ||
+          record?.status === "Pending" ||
+          record?.status === "blocked" ? (
             <button
               type="button"
               className="btn btn-warning btn-sm text-capitalize"
@@ -329,7 +355,7 @@ function Appointmentlist(doctorId) {
       dataIndex: "name",
       render: (text, record) => (
         <span>
-          {record?.doctor?.firstName + " " + record?.doctor?.lastName}
+          {record?.doctor?.firstName} {record?.doctor?.lastName}
         </span>
       ),
       responsive: ["xs", "md", "sm", "lg"],
@@ -357,7 +383,7 @@ function Appointmentlist(doctorId) {
       title: "Date",
       dataIndex: "date",
       render: (text, record) => (
-        <span>{moment(record?.date).format("LL")}</span>
+        <span>{moment(record?.appointment.date).format("LL")}</span>
       ),
       responsive: ["xs", "md", "sm", "lg"],
     },
@@ -383,9 +409,9 @@ function Appointmentlist(doctorId) {
       dataIndex: "actions",
       render: (text, record) => (
         <div className="d-flex justify-content-evenly align-items-center gap-3">
-          {record?.doctor?.status === "pending" ||
-          record?.doctor?.status === "Pending" ||
-          record?.doctor?.status === "blocked" ? (
+          {record.status === "pending" ||
+          record?.status === "Pending" ||
+          record?.status === "blocked" ? (
             <button
               type="button"
               className="btn btn-warning btn-sm text-capitalize"
@@ -414,6 +440,159 @@ function Appointmentlist(doctorId) {
       responsive: ["xs", "md", "sm", "lg"],
     },
   ];
+  const onChangeDate = (date, dateString) => {
+    setOnlyDate(moment(dateString).format("LL"));
+
+    console.log(moment(dateString).format("LL"));
+  };
+
+  const onChangeRange = (date, dateString) => {
+    setStartDate(moment(dateString[0]).format("LL"));
+    setEndDate(moment(dateString[1]).format("LL"));
+    console.log(
+      moment(dateString[0]).format("LL"),
+      moment(dateString[1]).format("LL")
+    );
+  };
+
+  const handleFilter = () => {
+    onlyDate = new Date(onlyDate);
+    const startDateObj = new Date(startDate);
+    const endDateObj = new Date(endDate);
+
+    const filtered = appointments.filter((item) => {
+      console.log(item);
+      const itemDate = new Date(item?.appointment?.date);
+      console.log(
+        onlyDate.toDateString(),
+        startDateObj.toDateString(),
+        endDateObj.toDateString(),
+        itemDate.toDateString()
+      );
+      if (filterType === "Date") {
+        return itemDate.toDateString() === onlyDate.toDateString();
+      } else {
+        // Date range filter
+        console.log(
+          itemDate.toDateString(),
+          startDateObj.toDateString(),
+          endDateObj.toDateString()
+        );
+
+        return (
+          itemDate.toDateString() >= startDateObj.toDateString() &&
+          itemDate.toDateString() <= endDateObj.toDateString()
+        );
+      }
+    });
+
+    const filteredGuest = openappointments.filter((item) => {
+      console.log(item);
+      const itemDate = new Date(item?.date);
+      console.log(
+        onlyDate.toDateString(),
+        startDateObj.toDateString(),
+        endDateObj.toDateString(),
+        itemDate.toDateString()
+      );
+      if (filterType === "Date") {
+        return itemDate.toDateString() === onlyDate.toDateString();
+      } else {
+        // Date range filter
+        return (
+          itemDate.toDateString() >= startDateObj.toDateString() &&
+          itemDate.toDateString() <= endDateObj.toDateString()
+        );
+      }
+    });
+
+    console.log(filtered);
+
+    setFilteredData(filtered.length > 0 ? filtered : null);
+    setFilteredGuestData(filteredGuest.length > 0 ? filteredGuest : null);
+
+    console.log(filtered.length > 0 ? filtered : null);
+
+    setFilter(false);
+  };
+
+  const createPdfWithTable = async (data) => {
+    const doc = new JsPDF();
+    doc.setFontSize(30);
+    doc.text(70, 20, "Appointments");
+
+    doc.setFontSize(20);
+    doc.text(10, 40, "Appointments List (Registered Users)");
+
+    const headers = [
+      "ParentName",
+      "Doctor",
+      "Specialization",
+      "Date",
+      "Status",
+      "Time",
+    ];
+    const datas = filteredData.map((item) => [
+      item?.user?.name,
+      `${item?.doctor?.firstName} ${item?.doctor?.lastName}`,
+      item?.doctor?.specialization,
+
+      moment(item?.appointment?.date).format("LL"),
+      item?.appointment?.status,
+      moment(item?.appointment?.createdAt).format("LTS"),
+    ]);
+    console.log(datas);
+
+    doc.autoTable({
+      head: [headers],
+      body: datas,
+      theme: "striped",
+      margin: { top: 50 },
+    });
+
+    const headers1 = [
+      "Service",
+      "Requested",
+      "Pet",
+      "Date",
+      "Time",
+      "Mobile",
+      "Status",
+    ];
+    const datas1 = filteredGuestData?.map((item) => [
+      item?.module,
+      item?.service,
+      item?.pet,
+      moment(item?.date).format("LL"),
+      moment(item?.createdAt).format("LTS"),
+      item?.mobile,
+      item?.status,
+    ]);
+    const tableHeight = doc.autoTable.previous.finalY;
+
+    doc.setFontSize(20);
+    doc.text(10, tableHeight + 20, "Guest Appointments");
+    doc.autoTable({
+      startY: tableHeight + 30,
+      head: [headers1],
+      body: datas1,
+      theme: "striped",
+    });
+
+    const pdfBytes = doc.save("appointments.pdf");
+
+    const blob = new Blob([pdfBytes], { type: "application/pdf" });
+    const url = URL.createObjectURL(blob);
+
+    // Create a temporary link element to trigger the download
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "appointments.pdf";
+    a.click();
+
+    // Clean up
+    URL.revokeObjectURL(url);
+  };
 
   return (
     <Layout>
@@ -448,12 +627,73 @@ function Appointmentlist(doctorId) {
           </div>
         </div>
         <hr />
-        <Table
-          columns={usercolumns}
-          dataSource={appointments}
-          responsive={true}
-          scroll={{ x: true }}
-        />
+        <div className="row">
+          <div className="mb-2 col">
+            <select
+              className="form-control"
+              id="break"
+              name="break"
+              value={filterType}
+              onChange={handleFilterType}
+            >
+              <option defaultValue="">Select Filter...</option>
+              <option value="Date">Date</option>
+              <option value="Range">Range</option>
+              {/* <option value="Weekly">Weekly</option>
+              <option value="Montly">Montly</option> */}
+            </select>
+          </div>
+          {filterType === "Range" && (
+            <div className="mb-2 col">
+              <RangePicker onChange={onChangeRange} style={{ width: "100%" }} />
+            </div>
+          )}
+          {filterType === "Date" && (
+            <div className="mb-2 col">
+              <DatePicker
+                onChange={onChangeDate}
+                size="large"
+                style={{ width: "100%" }}
+              />
+            </div>
+          )}
+          <div className="mt-1 col">
+            <button
+              type="submit"
+              className="btn btn-success btn-sm me-3"
+              onClick={handleFilter}
+            >
+              Filter
+            </button>
+            <button
+              type="submit"
+              className="btn btn-success btn-sm"
+              onClick={createPdfWithTable}
+              disabled={filter}
+            >
+              Export to PDF
+            </button>
+          </div>
+        </div>
+        {filteredData !== null ? (
+          filteredData.length > 0 ? (
+            <Table
+              columns={usercolumns}
+              dataSource={filteredData}
+              responsive={true}
+              scroll={{ x: true }}
+            />
+          ) : (
+            <Table
+              columns={usercolumns}
+              dataSource={appointments}
+              responsive={true}
+              scroll={{ x: true }}
+            />
+          )
+        ) : (
+          <div className="text-center m-5">No result found</div>
+        )}
         <div>
           <Modal show={showModal} onHide={handleCloseModal} size="lg">
             <Modal.Header closeButton>
@@ -469,7 +709,8 @@ function Appointmentlist(doctorId) {
                 <div className="d-lg-flex justify-content-between align-items-center gap-4 mb-3">
                   <label className="text-left">Parent Name: </label>
                   <span className="text-right">
-                    {selectedAppointment && selectedAppointment?.user?.name}
+                    {selectedAppointment &&
+                      selectedAppointment?.user?.firstName}
                   </span>
                 </div>
                 <div className="d-lg-flex justify-content-between align-items-center gap-4 mb-3">
@@ -480,7 +721,7 @@ function Appointmentlist(doctorId) {
                       <option>--Select Doctor--</option>
                       {selectedAppointment &&
                         doctors.map((doctoro) => (
-                          <option key={doctoro?._id} value={doctoro?._id}>
+                          <option key={doctoro._id} value={doctoro._id}>
                             Dr. {doctoro?.firstName} {doctoro?.lastName}
                           </option>
                         ))}
@@ -509,12 +750,26 @@ function Appointmentlist(doctorId) {
       </div>
       <div className="col-md-12">
         <h6>Guest Appointments</h6>
-        <Table
-          columns={opencolumns}
-          dataSource={openappointments}
-          responsive={true}
-          scroll={{ x: true }}
-        />
+
+        {filteredGuestData !== null ? (
+          filteredGuestData.length > 0 ? (
+            <Table
+              columns={opencolumns}
+              dataSource={filteredGuestData}
+              responsive={true}
+              scroll={{ x: true }}
+            />
+          ) : (
+            <Table
+              columns={opencolumns}
+              dataSource={openappointments}
+              responsive={true}
+              scroll={{ x: true }}
+            />
+          )
+        ) : (
+          <div className="text-center m-5">No result found</div>
+        )}
       </div>
     </Layout>
   );

@@ -4,11 +4,24 @@ import Layout from "../../components/Layout";
 import { showLoading, hideLoading } from "../../redux/alertsSlice";
 import { toast } from "react-hot-toast";
 import axios from "axios";
-import { Table, Modal, Button, Form, Input, DatePicker, Select, Spin } from "antd";
+import {
+  Table,
+  Modal,
+  Button,
+  Form,
+  Input,
+  DatePicker,
+  Select,
+  Spin,
+} from "antd";
 import { LoadingOutlined } from "@ant-design/icons";
 import moment from "moment";
+import JsPDF from "jspdf";
+import "jspdf-autotable";
 
 function DoctorsList() {
+  const { RangePicker } = DatePicker;
+
   const [doctors, setDoctors] = useState([]);
   const [editingDoctor, setEditingDoctor] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -20,6 +33,20 @@ function DoctorsList() {
   const [leaveLoading, setLeaveLoading] = useState(false);
   const [leaveForm] = Form.useForm();
   const [leaveDoctor, setLeaveDoctor] = useState([]);
+
+  const [filter, setFilter] = useState(true);
+
+  const [filterType, setFilterType] = useState("");
+  let [onlyDate, setOnlyDate] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [filteredData, setFilteredData] = useState([]);
+
+  const handleFilterType = (event) => {
+    console.log(event.target.value);
+    setFilterType(event.target.value);
+  };
+
   const openLeaveModal = (doctor) => {
     leaveForm.resetFields();
     setLeaveDoctor(doctor); // Use setLeaveDoctor here
@@ -62,26 +89,29 @@ function DoctorsList() {
       dispatch(hideLoading());
       if (response.data.success) {
         const doctorsData = response.data.data;
-  
+
         // Fetch leaves for each doctor and set them in the data
         for (const doctor of doctorsData) {
-          const leavesResponse = await axios.get(`/api/admin/get-doctor-leaves/${doctor._id}`, {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          });
-  
+          const leavesResponse = await axios.get(
+            `/api/admin/get-doctor-leaves/${doctor._id}`,
+            {
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+              },
+            }
+          );
+
           if (leavesResponse.data.success) {
             doctor.leaves = leavesResponse.data.data;
           }
         }
-  
+
         setDoctors(doctorsData);
         setLoading(false);
       }
     } catch (error) {
       dispatch(hideLoading());
-      setLoading(false); 
+      setLoading(false);
     }
   };
 
@@ -154,41 +184,43 @@ function DoctorsList() {
       dataIndex: "name",
       render: (text, record) => (
         <span>
-         Dr. {record.firstName} {record.lastName}
+          Dr. {record.firstName} {record.lastName}
         </span>
       ),
-      responsive: ["xs", "md","sm", "lg"],
+      responsive: ["xs", "md", "sm", "lg"],
     },
     {
       title: "Phone",
       dataIndex: "phoneNumber",
-      responsive: ["xs", "md","sm", "lg"],
+      responsive: ["xs", "md", "sm", "lg"],
     },
     {
-      title:"Specialization",
-      dataIndex:"specialization",
-      render:(text, record) => (
+      title: "Specialization",
+      dataIndex: "specialization",
+      render: (text, record) => (
         <span className="text-capitalize">{record.specialization}</span>
       ),
-      responsive: ["xs", "md","sm", "lg"],
+      responsive: ["xs", "md", "sm", "lg"],
     },
     {
-      title:"Experience", 
-      dataIndex:"experience",
-      render:(text, record)=>(
-        <p>{record.experience} Years</p>
-      ),
-      responsive: ["xs", "md","sm", "lg"],
+      title: "Experience",
+      dataIndex: "experience",
+      render: (text, record) => <p>{record.experience} Years</p>,
+      responsive: ["xs", "md", "sm", "lg"],
     },
     {
       title: "Break Time",
       dataIndex: "breakTime",
       render: (text, record) => {
         const breakTime = record.breakTime;
-        if (breakTime === '30') {
+        if (breakTime === "30") {
           return <span className="text-capitalize">{breakTime} mins</span>;
-        } else if (breakTime === '1' ||  breakTime === '1.5' || breakTime === '2') {
-          return <span >{breakTime} Hour(s)</span>;
+        } else if (
+          breakTime === "1" ||
+          breakTime === "1.5" ||
+          breakTime === "2"
+        ) {
+          return <span>{breakTime} Hour(s)</span>;
         } else {
           // Handle other cases if needed
           return <span className="text-capitalize">{breakTime} </span>;
@@ -203,9 +235,13 @@ function DoctorsList() {
           {leaves && leaves.length > 0 ? (
             leaves.map((leave, index) => (
               <div key={index}>
-                <span>Start Date: {moment(leave.startDate).format("DD-MM-YYYY")}</span>
+                <span>
+                  Start Date: {moment(leave.startDate).format("DD-MM-YYYY")}
+                </span>
                 <br />
-                <span>End Date: {moment(leave.endDate).format("DD-MM-YYYY")}</span>
+                <span>
+                  End Date: {moment(leave.endDate).format("DD-MM-YYYY")}
+                </span>
                 <br />
               </div>
             ))
@@ -215,10 +251,9 @@ function DoctorsList() {
         </div>
       ),
     },
-    
-    
+
     {
-      title:"Clinic Fees",
+      title: "Clinic Fees",
       dataIndex: "feePerCunsultation",
       render: (number, record) => {
         return (
@@ -227,45 +262,48 @@ function DoctorsList() {
           </p>
         );
       },
-      responsive: ["xs", "md","sm", "lg"],
+      responsive: ["xs", "md", "sm", "lg"],
     },
 
     {
       title: "Created At",
       dataIndex: "createdAt",
-      render: (record , text) => moment(record.createdAt).format("DD-MM-YYYY"),
+      render: (record, text) => moment(record.createdAt).format("DD-MM-YYYY"),
     },
     {
       title: "Status",
       dataIndex: "status",
-      render:(text, record) =>(
+      render: (text, record) => (
         <p className="text-capitalize">{record.status}</p>
       ),
-      responsive: ["xs", "md","sm", "lg"],
+      responsive: ["xs", "md", "sm", "lg"],
     },
     {
       title: "Actions",
       dataIndex: "actions",
       render: (text, record) => (
         <div className="d-flex justify-content-center align-items-center gap-2">
-          {(record.status === "pending" || record.status === "Pending")  && (
-            <button type="button"
+          {(record.status === "pending" || record.status === "Pending") && (
+            <button
+              type="button"
               className="btn btn-warning btn-sm text-capitalize"
               onClick={() => changeDoctorStatus(record, "approved")}
             >
-            approve
+              approve
             </button>
           )}
           {(record.status === "Approved" || record.status === "approved") && (
-            <button type="button"
+            <button
+              type="button"
               className="btn btn-danger btn-sm text-capitalize"
               onClick={() => changeDoctorStatus(record, "blocked")}
             >
               block
             </button>
           )}
-           {(record.status === "Blocked" || record.status === "blocked") && (
-            <button type="button"
+          {(record.status === "Blocked" || record.status === "blocked") && (
+            <button
+              type="button"
               className="btn btn-warning btn-sm text-capitalize"
               onClick={() => changeDoctorStatus(record, "approved")}
             >
@@ -273,50 +311,243 @@ function DoctorsList() {
             </button>
           )}
           <button
-          type="button"
-          className="btn btn-primary btn-sm text-capitalize"
-          onClick={() => openEditModal(record)}
-        >
-          edit
-        </button>
-        <button className="btn btn-warning btn-sm " type="button"  onClick={() => openLeaveModal(record)}>
-          Set Leave
-        </button>
+            type="button"
+            className="btn btn-primary btn-sm text-capitalize"
+            onClick={() => openEditModal(record)}
+          >
+            edit
+          </button>
+          <button
+            className="btn btn-warning btn-sm "
+            type="button"
+            onClick={() => openLeaveModal(record)}
+          >
+            Set Leave
+          </button>
         </div>
       ),
-      responsive: ["xs", "md","sm", "lg"],
+      responsive: ["xs", "md", "sm", "lg"],
     },
   ];
   const customLoader = (
     <div style={{ textAlign: "center", margin: "50px auto" }}>
-      <Spin indicator={<LoadingOutlined style={{ fontSize: 48, color: "#1890ff" }} spin />} />
+      <Spin
+        indicator={
+          <LoadingOutlined style={{ fontSize: 48, color: "#1890ff" }} spin />
+        }
+      />
       <p style={{ marginTop: "10px" }}>Loading...</p>
     </div>
   );
+  console.log(doctors);
+  const handleFilter = () => {
+    onlyDate = new Date(onlyDate);
+    const startDateObj = new Date(startDate);
+    const endDateObj = new Date(endDate);
+
+    const filtered = doctors.filter((item) => {
+      console.log(item);
+      const itemDate = new Date(item?.createdAt);
+      console.log(
+        onlyDate.toDateString(),
+        startDateObj.toDateString(),
+        endDateObj.toDateString(),
+        itemDate.toDateString()
+      );
+      if (filterType === "Date") {
+        return itemDate.toDateString() === onlyDate.toDateString();
+      } else {
+        // Date range filter
+        console.log(
+          itemDate.toDateString(),
+          startDateObj.toDateString(),
+          endDateObj.toDateString()
+        );
+
+        return (
+          itemDate.toDateString() >= startDateObj.toDateString() &&
+          itemDate.toDateString() <= endDateObj.toDateString()
+        );
+      }
+    });
+
+    console.log(filtered);
+
+    setFilteredData(filtered.length > 0 ? filtered : null);
+
+    console.log(filtered.length > 0 ? filtered : null);
+
+    setFilter(false);
+  };
+
+  const onChangeDate = (date, dateString) => {
+    setOnlyDate(moment(dateString).format("LL"));
+
+    console.log(moment(dateString).format("LL"));
+  };
+
+  const onChangeRange = (date, dateString) => {
+    setStartDate(moment(dateString[0]).format("LL"));
+    setEndDate(moment(dateString[1]).format("LL"));
+    console.log(
+      moment(dateString[0]).format("LL"),
+      moment(dateString[1]).format("LL")
+    );
+  };
+
+  const createPdfWithTable = async (data) => {
+    const doc = new JsPDF();
+    doc.setFontSize(30);
+    doc.text(80, 20, "Payments");
+
+    doc.setFontSize(20);
+
+    const headers = [
+      "Name",
+      "Phone",
+      "Specialization",
+      "Experience",
+      "Break Time",
+      "Leaves",
+      "Clinic Fees",
+      "Created At",
+      "Status",
+    ];
+    const datas = filteredData.map((item) => [
+      ` Dr. ${item?.firstName} ${item?.lastName}`,
+      item?.phoneNumber,
+      item?.specialization,
+      item?.experience,
+      item?.breakTime,
+      item?.leaves.map(
+        (leave, index) =>
+          `Start Date: ${moment(leave.startDate).format(
+            "LL"
+          )},  End Date: ${moment(leave.endDate).format("LL")}`
+      ),
+      item?.feePerCunsultation,
+      moment(item?.createdAt).format("LL"),
+      item?.status,
+    ]);
+    console.log(datas);
+
+    doc.setFontSize(10);
+
+    doc.autoTable({
+      head: [headers],
+      body: datas,
+      theme: "striped",
+      margin: { top: 30 },
+    });
+
+    const pdfBytes = doc.save("doctors.pdf");
+
+    const blob = new Blob([pdfBytes], { type: "application/pdf" });
+    const url = URL.createObjectURL(blob);
+
+    // Create a temporary link element to trigger the download
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "doctors.pdf";
+    a.click();
+
+    // Clean up
+    URL.revokeObjectURL(url);
+  };
   return (
     <Layout>
-       <div className="d-flex justify-content-between align-items-center">
-      <h5 className="page-title mb-0">Doctor List</h5>
-     <a href="/admin/apply-doctor" ><button className="btn btn-success " type="button">Add New Doctor</button></a>
-
+      <div className="d-flex justify-content-between align-items-center">
+        <h5 className="page-title mb-0">Doctor List</h5>
+        <a href="/admin/apply-doctor">
+          <button className="btn btn-success " type="button">
+            Add New Doctor
+          </button>
+        </a>
       </div>
       <hr />
+      <div className="row">
+        <div className="mb-2 col">
+          <select
+            className="form-control"
+            id="break"
+            name="break"
+            value={filterType}
+            onChange={handleFilterType}
+          >
+            <option defaultValue="">Select Filter...</option>
+            <option value="Date">Date</option>
+            <option value="Range">Range</option>
+            {/* <option value="Weekly">Weekly</option>
+              <option value="Montly">Montly</option> */}
+          </select>
+        </div>
+        {filterType === "Range" && (
+          <div className="mb-2 col">
+            <RangePicker onChange={onChangeRange} style={{ width: "100%" }} />
+          </div>
+        )}
+        {filterType === "Date" && (
+          <div className="mb-2 col">
+            <DatePicker
+              onChange={onChangeDate}
+              size="large"
+              style={{ width: "100%" }}
+            />
+          </div>
+        )}
+        <div className="mt-1 col">
+          <button
+            type="submit"
+            className="btn btn-success btn-sm me-3"
+            onClick={handleFilter}
+          >
+            Filter
+          </button>
+          <button
+            type="submit"
+            className="btn btn-success btn-sm"
+            onClick={createPdfWithTable}
+            disabled={filter}
+          >
+            Export to PDF
+          </button>
+        </div>
+      </div>
       {loading ? (
         customLoader // Use the custom loader
+      ) : filteredData !== null ? (
+        filteredData.length > 0 ? (
+          <Table
+            columns={columns}
+            dataSource={filteredData}
+            responsive={true}
+            scroll={{ x: true }}
+          />
+        ) : (
+          <Table
+            columns={columns}
+            dataSource={doctors}
+            responsive={true}
+            scroll={{ x: true }}
+          />
+        )
       ) : (
-        <Table columns={columns} dataSource={doctors} responsive={true} scroll={{ x: true }} />
+        <div className="text-center m-5">No result found</div>
       )}
       <Modal
         title="Edit Doctor"
         visible={editModalVisible}
         onCancel={closeEditModal}
         footer={null}
-        style={{borderRadius:"6px"}}
+        style={{ borderRadius: "6px" }}
         width={600}
       >
-        <Form form={form} onFinish={updateDoctor}   labelCol={{ span: 6 }} // Adjust the span value as needed
-          wrapperCol={{ span: 18 }}>
-       
+        <Form
+          form={form}
+          onFinish={updateDoctor}
+          labelCol={{ span: 6 }} // Adjust the span value as needed
+          wrapperCol={{ span: 18 }}
+        >
           <Form.Item
             name="firstName"
             label="First Name"
@@ -348,38 +579,42 @@ function DoctorsList() {
           <Form.Item
             name="experience"
             label="Experience"
-            rules={[{ required: true, message: "Please enter year of experience" }]}
+            rules={[
+              { required: true, message: "Please enter year of experience" },
+            ]}
           >
             <Input />
           </Form.Item>
           <Form.Item
-    name="breakTime"
-    label="Break Time"
-    rules={[{ required: true, message: "Please select break time" }]}
-  >
-    <Select>
-      <Select.Option value={30}>30 mins</Select.Option>
-      <Select.Option value={45}>45 mins</Select.Option>
-      <Select.Option value={1}>1 hour</Select.Option>
-      <Select.Option value={1.5}>1.5 hours</Select.Option>
-      <Select.Option value={2}>2 hours</Select.Option>
-    </Select>
-  </Form.Item>
-          <Form.Item labelAlign="right" >
-
+            name="breakTime"
+            label="Break Time"
+            rules={[{ required: true, message: "Please select break time" }]}
+          >
+            <Select>
+              <Select.Option value={30}>30 mins</Select.Option>
+              <Select.Option value={45}>45 mins</Select.Option>
+              <Select.Option value={1}>1 hour</Select.Option>
+              <Select.Option value={1.5}>1.5 hours</Select.Option>
+              <Select.Option value={2}>2 hours</Select.Option>
+            </Select>
+          </Form.Item>
+          <Form.Item labelAlign="right">
             <div className="text-center mt-2">
-            <button type="submit" className="btn btn-primary text-right btn-sm">
-              Update Doctor Details
-            </button>
+              <button
+                type="submit"
+                className="btn btn-primary text-right btn-sm"
+              >
+                Update Doctor Details
+              </button>
             </div>
           </Form.Item>
         </Form>
       </Modal>
-     
+
       <Modal
-        title={`Set Leave for Dr. ${
-          leaveDoctor ? leaveDoctor.firstName : ""
-        } ${leaveDoctor ? leaveDoctor.lastName : ""}`}
+        title={`Set Leave for Dr. ${leaveDoctor ? leaveDoctor.firstName : ""} ${
+          leaveDoctor ? leaveDoctor.lastName : ""
+        }`}
         visible={leaveModalVisible}
         onCancel={closeLeaveModal}
         width={800}
@@ -399,18 +634,23 @@ function DoctorsList() {
         ]}
       >
         <div className="d-lg-flex justify-content-between align-items-center gap-3">
-        <p className="text-dark">Doctor ID: {leaveDoctor ? leaveDoctor._id : ""}</p>
-        <p className="text-dark">
-          Doctor Name:{" "}
-          {leaveDoctor ? `${leaveDoctor.firstName} ${leaveDoctor.lastName}` : ""}
-        </p>
+          <p className="text-dark">
+            Doctor ID: {leaveDoctor ? leaveDoctor._id : ""}
+          </p>
+          <p className="text-dark">
+            Doctor Name:{" "}
+            {leaveDoctor
+              ? `${leaveDoctor.firstName} ${leaveDoctor.lastName}`
+              : ""}
+          </p>
         </div>
-        <Form form={leaveForm} labelCol={{ span: 8 }} 
-          wrapperCol={{ span: 12 }} >
+        <Form form={leaveForm} labelCol={{ span: 8 }} wrapperCol={{ span: 12 }}>
           <Form.Item
             form={leaveForm}
-            name="doctorId" style={{marginTop:'10px'}}
-            label="Doctor Id" hidden
+            name="doctorId"
+            style={{ marginTop: "10px" }}
+            label="Doctor Id"
+            hidden
             initialValue={leaveDoctor ? leaveDoctor._id : ""} // Pre-fill the doctorId field
           >
             <Input />
@@ -433,10 +673,6 @@ function DoctorsList() {
           </Form.Item>
         </Form>
       </Modal>
-
-
-
-
     </Layout>
   );
 }

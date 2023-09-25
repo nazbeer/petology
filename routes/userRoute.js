@@ -56,7 +56,7 @@ router.post("/register", async (req, res) => {
     const newUser = new User(req.body);
     newUser.activationToken = activationToken;
     await newUser.save();
-    const activationLink = `http://localhost:3000/#/activate/${activationToken}`;
+    const activationLink = `http://localhost:3000/activate/${activationToken}`;
 
     const transporter = nodemailer.createTransport({
       host: "mailslurp.mx",

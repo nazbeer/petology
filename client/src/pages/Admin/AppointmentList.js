@@ -8,6 +8,10 @@ import { Button, Modal } from "react-bootstrap";
 import moment from "moment";
 import { toast } from "react-hot-toast";
 import { Link } from "react-router-dom";
+
+import JsPDF from "jspdf";
+import "jspdf-autotable";
+
 function Appointmentlist(doctorId) {
   const [appointments, setAppointments] = useState([]);
   const [openappointments, setOpenAppointments] = useState([]);
@@ -16,6 +20,9 @@ function Appointmentlist(doctorId) {
   const [selectedDoctor, setSelectedDoctor] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [pets, setPets] = useState([]);
+
+  const [filter, setFilter] = useState(true);
+
 
   const [filterType, setFilterType] = useState("");
   let [onlyDate, setOnlyDate] = useState("");
@@ -133,7 +140,7 @@ function Appointmentlist(doctorId) {
 
   const assignDoctorToAppointment = async () => {
     try {
-      console.log(selectedAppointment)
+      console.log(selectedAppointment);
       const response = await axios.post(
         "/api/admin/assign-doctor-to-appointment",
         {
@@ -465,41 +472,14 @@ function Appointmentlist(doctorId) {
       );
       if (filterType === "Date") {
         return itemDate.toDateString() === onlyDate.toDateString();
-      } else if (filterType === "Weekly") {
-        // Filter by week
-        const weekStart = new Date();
-        // weekStart.setDate(selectedDateObj.getDate() - selectedDateObj.getDay());
-        const weekEnd = new Date();
-        weekEnd.setDate(weekStart.getDate() - 6);
-        console.log(
-          weekStart.toDateString(),
-          weekEnd.toDateString(),
-          itemDate.toDateString()
-        );
-        return (
-          itemDate.toDateString() >= weekStart.toDateString() &&
-          itemDate.toDateString() <= weekEnd.toDateString()
-        );
-      } else if (filterType === "Montly") {
-        // Filter by month
-        const monthStart = new Date();
-        // monthStart.setDate(
-        //   selectedDateObj.getDate() - selectedDateObj.getDay()
-        // );
-        const monthEnd = new Date();
-
-        monthEnd.setDate(monthStart.getDate() - 30);
-        console.log(
-          monthStart.toDateString(),
-          monthEnd.toDateString(),
-          itemDate.toDateString()
-        );
-        return (
-          itemDate.toDateString() >= monthStart.toDateString() &&
-          itemDate.toDateString() <= monthEnd.toDateString()
-        );
       } else {
         // Date range filter
+        console.log(
+          itemDate.toDateString(),
+          startDateObj.toDateString(),
+          endDateObj.toDateString()
+        );
+
         return (
           itemDate.toDateString() >= startDateObj.toDateString() &&
           itemDate.toDateString() <= endDateObj.toDateString()
@@ -518,39 +498,6 @@ function Appointmentlist(doctorId) {
       );
       if (filterType === "Date") {
         return itemDate.toDateString() === onlyDate.toDateString();
-      } else if (filterType === "Weekly") {
-        // Filter by week
-        const weekStart = new Date();
-        // weekStart.setDate(selectedDateObj.getDate() - selectedDateObj.getDay());
-        const weekEnd = new Date();
-        weekEnd.setDate(weekStart.getDate() - 6);
-        console.log(
-          weekStart.toDateString(),
-          weekEnd.toDateString(),
-          itemDate.toDateString()
-        );
-        return (
-          itemDate.toDateString() >= weekStart.toDateString() &&
-          itemDate.toDateString() <= weekEnd.toDateString()
-        );
-      } else if (filterType === "Montly") {
-        // Filter by month
-        const monthStart = new Date();
-        // monthStart.setDate(
-        //   selectedDateObj.getDate() - selectedDateObj.getDay()
-        // );
-        const monthEnd = new Date();
-
-        monthEnd.setDate(monthStart.getDate() - 30);
-        console.log(
-          monthStart.toDateString(),
-          monthEnd.toDateString(),
-          itemDate.toDateString()
-        );
-        return (
-          itemDate.toDateString() >= monthStart.toDateString() &&
-          itemDate.toDateString() <= monthEnd.toDateString()
-        );
       } else {
         // Date range filter
         return (
@@ -566,6 +513,87 @@ function Appointmentlist(doctorId) {
     setFilteredGuestData(filteredGuest.length > 0 ? filteredGuest : null);
 
     console.log(filtered.length > 0 ? filtered : null);
+
+    setFilter(false)
+  };
+
+
+  const createPdfWithTable = async (data) => {
+    const doc = new JsPDF();
+    doc.setFontSize(30);
+    doc.text(70, 20, "Appointments");
+
+    doc.setFontSize(20);
+    doc.text(10, 40, "Appointments List (Registered Users)");
+    
+    const headers = [
+      "ParentName",
+      "Doctor",
+      "Specialization",
+      "Date",
+      "Status",
+      "Time",
+    ];
+    const datas = filteredData.map((item) => [
+      item?.user?.name,
+      `${item?.doctor?.firstName} ${item?.doctor?.lastName}`,
+      item?.doctor?.specialization,
+
+      moment(item?.appointment?.date).format("LL"),
+      item?.appointment?.status,
+      moment(item?.appointment?.createdAt).format("LTS"),
+    ]);
+    console.log(datas);
+
+    doc.autoTable({
+      head: [headers],
+      body: datas,
+      theme: "striped",
+      margin: { top: 50 },
+    });
+
+    const headers1 = [
+      "Service",
+      "Requested",
+      "Pet",
+      "Date",
+      "Time",
+      "Mobile",
+      "Status",
+    ];
+    const datas1 = filteredGuestData?.map((item) => [
+      item?.module,
+      item?.service,
+      item?.pet,
+      moment(item?.date).format("LL"),
+      moment(item?.createdAt).format("LTS"),
+      item?.mobile,
+      item?.status,
+    ]);
+    const tableHeight = doc.autoTable.previous.finalY;
+
+    doc.setFontSize(20);
+    doc.text(10, tableHeight + 20, "Guest Appointments");
+    doc.autoTable({
+      startY: tableHeight + 30,
+      head: [headers1],
+      body: datas1,
+      theme: "striped",
+    });
+
+    const pdfBytes = doc.save("appointments.pdf");
+
+    const blob = new Blob([pdfBytes], { type: "application/pdf" });
+    const url = URL.createObjectURL(blob);
+
+    // Create a temporary link element to trigger the download
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "appointments.pdf";
+    a.click();
+
+    // Clean up
+    URL.revokeObjectURL(url);
   };
 
   return (
@@ -613,13 +641,13 @@ function Appointmentlist(doctorId) {
               <option defaultValue="">Select Filter...</option>
               <option value="Date">Date</option>
               <option value="Range">Range</option>
-              <option value="Weekly">Weekly</option>
-              <option value="Montly">Montly</option>
+              {/* <option value="Weekly">Weekly</option>
+              <option value="Montly">Montly</option> */}
             </select>
           </div>
           {filterType === "Range" && (
             <div className="mb-2 col">
-              <RangePicker onChange={onChangeRange} />
+              <RangePicker onChange={onChangeRange} style={{ width: "100%" }} />
             </div>
           )}
           {filterType === "Date" && (
@@ -639,7 +667,12 @@ function Appointmentlist(doctorId) {
             >
               Filter
             </button>
-            <button type="submit" className="btn btn-success btn-sm">
+            <button
+              type="submit"
+              className="btn btn-success btn-sm"
+              onClick={createPdfWithTable}
+              disabled={filter}
+            >
               Export to PDF
             </button>
           </div>
@@ -719,7 +752,6 @@ function Appointmentlist(doctorId) {
       </div>
       <div className="col-md-12">
         <h6>Guest Appointments</h6>
-
 
         {filteredGuestData !== null ? (
           filteredGuestData.length > 0 ? (
