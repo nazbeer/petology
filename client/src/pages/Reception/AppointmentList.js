@@ -717,7 +717,7 @@ function Appointmentlist(doctorId) {
                   <label className="text-left">Assign Doctor: </label>
                   <span className="text-right">
                     {" "}
-                    <select className="form-control">
+                    <select className="form-control" onChange={handleDoctorSelect}>
                       <option>--Select Doctor--</option>
                       {selectedAppointment &&
                         doctors.map((doctoro) => (
