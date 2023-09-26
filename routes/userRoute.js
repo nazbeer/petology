@@ -12,6 +12,7 @@ const OpenAppointment = require("../models/openAppointmentModel");
 const nodemailer = require("nodemailer");
 const UserappModel = require("../models/userappModel");
 const packModel = require("../models/packModel");
+require("dotenv").config();
 
 const crypto = require("crypto");
 const mongoose = require("mongoose");
@@ -64,12 +65,12 @@ router.post("/register", async (req, res) => {
       host: "mailslurp.mx",
       port: 2587,
       auth: {
-        user: "3XuAF86a05YLhLwO2vYB3oykQflir7J1",
-        pass: "y05g7jL61VapbV2eFOrCqrd2FVNJeWrB",
+        user: process.env.USER,
+        pass: process.env.PASS,
       },
     });
     const mailOptions = {
-      from: "6598040e-ceb7-44ae-a975-e1630c4856e4@mailslurp.com",
+      from: process.env.EMAIL,
       to: req.body.email,
       subject: "Welcome to Petology",
       html: `
@@ -951,13 +952,13 @@ router.post("/user-book-appointment", authMiddleware, async (req, res) => {
         host: "mailslurp.mx",
         port: 2587,
         auth: {
-          user: "3XuAF86a05YLhLwO2vYB3oykQflir7J1",
-          pass: "y05g7jL61VapbV2eFOrCqrd2FVNJeWrB",
+          user: process.env.USER,
+          pass: process.env.PASS,
         },
       });
       console.log(user?.email);
       const mailOptions = {
-        from: "6598040e-ceb7-44ae-a975-e1630c4856e4@mailslurp.com",
+        from: process.env.EMAIL,
         to: user?.email,
         subject: "Follow-Up Appointment",
         html: `

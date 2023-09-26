@@ -326,12 +326,12 @@ router.post("/addprescription", authMiddleware, async (req, res) => {
       host: "mailslurp.mx",
       port: 2587,
       auth: {
-        user: "7XCD5XTQcysTVxIaAICEQ4glqoUPnaaS",
-        pass: "ZS7ZvQV6hviecqx5PpkJ4bKfWmmL9iXo",
+        user: process.env.USER,
+        pass: process.env.PASS,
       },
     });
     const mailOptions = {
-      from: "ec735522-7f4c-4bdc-8d29-166736820c26@mailslurp.mx",
+      from: process.env.EMAIL,
       to: user.email,
       subject: "Appointment Scheduled for Pet Name",
       html: `

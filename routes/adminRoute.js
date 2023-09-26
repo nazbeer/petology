@@ -1013,8 +1013,10 @@ router.get("/get-all-pay", authMiddleware, async (req, res) => {
 
 router.post("/offie-time", authMiddleware, async (req, res) => {
   try {
-    const existingOfficeTime = await officetime.findOne({ module: req.body.module });
-    console.log(existingOfficeTime)
+    const existingOfficeTime = await officetime.findOne({
+      module: req.body.module,
+    });
+    console.log(existingOfficeTime);
     if (existingOfficeTime) {
       existingOfficeTime.starttime = req.body.starttime;
       existingOfficeTime.endtime = req.body.endtime;
@@ -1042,7 +1044,7 @@ router.post("/offie-time", authMiddleware, async (req, res) => {
 router.post("/get-offie-time", authMiddleware, async (req, res) => {
   try {
     const OfficeTime = await officetime.findOne({ module: req.body.module });
-    console.log(OfficeTime)
+    console.log(OfficeTime);
 
     res.status(200).send({
       message: "Office Time Fetched Successfully",
@@ -1051,9 +1053,77 @@ router.post("/get-offie-time", authMiddleware, async (req, res) => {
     });
   } catch (error) {
     console.log(error);
-    res
-      .status(500)
-      .send({ message: "Error in Fetching Office time", success: false, error });
+    res.status(500).send({
+      message: "Error in Fetching Office time",
+      success: false,
+      error,
+    });
+  }
+});
+
+router.get("/approved-appointment-count", authMiddleware, async (req, res) => {
+  try {
+    const data = await UserappModel.findOne({
+      status: "approved",
+    }).countDocuments();
+    console.log(data);
+
+    res.status(200).send({
+      message: "Approved appointments counted Successfully",
+      success: true,
+      data: data,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      message: "Error in Counting Approved appointments",
+      success: false,
+      error,
+    });
+  }
+});
+
+router.get("/pending-appointment-count", authMiddleware, async (req, res) => {
+  try {
+    const data = await UserappModel.findOne({
+      status: "pending",
+    }).countDocuments();
+    console.log(data);
+
+    res.status(200).send({
+      message: "Pending appointments counted Successfully",
+      success: true,
+      data: data,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      message: "Error in Counting Pending appointments",
+      success: false,
+      error,
+    });
+  }
+});
+
+router.get("/closed-appointment-count", authMiddleware, async (req, res) => {
+  try {
+    const data = await UserappModel.findOne({
+      status: "closed",
+    }).countDocuments();
+    console.log(data);
+
+    res.status(200).send({
+      message: "Closed appointments counted Successfully",
+      success: true,
+      data: data,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      message: "Error in Counting Closed appointments",
+      success: false,
+      error,
+    });
   }
 });
 module.exports = router;
