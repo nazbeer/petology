@@ -26,12 +26,10 @@ router.get("/profile/:userId", authMiddleware, async (req, res) => {
     res.status(200).json({ success: true, data: receptionist });
   } catch (error) {
     console.error(error);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "An error occurred while fetching the receptionist profile",
-      });
+    res.status(500).json({
+      success: false,
+      message: "An error occurred while fetching the receptionist profile",
+    });
   }
 });
 
@@ -146,21 +144,17 @@ router.post(
         { new: true }
       );
 
-      res
-        .status(200)
-        .json({
-          success: true,
-          message: "Doctor assigned successfully",
-          data: updatedAppointment,
-        });
+      res.status(200).json({
+        success: true,
+        message: "Doctor assigned successfully",
+        data: updatedAppointment,
+      });
     } catch (error) {
       console.error(error);
-      res
-        .status(500)
-        .json({
-          success: false,
-          message: "An error occurred while assigning the doctor",
-        });
+      res.status(500).json({
+        success: false,
+        message: "An error occurred while assigning the doctor",
+      });
     }
   }
 );
@@ -309,21 +303,17 @@ router.post(
           .json({ success: false, message: "Appointment not found" });
       }
 
-      res
-        .status(200)
-        .json({
-          success: true,
-          message: "Appointment status changed successfully",
-          data: updatedAppointment,
-        });
+      res.status(200).json({
+        success: true,
+        message: "Appointment status changed successfully",
+        data: updatedAppointment,
+      });
     } catch (error) {
       console.error(error);
-      res
-        .status(500)
-        .json({
-          success: false,
-          message: "An error occurred while changing appointment status",
-        });
+      res.status(500).json({
+        success: false,
+        message: "An error occurred while changing appointment status",
+      });
     }
   }
 );
@@ -359,12 +349,12 @@ router.post("/user-book-appointment", authMiddleware, async (req, res) => {
       host: "mailslurp.mx",
       port: 2587,
       auth: {
-        user: "3XuAF86a05YLhLwO2vYB3oykQflir7J1",
-        pass: "y05g7jL61VapbV2eFOrCqrd2FVNJeWrB",
+        user: process.env.USER,
+        pass: process.env.PASS,
       },
     });
     const mailOptions = {
-      from: "6598040e-ceb7-44ae-a975-e1630c4856e4@mailslurp.com",
+      from: process.env.EMAIL,
       to: user?.email,
       subject: "Follow-Up Appointment",
       html: `
@@ -393,7 +383,6 @@ router.post("/user-book-appointment", authMiddleware, async (req, res) => {
         console.log("Email sent:", info.response);
       }
     });
-
 
     res.json({
       success: true,
