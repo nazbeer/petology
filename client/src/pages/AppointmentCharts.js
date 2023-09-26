@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import CanvasJSReact from "@canvasjs/react-charts";
 import axios from "axios";
 import { useDispatch } from "react-redux";
@@ -12,6 +12,8 @@ const AppointmentCharts = () => {
   const [closedCount, setClosedCount] = useState([]);
   const [approvedCount, setApprovedCount] = useState([]);
   const [total, setTotal] = useState(0);
+
+  const [payments, setPayments] = useState([]);
   const dispatch = useDispatch();
   const getAppChartData = async () => {
     try {
@@ -29,6 +31,108 @@ const AppointmentCharts = () => {
       dispatch(hideLoading());
     }
   };
+
+  function sumValuesByMonth(data) {
+    const monthlySum = {};
+
+    const monthNames = [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
+    ];
+
+    data.forEach((item) => {
+      const date = new Date(item?.payment?.createdAt);
+      // const yearMonth = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+      const monthName = monthNames[date.getMonth()];
+
+      if (!monthlySum[monthName]) {
+        monthlySum[monthName] = 0;
+      }
+
+      monthlySum[monthName] += item?.payment?.amount;
+    });
+
+    let result = Object.keys(monthlySum).map((monthName) => ({
+      x: monthName,
+      y: monthlySum[monthName],
+    }));
+
+    const getMonthNumber = (monthName) => {
+      return new Date(`${monthName} 1, 2023`).getMonth();
+    };
+
+    return result.sort((a, b) => getMonthNumber(a.x) - getMonthNumber(b.x));
+
+  }
+
+  const getPayments = async () => {
+    try {
+      dispatch(showLoading());
+      const response = await axios.get("/api/admin/get-all-pay", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+      dispatch(hideLoading());
+      if (response.data.success) {
+        const data = response?.data?.data;
+        console.log(response?.data?.data);
+        console.log(sumValuesByMonth(data));
+        setPayments(sumValuesByMonth(data));
+        const monthlySum = {};
+
+        const monthNames = [
+          "January",
+          "February",
+          "March",
+          "April",
+          "May",
+          "June",
+          "July",
+          "August",
+          "September",
+          "October",
+          "November",
+          "December",
+        ];
+
+        data.forEach((item) => {
+          const date = new Date(item?.payment?.createdAt);
+          // const yearMonth = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+          console.log(`   ${date.getFullYear()}`);
+          const monthName = monthNames[date.getMonth()];
+
+          if (!monthlySum[monthName]) {
+            monthlySum[monthName] = 0;
+          }
+
+          monthlySum[monthName] += item?.payment?.amount;
+        });
+
+        console.log(monthlySum);
+
+        const result = Object.keys(monthlySum).map((monthName) => ({
+          x: monthName,
+          y: monthlySum[monthName],
+        }));
+
+        setPayments(result);
+      }
+    } catch (error) {
+      dispatch(hideLoading());
+    }
+  };
+
   useEffect(() => {
     axios
       .get("/api/admin/pending-appointment-count", {
@@ -38,7 +142,7 @@ const AppointmentCharts = () => {
       })
       .then((response) => setPendingCount(response.data.data))
       .catch((error) => console.error(error));
-  }, []);
+  }, [pendingCount]);
   useEffect(() => {
     axios
       .get("/api/admin/closed-appointment-count", {
@@ -52,7 +156,7 @@ const AppointmentCharts = () => {
         },
       })
       .catch((error) => console.error(error));
-  }, []);
+  }, [closedCount]);
   useEffect(() => {
     axios
       .get("/api/admin/approved-appointment-count", {
@@ -68,11 +172,33 @@ const AppointmentCharts = () => {
       .catch((error) => console.error(error));
 
     setTotal(approvedCount + closedCount + pendingCount);
-    // setPendingCount((approvedCount/total) * 100)
-  }, []);
+  }, [approvedCount]);
   useEffect(() => {
     getAppChartData();
+    getPayments();
+    console.log(payments);
   }, []);
+
+  const optionsBar = {
+    animationEnabled: true,
+    theme: "light2",
+    title: {
+      text: "Monthly Sum of Amount",
+    },
+    axisX: {
+      interval: 1,
+      labels: payments.map((item) => item.x), // Month names
+    },
+
+    data: [
+      {
+        type: "column",
+        dataPoints: payments.map((item) => ({ label: item.x, y: item.y })), // Sum of values
+      },
+    ],
+  };
+
+  console.log(optionsBar);
 
   const options = {
     animationEnabled: true,
@@ -95,17 +221,22 @@ const AppointmentCharts = () => {
         indexLabel: "{name}: {y}",
         yValueFormatString: "#.##'%'",
         dataPoints: [
-          { name: "Approved", y: (approvedCount/total) * 100  },
-          { name: "Pending", y: (pendingCount/total) * 100  },
-          { name: "Closed", y: (closedCount/total) * 100  },
+          { name: "Approved", y: (approvedCount / total) * 100 },
+          { name: "Pending", y: (pendingCount / total) * 100 },
+          { name: "Closed", y: (closedCount / total) * 100 },
         ],
       },
     ],
   };
 
   return (
-    <div>
-      <CanvasJSChart options={options} />
+    <div className="row">
+      <div className="col">
+        <CanvasJSChart options={options} />
+      </div>
+      <div className="col">
+        <CanvasJSChart options={optionsBar} />{" "}
+      </div>
     </div>
   );
 };

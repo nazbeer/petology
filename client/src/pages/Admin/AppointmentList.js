@@ -140,7 +140,7 @@ function Appointmentlist(doctorId) {
 
   const assignDoctorToAppointment = async () => {
     try {
-      console.log(selectedAppointment);
+      console.log(selectedAppointment, selectedDoctor);
       const response = await axios.post(
         "/api/admin/assign-doctor-to-appointment",
         {
@@ -719,7 +719,7 @@ function Appointmentlist(doctorId) {
                   <label className="text-left">Assign Doctor: </label>
                   <span className="text-right">
                     {" "}
-                    <select className="form-control">
+                    <select className="form-control" onChange={handleDoctorSelect}>
                       <option>--Select Doctor--</option>
                       {selectedAppointment &&
                         doctors.map((doctoro) => (
