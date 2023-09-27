@@ -53,13 +53,15 @@ function Petlist() {
             <div className="d-lg-flex justify-content-between align-items-center gap-3">
               <strong>Size:</strong> {record.size}
             </div>
+            <div className="d-lg-flex justify-content-center align-items-center">
+              <img
+                width={50}
+                height={50}
+                src={base64ToDataUrl(record.image)}
+                alt="PET"
+              />
+            </div>
           </div>
-          <img
-            width={50}
-            height={50}
-            src={base64ToDataUrl(record.image)}
-            alt="PET"
-          />
         </div>
       ),
       onOk() {},
@@ -153,7 +155,7 @@ function Petlist() {
     const url = `http://localhost:5000/${base64String}`;
     const mainPath = url.replace(/^uploads\\/, "").toLowerCase();
     console.log(mainPath);
-    
+
     return mainPath;
   };
   const generateCustomID = (createdAt) => {
