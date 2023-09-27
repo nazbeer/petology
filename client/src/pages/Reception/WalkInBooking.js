@@ -58,30 +58,7 @@ const WalkInBooking = () => {
       .then((response) => setDoctorList(response.data.data))
       .catch((error) => console.error(error));
 
-    // Fetch user details
-    const userId = localStorage.getItem("userId"); // Get user ID from localStorage
-
-    axios
-      .get(`/api/user/user-details/${userId}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      })
-      .then((response) => {
-        console.log(response);
-        const userData = response.data.data;
-        const [firstname, lastname] = userData.name.split(" ");
-
-        setService({
-          firstname: firstname,
-          lastname: lastname,
-          email: userData.email,
-          mobile: userData.mobile,
-          userId: userId,
-          module: "veterinary",
-        });
-      })
-      .catch((error) => console.error(error));
+    getOfficeTime();
   }, []);
   const [service, setService] = useState({
     module: "Veterinary",

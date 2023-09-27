@@ -1,9 +1,14 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 import Layout from "./Layout";
+import moment from "moment";
+import { TimePicker, Select, Table } from "antd";
 
 function OfficeTimmings() {
+  const [time, setTime] = useState([]);
+  const [groomsTime, setGroomsTime] = useState([]);
+  const { RangePicker } = TimePicker;
   const [vetTime, setVetTime] = useState({
     module: "vet",
     starttime: "",
@@ -18,24 +23,41 @@ function OfficeTimmings() {
     break: "",
   });
 
-  console.log(vetTime.starttime);
-
-  const handleChangeVet = (e) => {
-    const { name, value } = e.target;
-
-    setVetTime((prevState) => ({
-      ...prevState,
-      [name]: value,
+  console.log(groomTime);
+  const onChangeVetRange = (value, dateString) => {
+    setVetTime((prev) => ({
+      ...prev,
+      starttime: dateString[0],
+      endtime: dateString[1],
     }));
+    console.log(dateString[0]);
+    console.log(dateString[1]);
   };
 
-  const handleChangeGroom = (e) => {
-    const { name, value } = e.target;
-
-    setGroomTime((prevState) => ({
-      ...prevState,
-      [name]: value,
+  const onChangeGroomRange = (value, dateString) => {
+    setGroomTime((prev) => ({
+      ...prev,
+      starttime: dateString[0],
+      endtime: dateString[1],
     }));
+    console.log(dateString[0]);
+    console.log(dateString[1]);
+  };
+
+  const onVetBreakChange = (value) => {
+    setVetTime((prev) => ({
+      ...prev,
+      break: value,
+    }));
+    console.log(value);
+  };
+
+  const onGroomBreakChange = (value) => {
+    setGroomTime((prev) => ({
+      ...prev,
+      break: value,
+    }));
+    console.log(value);
   };
 
   const timeFormat = (value) => {
@@ -55,6 +77,8 @@ function OfficeTimmings() {
   const handleSubmitVet = async (e) => {
     e.preventDefault();
 
+    console.log(vetTime);
+
     const starttime = timeFormat(vetTime.starttime);
     const endtime = timeFormat(vetTime.endtime);
 
@@ -62,7 +86,7 @@ function OfficeTimmings() {
 
     try {
       const response = await axios.post(
-        "/api/admin//offie-time",
+        "/api/admin/offie-time",
         { module: vetTime.module, starttime, endtime, break: vetTime.break },
         {
           headers: {
@@ -93,7 +117,7 @@ function OfficeTimmings() {
 
     try {
       const response = await axios.post(
-        "/api/admin//offie-time",
+        "/api/admin/offie-time",
         {
           module: groomTime.module,
           starttime,
@@ -119,6 +143,72 @@ function OfficeTimmings() {
     }
   };
 
+  const getOfficeTime = (module) => {
+    axios
+      .post(
+        "/api/admin/get-offie-time",
+        { module: "vet" },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      )
+      .then((response) => {
+        console.log(response?.data?.data);
+
+        setTime([response?.data?.data]);
+      })
+      .catch((error) => console.error(error));
+
+    axios
+      .post(
+        "/api/admin/get-offie-time",
+        { module: "groom" },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      )
+      .then((response) => {
+        console.log(response?.data?.data);
+
+        setGroomsTime([response?.data?.data]);
+      })
+      .catch((error) => console.error(error));
+  };
+
+  useEffect(() => {
+    getOfficeTime();
+  }, []);
+
+  const columns = [
+    {
+      title: "Start Time",
+      dataIndex: "starttime",
+      render: (text, record) => <span>{record?.starttime}</span>,
+    },
+    {
+      title: "End Time",
+      dataIndex: "endtime",
+      render: (text, record) => <span>{record?.endtime}</span>,
+    },
+    {
+      title: "Break Time",
+      dataIndex: "break",
+      render: (text, record) => <span>{record?.break}</span>,
+    },
+
+    {
+      title: "Created At",
+      dataIndex: "createdAt",
+      render: (text, record) => (
+        <span>{moment(record?.createdAt).format("LLL")}</span>
+      ),
+    },
+  ];
+
   return (
     <Layout>
       <div className="row mt-5">
@@ -129,50 +219,34 @@ function OfficeTimmings() {
             </h1>
             <form onSubmit={handleSubmitVet}>
               <div className="row me-3 ms-3">
-                <div className="col">
-                  <div className="mb-2">
-                    <label htmlFor="starttime">Start Time:</label>
-                    <input
-                      className="form-control"
-                      type="time"
-                      id="starttime"
-                      name="starttime"
-                      value={vetTime.starttime}
-                      onChange={handleChangeVet}
-                      required
-                    />
-                  </div>
+                <label htmlFor="break">Office Time </label>
+                <div className=" mb-3 ms-2 me-2">
+                  <RangePicker
+                    style={{ width: "98%" }}
+                    format={"HH:mm"}
+                    onChange={onChangeVetRange}
+                  />
                 </div>
-                <div className="col">
-                  <div className="mb-2">
-                    <label htmlFor="endtime">End Time:</label>
-                    <input
-                      className="form-control"
-                      type="time"
-                      id="endtime"
-                      name="endtime"
-                      value={vetTime.endtime}
-                      onChange={handleChangeVet}
-                      required
-                    />
-                  </div>
-                </div>
-                <div className="mb-2">
+                <div className="mb-2 ">
                   <label htmlFor="break">Break Time </label>
-                  <select
+                  <Select
                     className="form-control"
                     id="break"
                     name="break"
-                    value={vetTime.break}
-                    onChange={handleChangeVet}
-                  >
-                    <option defaultValue="">Select Break Time...</option>
-                    <option value="15">15 Minutes</option>
-                    <option value="30">30 Minutes</option>
-                    <option value="45">45 Minutes</option>
-                    <option value="60">60 Minutes</option>
-                    <option value="60">90 Minutes</option>
-                  </select>
+                    defaultValue="15 Minutes"
+                    // value={groomTime.break}
+                    onChange={onVetBreakChange}
+                    placeholder="Select break time"
+                    required
+                    bordered={false}
+                    options={[
+                      { value: "15 Minutes", label: "15 Minutes" },
+                      { value: "30 Minutes", label: "30 Minutes" },
+                      { value: "45 Minutes", label: "45 Minutes" },
+                      { value: "60 Minutes", label: "60 Minutes" },
+                      { value: "90 Minutes", label: "90 Minutes" },
+                    ]}
+                  ></Select>
                 </div>
               </div>
               <div className="d-flex justify-content-end me-3 mb-3 mt-3">
@@ -190,51 +264,34 @@ function OfficeTimmings() {
             </h1>
             <form onSubmit={handleSubmitGroom}>
               <div className="row me-3 ms-3">
-                <div className="col">
-                  <div className="mb-2">
-                    <label htmlFor="starttime">Start Time:</label>
-                    <input
-                      className="form-control"
-                      type="time"
-                      id="starttime"
-                      name="starttime"
-                      value={groomTime.starttime}
-                      onChange={handleChangeGroom}
-                      required
-                    />
-                  </div>
+                <label htmlFor="break">Office Time </label>
+                <div className=" mb-3 ms-2 me-2">
+                  <RangePicker
+                    style={{ width: "98%" }}
+                    format={"HH:mm"}
+                    onChange={onChangeGroomRange}
+                  />
                 </div>
-                <div className="col">
-                  <div className="mb-2">
-                    <label htmlFor="endtime">End Time:</label>
-                    <input
-                      className="form-control"
-                      type="time"
-                      id="endtime"
-                      name="endtime"
-                      value={groomTime.endtime}
-                      onChange={handleChangeGroom}
-                      required
-                    />
-                  </div>
-                </div>
-                <div className="mb-2">
+                <div className="mb-2 ">
                   <label htmlFor="break">Break Time </label>
-                  <select
+                  <Select
                     className="form-control"
                     id="break"
                     name="break"
-                    value={groomTime.break}
-                    onChange={handleChangeGroom}
+                    defaultValue="15"
+                    // value={groomTime.break}
+                    onChange={onGroomBreakChange}
+                    placeholder="Select break time"
                     required
-                  >
-                    <option defaultValue="">Select Break Time...</option>
-                    <option value="15">15 Minutes</option>
-                    <option value="30">30 Minutes</option>
-                    <option value="45">45 Minutes</option>
-                    <option value="60">60 Minutes</option>
-                    <option value="60">90 Minutes</option>
-                  </select>
+                    bordered={false}
+                    options={[
+                      { value: "15 Minutes", label: "15 Minutes" },
+                      { value: "30 Minutes", label: "30 Minutes" },
+                      { value: "45 Minutes", label: "45 Minutes" },
+                      { value: "60 Minutes", label: "60 Minutes" },
+                      { value: "90 Minutes", label: "90 Minutes" },
+                    ]}
+                  ></Select>
                 </div>
               </div>
               <div className="d-flex justify-content-end me-3 mb-3 mt-3">
@@ -245,6 +302,25 @@ function OfficeTimmings() {
             </form>
           </div>
         </div>
+      </div>
+      <div className="card mt-3">
+        <h4 className="m-3">Veterinary Office Timmings</h4>
+        <Table
+          className="m-3"
+          columns={columns}
+          dataSource={time}
+          responsive={true}
+          scroll={{ x: true }}
+        />
+
+        <h4 className="m-3">Grooming Office Timmings</h4>
+        <Table
+          className="m-3"
+          columns={columns}
+          dataSource={groomsTime}
+          responsive={true}
+          scroll={{ x: true }}
+        />
       </div>
     </Layout>
   );

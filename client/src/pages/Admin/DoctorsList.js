@@ -13,6 +13,7 @@ import {
   DatePicker,
   Select,
   Spin,
+  TimePicker,
 } from "antd";
 import { LoadingOutlined } from "@ant-design/icons";
 import moment from "moment";
@@ -22,13 +23,20 @@ import "jspdf-autotable";
 function DoctorsList() {
   const { RangePicker } = DatePicker;
 
-  const [doctors, setDoctors] = useState([]);
+  const [time, setTime] = useState({
+    starttime: "",
+    endtime: "",
+  });
+  const [doctors, setDoctors] = useState("");
+  const [doctorId, setDoctorId] = useState("");
   const [editingDoctor, setEditingDoctor] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editModalVisible, setEditModalVisible] = useState(false);
   const dispatch = useDispatch();
   const [form] = Form.useForm();
   const [leaveModalVisible, setLeaveModalVisible] = useState(false);
+
+  const [availableModalVisible, setAvailableModalVisible] = useState(false);
 
   const [leaveLoading, setLeaveLoading] = useState(false);
   const [leaveForm] = Form.useForm();
@@ -54,8 +62,28 @@ function DoctorsList() {
     setLeaveModalVisible(true);
   };
 
+  const openAvailablityModal = (doctorId) => {
+    setDoctorId(doctorId);
+    console.log(doctorId);
+    setAvailableModalVisible(true);
+  };
+
+  const closeAvailablityModal = () => {
+    setDoctorId("");
+    setAvailableModalVisible(false);
+  };
+
   const closeLeaveModal = () => {
     setLeaveModalVisible(false);
+  };
+
+  const onChange = (value, dateString) => {
+    setTime({
+      starttime: dateString[0],
+      endtime: dateString[1],
+    });
+    console.log(dateString[0]);
+    console.log(dateString[1]);
   };
 
   const handleSetLeave = async () => {
@@ -283,6 +311,13 @@ function DoctorsList() {
       dataIndex: "actions",
       render: (text, record) => (
         <div className="d-flex justify-content-center align-items-center gap-2">
+          <button
+            className="btn btn-success btn-sm "
+            type="button"
+            onClick={() => openAvailablityModal(record._id)}
+          >
+            Availablity
+          </button>
           {(record.status === "pending" || record.status === "Pending") && (
             <button
               type="button"
@@ -454,6 +489,48 @@ function DoctorsList() {
     // Clean up
     URL.revokeObjectURL(url);
   };
+
+  const timeFormat = (value) => {
+    let [hour, minute] = value.split(":").map(Number);
+    let amPm = "AM";
+    minute = String(minute).padStart(2, "0");
+    if (hour >= 12) {
+      amPm = "PM";
+      if (hour > 12) {
+        hour -= 12;
+      }
+    }
+    hour = String(hour).padStart(2, "0");
+    return `${hour}:${minute} ${amPm}`;
+  };
+
+  const handleAvailiblitySubmit = async () => {
+    const starttime = timeFormat(time?.starttime);
+    const endtime = timeFormat(time?.endtime);
+    try {
+      console.log(starttime, endtime)
+      dispatch(showLoading());
+      const response = await axios.post(
+        `/api/admin/update-doctor/${doctorId}`,
+        { starttime:starttime, endtime:endtime },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      dispatch(hideLoading());
+      if (response.data.success) {
+        toast.success(response.data.message);
+        getDoctorsData();
+        closeEditModal();
+      }
+    } catch (error) {
+      toast.error("Error updating doctor information");
+      dispatch(hideLoading());
+    }
+  };
+
   return (
     <Layout>
       <div className="d-flex justify-content-between align-items-center">
@@ -534,6 +611,31 @@ function DoctorsList() {
       ) : (
         <div className="text-center m-5">No result found</div>
       )}
+      <Modal
+        title="Doctor Availablity"
+        visible={availableModalVisible}
+        onCancel={closeAvailablityModal}
+        footer={null}
+        style={{ borderRadius: "6px" }}
+        width={600}
+      >
+        <label>Select Time For Doctor Shift</label>
+        <br />
+        <TimePicker.RangePicker
+          className="mt-3 w-100"
+          format={"HH:mm"}
+          onChange={onChange}
+          required
+        />
+        <div className="d-flex justify-content-end  mb-3 mt-3">
+          <button
+            className="btn btn-success btn-sm"
+            onClick={() => handleAvailiblitySubmit()}
+          >
+            Submit
+          </button>
+        </div>
+      </Modal>
       <Modal
         title="Edit Doctor"
         visible={editModalVisible}

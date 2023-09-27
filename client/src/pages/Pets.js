@@ -33,8 +33,11 @@ function Petlist() {
   }, []);
 
   const base64ToDataUrl = (base64String) => {
-    //console.log(base64String);
-    return `../${base64String}.png`;
+    const url = `http://localhost:5000/${base64String}`;
+    const mainPath = url.replace(/^uploads\\/, "").toLowerCase();
+    console.log(mainPath);
+
+    return mainPath;
   };
   const columns = [
     {
