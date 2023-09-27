@@ -393,9 +393,9 @@ function Payments() {
   };
 
   const createPdfWithTable = async (data) => {
-    const doc = new JsPDF();
+    const doc = new JsPDF("landscape");
     doc.setFontSize(30);
-    doc.text(80, 20, "Payments");
+    doc.text(130, 20, "Payments");
 
     doc.setFontSize(20);
 
@@ -403,7 +403,9 @@ function Payments() {
       "Appointment ID",
       "Date",
       "Status",
-      "Name",
+      "Client Name",
+      "Pet Name",
+      "Doctor Name",
       "Transaction ID",
       "Amount",
     ];
@@ -411,11 +413,12 @@ function Payments() {
       item?.appointment?.customId,
 
       moment(item?.payment?.createdAt).format("LL"),
-      item?.appointment?.status,
+      item?.payment?.status,
       item?.user?.name,
-
+      item?.appointment?.petName,
+      `${item?.doctor?.firstName} ${item?.doctor?.lastName}`,
       item?.payment?._id,
-      item?.payment?.amount,
+      item?.payment?.amount + " AED",
     ]);
     console.log(datas);
 

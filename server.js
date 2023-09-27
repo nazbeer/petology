@@ -33,7 +33,7 @@ app.use("/api/reception", receptionRoute);
 app.use("/api/groomer" , groomerRoute);
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, path.join(__dirname, '../uploads'));
+    cb(null, path.join(__dirname,'/uploads/'));
   },
   filename: function (req, file, cb) {
     const ext = path.extname(file.originalname);
@@ -48,7 +48,7 @@ const storage = multer.diskStorage({
 
  const upload = multer({ storage: storage });
 //app.use("/api/prescription", prescriptionRoute);
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+app.use(express.static(path.join(__dirname,'/uploads/')));
 app.enable('trust proxy');
 if (process.env.NODE_ENV === "production") {
   app.use("/", express.static("client/build"));

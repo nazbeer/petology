@@ -97,12 +97,12 @@ td.disabled.day {
     font-weight: 600;
 }
 .petimg{
-    border-radius:100%;
+    /* border-radius:100%; */
     width: auto;
     height: 50px;
-    object-fit: contain;
+    /* object-fit: contain; */
     padding: 6px;
-    background-color: #98bda6;
+    /* background-color: #98bda6; */
 }
 .menu{
     
