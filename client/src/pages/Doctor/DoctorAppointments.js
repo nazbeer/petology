@@ -12,6 +12,11 @@ function DoctorAppointments() {
   const [appointments, setAppointments] = useState([]);
   const [selectedAppointmentId, setSelectedAppointmentId] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
+
+  const [historyRecords, setHistoryRecords] = useState([]);
+  const [historyModalVisible, setHistoryModalVisible] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState(null);
+
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -28,6 +33,7 @@ function DoctorAppointments() {
       });
       dispatch(hideLoading());
       if (response.data.success) {
+        console.log(response.data.data);
         setAppointments(response.data.data);
       }
     } catch (error) {
@@ -43,6 +49,18 @@ function DoctorAppointments() {
   const hideAddPrescriptionModal = () => {
     setSelectedAppointmentId(null);
     setModalVisible(false);
+  };
+
+  const showAddHistoryModal = (userId) => {
+    console.log(userId);
+    setSelectedUserId(userId);
+    setHistoryModalVisible(true);
+    fetchHistoryRecords(userId);
+  };
+
+  const hideHistoryModal = () => {
+    setSelectedUserId(null);
+    setHistoryModalVisible(false);
   };
 
   const changeAppointmentStatus = async (record, status) => {
@@ -110,6 +128,20 @@ function DoctorAppointments() {
       dataIndex: "status",
       render: (text, record) => (
         <span className="text-capitalize">{record.status}</span>
+      ),
+    },
+    {
+      title: "History",
+      dataIndex: "actions",
+      render: (text, record) => (
+        <div className="d-flex justify-content-evently gap-2 align-items-center">
+          <Button
+            type="primary"
+            onClick={() => showAddHistoryModal(record?.userId)}
+          >
+            View
+          </Button>
+        </div>
       ),
     },
     {
@@ -254,6 +286,69 @@ function DoctorAppointments() {
   useEffect(() => {
     getopenAppointmentsData();
   }, []);
+  const fetchHistoryRecords = async (userId) => {
+    try {
+      const response = await axios.get(`/api/admin/history/${userId}`);
+      if (response.data.success) {
+        setHistoryRecords(response.data.data);
+      }
+    } catch (error) {
+      console.error("Error fetching history records:", error);
+    }
+  };
+
+  const renderFile = (path) => {
+    const ext = path.split(".").pop().toLowerCase();
+    const mainPath = path.replace(/^uploads\\/, "").toLowerCase();
+    console.log(path);
+    const file = `http://localhost:5000/${mainPath}`;
+    console.log(file);
+    // If it's an image
+    if (["jpg", "jpeg", "png", "gif"].includes(ext)) {
+      return (
+        <img
+          src={file}
+          alt="Uploaded"
+          style={{ width: "100px", height: "auto" }}
+        />
+      );
+    }
+    // If it's a PDF
+    if (ext === "pdf") {
+      return <iframe src={file} width="100px" height="100px"></iframe>;
+    }
+    // For .doc or .docx
+    if (["doc", "docx"].includes(ext)) {
+      return (
+        <iframe
+          src={`https://docs.google.com/viewer?url=${file}&embedded=true`}
+          width="100px"
+          height="100px"
+          frameBorder="0"
+        ></iframe>
+      );
+    }
+    // Add other file types if needed
+    //  console.log(file);
+    return (
+      <a href={file} target="_blank" rel="noreferrer">
+        Open File
+      </a>
+    );
+  };
+  const historyColumns = [
+    // Define columns for the history records table
+    // You can have columns like "Date", "Description", "Actions", etc.
+    {
+      title: "ID",
+      dataIndex: "_id",
+    },
+    {
+      title: "Patient History",
+      dataIndex: "documentPath",
+      render: (path) => renderFile(selectedUserId),
+    },
+  ];
   return (
     <Layout>
       <div>
@@ -282,6 +377,22 @@ function DoctorAppointments() {
               )}
             />
           )}
+        </Modal>
+
+        <Modal
+          title="History"
+          visible={historyModalVisible}
+          onCancel={hideHistoryModal}
+          footer={null}
+          width={700}
+        >
+          <Table
+            columns={historyColumns}
+            dataSource={historyRecords}
+            rowKey="_id"
+            pagination={false}
+            style={{ padding: "0px" }}
+          />
         </Modal>
       </div>
       <div className="d-none">

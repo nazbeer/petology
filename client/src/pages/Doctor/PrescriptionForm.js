@@ -20,7 +20,7 @@ const PrescriptionForm = ({ selectedAppointmentId, onClose, appointmentData }) =
       userName: appointmentData?.user?.name,
       petName: appointmentData?.user?.pet,
       petId: appointmentData?.petInfo?.pet,
-      doctorId:appointmentData?.doctor?._id,
+      doctorId:`${appointmentData?.doctor?.firstName} ${appointmentData?.doctor?.lastName}`,
       doctorName: `${appointmentData?.doctorInfo?.firstName} ${appointmentData?.doctorInfo?.lastName}`,
     });
   }, [selectedAppointmentId, appointmentData]);
