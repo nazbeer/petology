@@ -87,12 +87,14 @@ const Veterinary = () => {
     const filteredList = data.filter((value) => setList1.has(value));
 
     // Filter out elements from firstList that are present in secondList
-    const finalList = filteredList.filter(
-      (item) => !appointments.includes(item)
-    );
-    setDoctorTime(finalList);
+    if (appointments.length > 0) {
+      const finalList = filteredList.filter(
+        (item) => !appointments.includes(item)
+      );
+      setDoctorTime(finalList);
 
-    return finalList;
+      return finalList;
+    }
   };
 
   const handleDoctorChange = (e) => {
@@ -105,7 +107,7 @@ const Veterinary = () => {
       doctorId: doctorId,
     }));
 
-    getDoctorInfo(e.target.value);
+    // getDoctorInfo(e.target.value);
   };
 
   const getAppointmentInfo = async (id) => {
@@ -126,6 +128,7 @@ const Veterinary = () => {
           return timeFormat(item.time);
         });
         setAppointment(appointments);
+        getDoctorInfo(id, appointments);
       }
     } catch (error) {
       console.log(error);
@@ -147,7 +150,7 @@ const Veterinary = () => {
     return `${hour}:${minute} ${amPm}`;
   };
 
-  const getDoctorInfo = async (id) => {
+  const getDoctorInfo = async (id, appointment) => {
     try {
       dispatch(showLoading());
       console.log(doctorId);

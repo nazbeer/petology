@@ -310,7 +310,7 @@ function DoctorsList() {
       title: "Actions",
       dataIndex: "actions",
       render: (text, record) => (
-        <div className="d-flex justify-content-center align-items-center gap-2">
+        <div className="d-flex justify-content-between align-items-center gap-2">
           <button
             className="btn btn-success btn-sm "
             type="button"
