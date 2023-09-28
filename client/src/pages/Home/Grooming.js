@@ -1,11 +1,13 @@
 // src/components/Grooming.js
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 import Header from "../../frontend_components/Header";
 import Footer from "../../frontend_components/Footer";
+import OfficeTimeCalculate from "../../components/OfficeTimeCalculate";
 
 const Grooming = () => {
+  const [time, setTime] = useState([]);
   const [service, setService] = useState({
     module: "Grooming",
     service: "",
@@ -21,12 +23,39 @@ const Grooming = () => {
     mobile: "",
   });
 
+  useEffect(() => {
+    getOfficeTime();
+    console.log(time);
+  }, []);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setService((prevState) => ({
       ...prevState,
       [name]: value,
     }));
+  };
+  const getOfficeTime = () => {
+    axios
+      .post("/api/open/get-offie-time", { module: "vet" })
+      .then((response) => {
+        console.log(
+          response?.data?.data?.starttime,
+          response?.data?.data?.endtime,
+          response?.data?.data?.break
+        );
+        const data = OfficeTimeCalculate(
+          response?.data?.data?.starttime,
+          response?.data?.data?.endtime,
+          response?.data?.data?.break,
+          30
+        );
+
+        console.log(data);
+
+        setTime(data);
+      })
+      .catch((error) => console.error(error));
   };
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -89,20 +118,22 @@ const Grooming = () => {
                       <option value="Other">Other</option>
                     </select>
                   </div>
-                  {service.pet === 'Dog' && <div className="mb-2">
-                    <label htmlFor="size">Choose Size: </label>
-                    <select
-                      className="form-control"
-                      id="size"
-                      name="size"
-                      onChange={handleChange}
-                    >
-                      <option defaultValue="">Select size...</option>
-                      <option value={service.size}>S (Small)</option>
-                      <option value={service.size}>M (Medium)</option>
-                      <option value={service.size}>L (Large)</option>
-                    </select>
-                  </div>}
+                  {service.pet === "Dog" && (
+                    <div className="mb-2">
+                      <label htmlFor="size">Choose Size: </label>
+                      <select
+                        className="form-control"
+                        id="size"
+                        name="size"
+                        onChange={handleChange}
+                      >
+                        <option defaultValue="">Select size...</option>
+                        <option value={service.size}>S (Small)</option>
+                        <option value={service.size}>M (Medium)</option>
+                        <option value={service.size}>L (Large)</option>
+                      </select>
+                    </div>
+                  )}
 
                   <div className="mb-2">
                     <label htmlFor="Age">Age:</label>
@@ -192,15 +223,19 @@ const Grooming = () => {
                   </div>
                   <div className="mb-2">
                     <label htmlFor="time">Time:</label>
-                    <input
+
+                    <select
                       className="form-control"
-                      type="time"
                       id="time"
                       name="time"
-                      value={service.time}
                       onChange={handleChange}
-                      required
-                    />
+                    >
+                      {time.map((option, index) => (
+                        <option key={index} value={option}>
+                          {option}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                 </div>
               </div>

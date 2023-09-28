@@ -34,6 +34,7 @@ router.post("/get-doctor-info-by-id", authMiddleware, async (req, res) => {
       data: doctor,
     });
   } catch (error) {
+    console.log(error)
     res
       .status(500)
       .send({ message: "Error getting doctor info", success: false, error });

@@ -3,6 +3,9 @@ import axios from "axios";
 import { toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 
+import { showLoading, hideLoading } from "../../redux/alertsSlice";
+import { useDispatch } from "react-redux";
+
 import "antd/dist/antd.css";
 
 import "bootstrap/dist/css/bootstrap.min.css"; // Import Bootstrap CSS
@@ -15,7 +18,15 @@ import OfficeTimeCalculate from "../../components/OfficeTimeCalculate";
 const Vet = () => {
   const navigate = useNavigate();
   const [doctorList, setDoctorList] = useState([]);
+  const [doctorId, setDoctorId] = useState("");
+
   const [doctor, setDoctor] = useState({});
+
+  const [appointmentTime, setAppointment] = useState({});
+
+  const [doctorTime, setDoctorTime] = useState("");
+
+  const dispatch = useDispatch();
 
   const [time, setTime] = useState([]);
 
@@ -42,6 +53,8 @@ const Vet = () => {
           response?.data?.data?.break,
           30
         );
+
+        console.log(data);
 
         setTime(data);
       })
@@ -87,6 +100,8 @@ const Vet = () => {
   });
   console.log(localStorage.getItem("token"));
   useEffect(() => {
+    getAppointmentInfo(doctorId);
+    getDoctorInfo(doctorId);
     // Fetch doctor list
     axios
       .get("/api/user/get-all-approved-doctors", {
@@ -129,6 +144,120 @@ const Vet = () => {
       ...prevState,
       [name]: value,
     }));
+  };
+
+  const doctorAvailable = (startTime, endTime, timeList) => {
+    const data = OfficeTimeCalculate(startTime, endTime, 1, 0);
+    console.log(data);
+
+    // Convert list1 to a Set for faster lookup
+    const setList1 = new Set(timeList);
+
+    // Filter values from list2 that are present in list1
+    const filteredList = data.filter((value) => setList1.has(value));
+
+    // Filter out elements from firstList that are present in secondList
+    if (appointmentTime.length > 0) {
+      const finalList = filteredList.filter(
+        (item) => !appointmentTime.includes(item)
+      );
+      console.log(appointmentTime);
+      console.log(filteredList);
+      console.log(finalList);
+      setDoctorTime(finalList);
+
+      return finalList;
+    }
+  };
+
+  const handleDoctorChange = (e) => {
+    const doctorId = e.target.value;
+    getAppointmentInfo(e.target.value);
+
+    setDoctorId(doctorId);
+    console.log(doctorId);
+    setService((prevState) => ({
+      ...prevState,
+      doctorId: doctorId,
+    }));
+    getDoctorInfo(e.target.value);
+  };
+
+  const getAppointmentInfo = async (id) => {
+    try {
+      dispatch(showLoading());
+      console.log(doctorId);
+      const response = await axios.post(
+        "/api/user/get-appointments-by-doctor-id",
+        {
+          doctorId: id,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      dispatch(hideLoading());
+      if (response.data.success) {
+        console.log(response.data.data);
+        const appointments = response.data.data.map((item) => {
+          return timeFormat(item.time);
+        });
+        setAppointment(appointments);
+      }
+    } catch (error) {
+      console.log(error);
+      dispatch(hideLoading());
+    }
+  };
+
+  const timeFormat = (value) => {
+    let [hour, minute] = value.split(":").map(Number);
+    let amPm = "AM";
+    minute = String(minute).padStart(2, "0");
+    if (hour >= 12) {
+      amPm = "PM";
+      if (hour > 12) {
+        hour -= 12;
+      }
+    }
+    hour = String(hour);
+    return `${hour}:${minute} ${amPm}`;
+  };
+
+  const getDoctorInfo = async (id) => {
+    try {
+      dispatch(showLoading());
+      console.log(doctorId);
+      const response = await axios.post(
+        "/api/doctor/get-doctor-info-by-id",
+        {
+          doctorId: id,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      dispatch(hideLoading());
+      if (response.data.success) {
+        console.log(response.data.data);
+
+        doctorAvailable(
+          response?.data?.data?.starttime,
+          response?.data?.data?.endtime,
+          time
+        );
+        setDoctor(response.data.data);
+      }
+    } catch (error) {
+      console.log(error);
+      dispatch(hideLoading());
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -253,7 +382,7 @@ const Vet = () => {
                   className="form-control"
                   id="doctor"
                   name="doctorId"
-                  onChange={handleChange}
+                  onChange={handleDoctorChange}
                 >
                   <option>Select Doctor...</option>
                   {doctorList &&
@@ -347,11 +476,21 @@ const Vet = () => {
                   name="time"
                   onChange={handleChange}
                 >
-                  {time.map((option, index) => (
-                    <option key={index} value={option}>
-                      {option}
-                    </option>
-                  ))}
+                  {service.doctorId === "Any" ? (
+                    time.map((option, index) => (
+                      <option key={index} value={option}>
+                        {option}
+                      </option>
+                    ))
+                  ) : doctorTime.length > 0 ? (
+                    doctorTime.map((option, index) => (
+                      <option key={index} value={option}>
+                        {option}
+                      </option>
+                    ))
+                  ) : (
+                    <option>Fully Booked</option>
+                  )}
                 </select>
               </div>
             </div>

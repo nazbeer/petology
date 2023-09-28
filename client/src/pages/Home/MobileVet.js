@@ -10,9 +10,11 @@ import {
   LoadScript,
   Autocomplete,
 } from "@react-google-maps/api";
+import OfficeTimeCalculate from "../../components/OfficeTimeCalculate";
 
 const MobileVet = () => {
   // const [doctorList, setDoctorList] = useState([]);
+  const [time, setTime] = useState([]);
   const [autocomplete, setAutocomplete] = useState(null);
   const [location, setLocation] = useState({ lat: 25.2048, lng: 55.2708 });
   const [service, setService] = useState({
@@ -32,6 +34,11 @@ const MobileVet = () => {
     lat: "",
     lng: "",
   });
+
+  useEffect(() => {
+    getOfficeTime();
+    console.log(time);
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -55,6 +62,29 @@ const MobileVet = () => {
         }));
       }
     }
+  };
+
+  const getOfficeTime = () => {
+    axios
+      .post("/api/open/get-offie-time", { module: "vet" })
+      .then((response) => {
+        console.log(
+          response?.data?.data?.starttime,
+          response?.data?.data?.endtime,
+          response?.data?.data?.break
+        );
+        const data = OfficeTimeCalculate(
+          response?.data?.data?.starttime,
+          response?.data?.data?.endtime,
+          response?.data?.data?.break,
+          30
+        );
+
+        console.log(data);
+
+        setTime(data);
+      })
+      .catch((error) => console.error(error));
   };
 
   const handleSubmit = async (e) => {
@@ -120,20 +150,22 @@ const MobileVet = () => {
                       <option value="Other">Other</option>
                     </select>
                   </div>
-                  {service.pet === 'Dog' && <div className="mb-2">
-                    <label htmlFor="size">Choose Size: </label>
-                    <select
-                      className="form-control"
-                      id="size"
-                      name="size"
-                      onChange={handleChange}
-                    >
-                      <option defaultValue="">Select size...</option>
-                      <option value={service.size}>S (Small)</option>
-                      <option value={service.size}>M (Medium)</option>
-                      <option value={service.size}>L (Large)</option>
-                    </select>
-                  </div>}
+                  {service.pet === "Dog" && (
+                    <div className="mb-2">
+                      <label htmlFor="size">Choose Size: </label>
+                      <select
+                        className="form-control"
+                        id="size"
+                        name="size"
+                        onChange={handleChange}
+                      >
+                        <option defaultValue="">Select size...</option>
+                        <option value={service.size}>S (Small)</option>
+                        <option value={service.size}>M (Medium)</option>
+                        <option value={service.size}>L (Large)</option>
+                      </select>
+                    </div>
+                  )}
 
                   <div className="mb-2">
                     <label htmlFor="Age">Age:</label>
@@ -173,15 +205,19 @@ const MobileVet = () => {
                   </div>
                   <div className="mb-2">
                     <label htmlFor="time">Time:</label>
-                    <input
+
+                    <select
                       className="form-control"
-                      type="time"
                       id="time"
                       name="time"
-                      value={service.time}
                       onChange={handleChange}
-                      required
-                    />
+                    >
+                      {time.map((option, index) => (
+                        <option key={index} value={option}>
+                          {option}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                   <div className="mb-2">
                     <label htmlFor="firstname">First Name:</label>

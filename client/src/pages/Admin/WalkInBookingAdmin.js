@@ -38,11 +38,129 @@ const WalkInBookingAdmin = () => {
     // password:''
   });
 
+  const [doctorId, setDoctorId] = useState("");
+
+  const [doctor, setDoctor] = useState({});
+
+  const [appointment, setAppointment] = useState({});
+
+  const [doctorTime, setDoctorTime] = useState("");
+
+  const doctorAvailable = (startTime, endTime, timeList, appointments) => {
+    const data = OfficeTimeCalculate(startTime, endTime, 1, 0);
+    console.log(data);
+
+    // Convert list1 to a Set for faster lookup
+    const setList1 = new Set(timeList);
+
+    // Filter values from list2 that are present in list1
+    const filteredList = data.filter((value) => setList1.has(value));
+
+    // Filter out elements from firstList that are present in secondList
+    const finalList = filteredList.filter(
+      (item) => !appointments.includes(item)
+    );
+    setDoctorTime(finalList);
+
+    return finalList;
+  };
+
+  const handleDoctorChange = (e) => {
+    const doctorId = e.target.value;
+    getAppointmentInfo(e.target.value);
+    setDoctorId(doctorId);
+    console.log(doctorId);
+    setService((prevState) => ({
+      ...prevState,
+      doctorId: doctorId,
+    }));
+
+    getDoctorInfo(e.target.value);
+  };
+
+  const getAppointmentInfo = async (id) => {
+    try {
+      dispatch(showLoading());
+      console.log(doctorId);
+      const response = await axios.post(
+        "/api/user/get-appointments-by-doctor-id",
+        {
+          doctorId: id,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      dispatch(hideLoading());
+      if (response.data.success) {
+        console.log(response.data.data);
+        const appointments = response.data.data.map((item) => {
+          return timeFormat(item.time);
+        });
+        setAppointment(appointments);
+      }
+    } catch (error) {
+      console.log(error);
+      dispatch(hideLoading());
+    }
+  };
+
+  const timeFormat = (value) => {
+    let [hour, minute] = value.split(":").map(Number);
+    let amPm = "AM";
+    minute = String(minute).padStart(2, "0");
+    if (hour >= 12) {
+      amPm = "PM";
+      if (hour > 12) {
+        hour -= 12;
+      }
+    }
+    hour = String(hour);
+    return `${hour}:${minute} ${amPm}`;
+  };
+
+  const getDoctorInfo = async (id) => {
+    try {
+      dispatch(showLoading());
+      console.log(doctorId);
+      const response = await axios.post(
+        "/api/doctor/get-doctor-info-by-id",
+        {
+          doctorId: id,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      dispatch(hideLoading());
+      if (response.data.success) {
+        console.log(response.data.data);
+
+        doctorAvailable(
+          response?.data?.data?.starttime,
+          response?.data?.data?.endtime,
+          time,
+          appointment
+        );
+        setDoctor(response.data.data);
+      }
+    } catch (error) {
+      console.log(error);
+      dispatch(hideLoading());
+    }
+  };
+
   const getOfficeTime = (module) => {
     axios
       .post(
         "/api/admin/get-offie-time",
-        { module: 'vet' },
+        { module: "vet" },
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -67,6 +185,8 @@ const WalkInBookingAdmin = () => {
       .catch((error) => console.error(error));
   };
   useEffect(() => {
+    getAppointmentInfo(doctorId);
+    getDoctorInfo(doctorId);
     axios
       .get("http://localhost:5000/api/open/get-all-approved-doctors", {
         // headers: {
@@ -75,8 +195,6 @@ const WalkInBookingAdmin = () => {
       })
       .then((response) => setDoctorList(response.data.data))
       .catch((error) => console.error(error));
-
-
 
     getOfficeTime();
   }, []);
@@ -246,7 +364,7 @@ const WalkInBookingAdmin = () => {
                           className="form-control"
                           id="doctor"
                           name="doctorId"
-                          onChange={handleChange}
+                          onChange={handleDoctorChange}
                         >
                           <option>Select Doctor...</option>
                           {doctorList &&
@@ -410,11 +528,22 @@ const WalkInBookingAdmin = () => {
                         name="time"
                         onChange={handleChange}
                       >
-                        {time.map((option, index) => (
-                          <option key={index} value={option}>
-                            {option}
-                          </option>
-                        ))}
+                        {service.doctorId === "Any" ||
+                        service.service === "Grooming" ? (
+                          time.map((option, index) => (
+                            <option key={index} value={option}>
+                              {option}
+                            </option>
+                          ))
+                        ) : doctorTime.length > 0 ? (
+                          doctorTime.map((option, index) => (
+                            <option key={index} value={option}>
+                              {option}
+                            </option>
+                          ))
+                        ) : (
+                          <option>Fully Booked</option>
+                        )}
                       </select>
                     </div>
                   </div>

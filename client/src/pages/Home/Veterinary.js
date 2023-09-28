@@ -5,18 +5,15 @@ import { toast } from "react-hot-toast";
 import Header from "../../frontend_components/Header";
 import Footer from "../../frontend_components/Footer";
 
+import { showLoading, hideLoading } from "../../redux/alertsSlice";
+import { useDispatch } from "react-redux";
+import OfficeTimeCalculate from "../../components/OfficeTimeCalculate";
+
 const Veterinary = () => {
   const [doctorList, setDoctorList] = useState([]);
-  useEffect(() => {
-    axios
-      .get("http://localhost:5000/api/open/get-all-approved-doctors", {
-        // headers: {
-        //   Authorization: `Bearer ${localStorage.getItem("token")}`,
-        // },
-      })
-      .then((response) => setDoctorList(response.data.data))
-      .catch((error) => console.error(error));
-  }, []);
+  const [time, setTime] = useState([]);
+  const dispatch = useDispatch();
+
   const [service, setService] = useState({
     module: "Veterinary",
     // doctor:'',
@@ -31,6 +28,150 @@ const Veterinary = () => {
     mobile: "",
     // password:''
   });
+
+  const [doctorId, setDoctorId] = useState("");
+
+  const [doctor, setDoctor] = useState({});
+
+  const [appointment, setAppointment] = useState({});
+
+  const [doctorTime, setDoctorTime] = useState("");
+
+  const getOfficeTime = () => {
+    axios
+      .post("/api/open/get-offie-time", { module: "vet" })
+      .then((response) => {
+        console.log(
+          response?.data?.data?.starttime,
+          response?.data?.data?.endtime,
+          response?.data?.data?.break
+        );
+        const data = OfficeTimeCalculate(
+          response?.data?.data?.starttime,
+          response?.data?.data?.endtime,
+          response?.data?.data?.break,
+          30
+        );
+
+        console.log(data);
+
+        setTime(data);
+      })
+      .catch((error) => console.error(error));
+  };
+
+  useEffect(() => {
+    getAppointmentInfo(doctorId);
+    getDoctorInfo(doctorId);
+    axios
+      .get("http://localhost:5000/api/open/get-all-approved-doctors", {
+        // headers: {
+        //   Authorization: `Bearer ${localStorage.getItem("token")}`,
+        // },
+      })
+      .then((response) => setDoctorList(response.data.data))
+      .catch((error) => console.error(error));
+
+    getOfficeTime();
+    console.log(time);
+  }, []);
+
+  const doctorAvailable = (startTime, endTime, timeList, appointments) => {
+    const data = OfficeTimeCalculate(startTime, endTime, 1, 0);
+    console.log(data);
+
+    // Convert list1 to a Set for faster lookup
+    const setList1 = new Set(timeList);
+
+    // Filter values from list2 that are present in list1
+    const filteredList = data.filter((value) => setList1.has(value));
+
+    // Filter out elements from firstList that are present in secondList
+    const finalList = filteredList.filter(
+      (item) => !appointments.includes(item)
+    );
+    setDoctorTime(finalList);
+
+    return finalList;
+  };
+
+  const handleDoctorChange = (e) => {
+    const doctorId = e.target.value;
+    getAppointmentInfo(e.target.value);
+    setDoctorId(doctorId);
+    console.log(doctorId);
+    setService((prevState) => ({
+      ...prevState,
+      doctorId: doctorId,
+    }));
+
+    getDoctorInfo(e.target.value);
+  };
+
+  const getAppointmentInfo = async (id) => {
+    try {
+      dispatch(showLoading());
+      console.log(doctorId);
+      const response = await axios.post(
+        "/api/open/get-appointments-by-doctor-id",
+        {
+          doctorId: id,
+        }
+      );
+
+      dispatch(hideLoading());
+      if (response.data.success) {
+        console.log(response.data.data);
+        const appointments = response.data.data.map((item) => {
+          return timeFormat(item.time);
+        });
+        setAppointment(appointments);
+      }
+    } catch (error) {
+      console.log(error);
+      dispatch(hideLoading());
+    }
+  };
+
+  const timeFormat = (value) => {
+    let [hour, minute] = value.split(":").map(Number);
+    let amPm = "AM";
+    minute = String(minute).padStart(2, "0");
+    if (hour >= 12) {
+      amPm = "PM";
+      if (hour > 12) {
+        hour -= 12;
+      }
+    }
+    hour = String(hour);
+    return `${hour}:${minute} ${amPm}`;
+  };
+
+  const getDoctorInfo = async (id) => {
+    try {
+      dispatch(showLoading());
+      console.log(doctorId);
+      const response = await axios.post("/api/open/get-doctor-info-by-id", {
+        doctorId: id,
+      });
+
+      dispatch(hideLoading());
+      if (response.data.success) {
+        console.log(response.data.data);
+
+        doctorAvailable(
+          response?.data?.data?.starttime,
+          response?.data?.data?.endtime,
+          time,
+          appointment
+        );
+        setDoctor(response.data.data);
+      }
+    } catch (error) {
+      console.log(error);
+      dispatch(hideLoading());
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -92,7 +233,7 @@ const Veterinary = () => {
                       className="form-control"
                       id="doctor"
                       name="doctorId"
-                      onChange={handleChange}
+                      onChange={handleDoctorChange}
                     >
                       <option>Select Doctor...</option>
                       {doctorList &&
@@ -132,20 +273,22 @@ const Veterinary = () => {
                       <option value="Other">Other</option>
                     </select>
                   </div>
-                 {service.pet === 'Dog' && <div className="mb-2">
-                    <label htmlFor="size">Choose Size: </label>
-                    <select
-                      className="form-control"
-                      id="size"
-                      name="size"
-                      onChange={handleChange}
-                    >
-                      <option defaultValue="">Select size...</option>
-                      <option value={service.size}>S (Small)</option>
-                      <option value={service.size}>M (Medium)</option>
-                      <option value={service.size}>L (Large)</option>
-                    </select>
-                  </div>}
+                  {service.pet === "Dog" && (
+                    <div className="mb-2">
+                      <label htmlFor="size">Choose Size: </label>
+                      <select
+                        className="form-control"
+                        id="size"
+                        name="size"
+                        onChange={handleChange}
+                      >
+                        <option defaultValue="">Select size...</option>
+                        <option value={service.size}>S (Small)</option>
+                        <option value={service.size}>M (Medium)</option>
+                        <option value={service.size}>L (Large)</option>
+                      </select>
+                    </div>
+                  )}
                   <div className="mb-2">
                     <label htmlFor="Age">Age:</label>
                     <input
@@ -244,15 +387,29 @@ const Veterinary = () => {
                   </div>
                   <div className="mb-2">
                     <label htmlFor="time">Time:</label>
-                    <input
+
+                    <select
                       className="form-control"
-                      type="time"
                       id="time"
                       name="time"
-                      value={service.time}
                       onChange={handleChange}
-                      required
-                    />
+                    >
+                      {service.doctorId === "Any" ? (
+                        time.map((option, index) => (
+                          <option key={index} value={option}>
+                            {option}
+                          </option>
+                        ))
+                      ) : doctorTime.length > 0 ? (
+                        doctorTime.map((option, index) => (
+                          <option key={index} value={option}>
+                            {option}
+                          </option>
+                        ))
+                      ) : (
+                        <option>Fully Booked</option>
+                      )}
+                    </select>
                   </div>
                 </div>
                 <div className="col-md-12">
