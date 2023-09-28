@@ -3,10 +3,11 @@ import axios from "axios";
 import { toast } from "react-hot-toast";
 import Layout from "./Layout";
 import moment from "moment";
-import { TimePicker, Select, Table } from "antd";
+import { TimePicker, Select, Table, DatePicker } from "antd";
 
 function OfficeTimmings() {
   const [time, setTime] = useState([]);
+  const [holidayDate, setholidayDate] = useState([]);
   const [groomsTime, setGroomsTime] = useState([]);
   const { RangePicker } = TimePicker;
   const [vetTime, setVetTime] = useState({
@@ -32,6 +33,11 @@ function OfficeTimmings() {
     }));
     console.log(dateString[0]);
     console.log(dateString[1]);
+  };
+
+  const onChangeDate = (value, dateString) => {
+    console.log(moment(dateString).format("YYYY-MM-DDTHH:mm:ss.000+00:00"));
+    setholidayDate(moment(dateString).format("YYYY-MM-DDTHH:mm:ss.000+00:00"));
   };
 
   const onChangeGroomRange = (value, dateString) => {
@@ -72,6 +78,32 @@ function OfficeTimmings() {
     }
     hour = String(hour).padStart(2, "0");
     return `${hour}:${minute} ${amPm}`;
+  };
+
+  const handleHolidayCancel = async () => {
+    if (holidayDate) {
+      try {
+        const response = await axios.post(
+          "/api/admin/cancel-appointment-holiday",
+          { date: holidayDate },
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+
+        if (response.data.success) {
+          toast.success(response.data.message);
+          console.log(response?.data?.data);
+
+          // Do something else, like navigating to another page
+        }
+      } catch (error) {
+        console.log(error);
+        toast.error("Error in cancelling appointment.");
+      }
+    }
   };
 
   const handleSubmitVet = async (e) => {
@@ -146,7 +178,7 @@ function OfficeTimmings() {
   const getOfficeTime = (module) => {
     axios
       .post(
-        "/api/admin/get-offie-time",
+        "/api/admin/get-office-time",
         { module: "vet" },
         {
           headers: {
@@ -163,7 +195,7 @@ function OfficeTimmings() {
 
     axios
       .post(
-        "/api/admin/get-offie-time",
+        "/api/admin/get-office-time",
         { module: "groom" },
         {
           headers: {
@@ -204,7 +236,7 @@ function OfficeTimmings() {
       title: "Created At",
       dataIndex: "createdAt",
       render: (text, record) => (
-        <span>{moment(record?.createdAt).format("LLL")}</span>
+        <span>{moment(record?.updatedAt).format("LLL")}</span>
       ),
     },
   ];
@@ -321,6 +353,24 @@ function OfficeTimmings() {
           responsive={true}
           scroll={{ x: true }}
         />
+      </div>
+      <div className="card mt-3">
+        <h1 className="card-title mt-3 ms-3 mb-3">Holiday Alert</h1>
+        <div className="m-4">
+          <DatePicker
+            style={{ width: "100%" }}
+            size="large"
+            onChange={onChangeDate}
+          />
+        </div>
+        <div className="d-flex justify-content-end me-3 mb-3 mt-3">
+          <button
+            className="btn btn-success btn-sm"
+            onClick={handleHolidayCancel}
+          >
+            Change
+          </button>
+        </div>
       </div>
     </Layout>
   );

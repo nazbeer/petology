@@ -9,6 +9,7 @@ import moment from "moment";
 import { Link } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import Geocode from "react-geocode";
+import OfficeTimeCalculate from "../../components/OfficeTimeCalculate";
 
 Geocode.setApiKey("AIzaSyAxdklbUsegbWsasCJpvfmin95xzIxiY3Y");
 const apiKey = "AIzaSyAxdklbUsegbWsasCJpvfmin95xzIxiY3Y";
@@ -22,7 +23,118 @@ function MobileGroomingList(doctorId) {
   const [showModal, setShowModal] = useState(false);
   const [pets, setPets] = useState([]);
 
+  const [showReschudleModal, setShowReschudleModal] = useState(false);
+  const [appTime, setAppTime] = useState({});
+  const [time, setTime] = useState([]);
+  const [showOpenReschudleModal, setShowOpenReschudleModal] = useState(false);
+
+
   const dispatch = useDispatch();
+
+  const handleChange = (event) => {
+    setAppTime(event.target.value);
+    console.log(event.target.value);
+  };
+
+  const handleShowReschudleModal = (record) => {
+    setSelectedAppointment(record);
+    setShowReschudleModal(true);
+  };
+
+  const handleCloseReschudleModal = () => {
+    setSelectedAppointment(null);
+    setSelectedDoctor(null);
+    setShowReschudleModal(false);
+  };
+
+  const handleShowOpenReschudleModal = (record) => {
+    setSelectedAppointment(record);
+    setShowOpenReschudleModal(true);
+  };
+
+  const handleCloseOenReschudleModal = () => {
+    setSelectedAppointment(null);
+    setSelectedDoctor(null);
+    setShowOpenReschudleModal(false);
+  };
+
+  const getOfficeTime = () => {
+    axios
+      .post(
+        "/api/admin/get-office-time",
+        { module: "groom" },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      )
+      .then((response) => {
+        console.log(
+          response?.data?.data?.starttime,
+          response?.data?.data?.endtime,
+          response?.data?.data?.break
+        );
+        const data = OfficeTimeCalculate(
+          response?.data?.data?.starttime,
+          response?.data?.data?.endtime,
+          response?.data?.data?.break,
+          30
+        );
+
+        console.log(data);
+
+        setTime(data);
+      })
+      .catch((error) => console.error(error));
+  };
+  const parseTime = (time1) => {
+    if (time1) {
+      const [time, period] = time1.split(" ");
+
+      let [hours, minutes] = time.split(":");
+      hours = parseInt(hours, 10);
+
+      if (period === "PM" && hours !== 12) {
+        hours += 12;
+      } else if (period === "AM" && hours === 12) {
+        hours = 0;
+      }
+
+      // Ensure hours and minutes are two digits
+      hours = hours < 10 ? "0" + hours : hours;
+      // minutes = minutes < 10 ? "0" + minutes : minutes;
+
+      return `${hours}:${minutes}`;
+    }
+  };
+  const reschudleAppointment = async () => {
+    try {
+      console.log(selectedAppointment, selectedAppointment?.appointment?._id, appTime);
+      const time = parseTime(appTime);
+      console.log(time);
+      const response = await axios.post(
+        "/api/admin/reschudle-appointment-time",
+        {
+          appointmentId: selectedAppointment?.appointment?._id,
+          time: time,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      // console.log(response);
+      if (response.data.success) {
+        toast.success(response.data.message);
+        getAppointmentsData();
+        handleCloseReschudleModal();
+      }
+    } catch (error) {
+      toast.error("Error reschudling the appointment");
+    }
+  };
   const changeOpenAppointmentStatus = async (record, status) => {
     try {
       dispatch(showLoading());
@@ -122,6 +234,34 @@ function MobileGroomingList(doctorId) {
   const [doctorDetails, setDoctorDetails] = useState(null);
 
   const [data, setData] = useState([]);
+  const reschudleOpenAppointment = async () => {
+    try {
+      console.log(selectedAppointment, selectedDoctor, appTime);
+      const time = parseTime(appTime);
+      console.log(time);
+      const response = await axios.post(
+        "/api/admin/reschudle-open-appointment",
+        {
+          appointmentId: selectedAppointment?._id,
+          doctorId: selectedDoctor,
+          time: time,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      // console.log(response);
+      if (response.data.success) {
+        toast.success(response.data.message);
+        getAppointmentsData();
+        handleCloseOenReschudleModal();
+      }
+    } catch (error) {
+      toast.error("Error reschudling the appointment");
+    }
+  };
   const fetchData = async () => {
     try {
       const response = await axios.get(
@@ -156,6 +296,7 @@ function MobileGroomingList(doctorId) {
   };
 
   useEffect(() => {
+    getOfficeTime()
     fetchData();
   }, []);
 
@@ -292,6 +433,13 @@ function MobileGroomingList(doctorId) {
       dataIndex: "actions",
       render: (text, record) => (
         <div className="d-flex justify-content-evenly align-items-center gap-3">
+          <button
+            type="button"
+            className="btn btn-success btn-sm text-capitalize ml-2"
+            onClick={() => handleShowOpenReschudleModal(record)}
+          >
+            Reschedule
+          </button>
           {record?.status === "pending" ||
           record?.status === "Pending" ||
           record?.status === "blocked" ? (
@@ -379,7 +527,7 @@ function MobileGroomingList(doctorId) {
       title: "Time",
       dataIndex: "time",
       render: (text, record) => (
-        <span>{moment(record.time).format("LTS")}</span>
+        <span>{record?.appointment?.time}</span>
       ),
       responsive: ["xs", "md", "sm", "lg"],
     },
@@ -397,6 +545,13 @@ function MobileGroomingList(doctorId) {
       dataIndex: "actions",
       render: (text, record) => (
         <div className="d-flex justify-content-evenly align-items-center gap-3">
+          <button
+            type="button"
+            className="btn btn-success btn-sm text-capitalize ml-2"
+            onClick={() => handleShowReschudleModal(record)}
+          >
+            Reschedule
+          </button>
           {record?.appointment?.status === "pending" ||
           record?.appointment?.status === "Pending" ||
           record?.appointment?.status === "blocked" ? (
@@ -469,6 +624,107 @@ function MobileGroomingList(doctorId) {
           responsive={true}
           scroll={{ x: true }}
         />
+      </div>
+      <div>
+        <Modal
+          show={showReschudleModal}
+          onHide={handleCloseReschudleModal}
+          size="lg"
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>
+              <div className="d-lg-flex justify-content-between align-items-center">
+                <span>Appointment Details</span>
+                {/* {selectedAppointment && selectedAppointment._id} */}
+              </div>
+            </Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <div className="col-md-12 ">
+              
+
+              <div className="d-lg-flex justify-content-between align-items-center gap-4 mb-3">
+                <label htmlFor="time">Time:</label>
+
+                <select
+                  className="form-control"
+                  id="time"
+                  name="time"
+                  onChange={handleChange}
+                >
+                  {time.map((option, index) => (
+                    <option key={index} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={handleCloseReschudleModal}>
+              Close
+            </Button>
+            <Button variant="primary" onClick={reschudleAppointment}>
+              Save Changes
+            </Button>
+          </Modal.Footer>
+        </Modal>
+      </div>
+
+      <div>
+        <Modal
+          show={showOpenReschudleModal}
+          onHide={handleCloseOenReschudleModal}
+          size="lg"
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>
+              <div className="d-lg-flex justify-content-between align-items-center">
+                <span>Appointment Details</span>
+                {/* {selectedAppointment && selectedAppointment._id} */}
+              </div>
+            </Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <div className="col-md-12 ">
+              <div className="d-lg-flex justify-content-between align-items-center gap-4 mb-3">
+                <label className="text-left">Parent Name: </label>
+                <span className="text-right">
+                  {selectedAppointment &&
+                    selectedAppointment?.firstname +
+                      " " +
+                      selectedAppointment?.lastname}
+                </span>
+              </div>
+              
+              <div className="d-lg-flex justify-content-between align-items-center gap-4 mb-3">
+                <label htmlFor="time">Time:</label>
+
+                <select
+                  className="form-control"
+                  id="time"
+                  name="time"
+                  onChange={handleChange}
+                >
+                  {time.map((option, index) => (
+                    <option key={index} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={handleCloseOenReschudleModal}>
+              Close
+            </Button>
+            <Button variant="primary" onClick={reschudleOpenAppointment}>
+              Save Changes
+            </Button>
+          </Modal.Footer>
+        </Modal>
       </div>
     </Layout>
   );

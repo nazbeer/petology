@@ -43,7 +43,7 @@ const MobGroom = () => {
   const getOfficeTime = () => {
     axios
       .post(
-        "/api/admin/get-offie-time",
+        "/api/admin/get-office-time",
         { module: "groom" },
         {
           headers: {

@@ -259,7 +259,7 @@ router.post("/get-appointments-by-doctor-id", async (req, res) => {
   }
 });
 
-router.post("/get-offie-time", async (req, res) => {
+router.post("/get-office-time", async (req, res) => {
   try {
     const OfficeTime = await officetime.findOne({ module: req.body.module });
     console.log(OfficeTime);

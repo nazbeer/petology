@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const nodemailer = require("nodemailer");
 const User = require("../models/userModel");
 const Doctor = require("../models/doctorModel");
 const Appointment = require("../models/appointmentModel");
@@ -18,6 +19,9 @@ const Paymentmodel = require("../models/Paymentmodel");
 const officetime = require("../models/OfficeTimeModel");
 const fs = require("fs");
 const path = require("path");
+const openappointmentModel = require("../models/openAppointmentModel");
+require("dotenv").config();
+
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, "uploads/"); // Directory where files will be stored
@@ -128,6 +132,120 @@ router.post(
     }
   }
 );
+
+router.post("/reschudle-appointment", authMiddleware, async (req, res) => {
+  try {
+    const { appointmentId, doctorId, time } = req.body;
+
+    // Find the appointment by ID and update the doctorId
+    const updatedAppointment = await UserappModel.findByIdAndUpdate(
+      appointmentId,
+      { doctorId, time },
+      { new: true } // Return the updated appointment
+    );
+
+    if (!updatedAppointment) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Appointment not found" });
+    }
+
+    // Update the doctor's appointments array
+    await Doctor.findByIdAndUpdate(
+      doctorId,
+      { $addToSet: { appointments: appointmentId } },
+      { new: true }
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Doctor assigned successfully",
+      data: updatedAppointment,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "An error occurred while assigning the doctor",
+    });
+  }
+});
+
+router.post("/reschudle-open-appointment", authMiddleware, async (req, res) => {
+  try {
+    const { appointmentId, doctorId, time } = req.body;
+
+    // Find the appointment by ID and update the doctorId
+    const updatedAppointment = await openappointmentModel.findByIdAndUpdate(
+      appointmentId,
+      { doctorId, time },
+      { new: true } // Return the updated appointment
+    );
+
+    if (!updatedAppointment) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Appointment not found" });
+    }
+
+    // Update the doctor's appointments array
+    await Doctor.findByIdAndUpdate(
+      doctorId,
+      { $addToSet: { appointments: appointmentId } },
+      { new: true }
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Doctor assigned successfully",
+      data: updatedAppointment,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "An error occurred while assigning the doctor",
+    });
+  }
+});
+
+router.post("/reschudle-appointment-time", authMiddleware, async (req, res) => {
+  try {
+    const { appointmentId, doctorId, time } = req.body;
+
+    // Find the appointment by ID and update the doctorId
+    const updatedAppointment = await UserappModel.findByIdAndUpdate(
+      appointmentId,
+      { time },
+      { new: true } // Return the updated appointment
+    );
+
+    if (!updatedAppointment) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Appointment not found" });
+    }
+
+    // Update the doctor's appointments array
+    await Doctor.findByIdAndUpdate(
+      doctorId,
+      { $addToSet: { appointments: appointmentId } },
+      { new: true }
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Doctor assigned successfully",
+      data: updatedAppointment,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "An error occurred while assigning the doctor",
+    });
+  }
+});
 
 router.get("/doctordetails/:doctorId", async (req, res) => {
   //  console.log(doctorInfo);
@@ -1066,7 +1184,7 @@ router.post("/offie-time", authMiddleware, async (req, res) => {
   }
 });
 
-router.post("/get-offie-time", authMiddleware, async (req, res) => {
+router.post("/get-office-time", authMiddleware, async (req, res) => {
   try {
     const OfficeTime = await officetime.findOne({ module: req.body.module });
     console.log(OfficeTime);
@@ -1148,6 +1266,110 @@ router.get("/closed-appointment-count", authMiddleware, async (req, res) => {
       message: "Error in Counting Closed appointments",
       success: false,
       error,
+    });
+  }
+});
+
+router.post("/cancel-appointment-holiday", authMiddleware, async (req, res) => {
+  try {
+    const { date } = req.body;
+    console.log(date);
+
+    const filter = { date: { $in: date } };
+    // Find the appointment by ID and update the doctorId
+    const updatedAppointment = await UserappModel.updateMany(
+      filter,
+      { status: "blocked" },
+      { new: true } // Return the updated appointment
+    );
+
+    if (!updatedAppointment) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Appointment not found" });
+    }
+
+    console.log(updatedAppointment);
+
+    const appointmens = await UserappModel.find(filter);
+
+    console.log(appointmens);
+
+    const userID = appointmens.map((item) => item.userId);
+    console.log(userID);
+
+    const users = await User.find(
+      { _id: { $in: userID } },
+      { name: 1, _id: 1, email: 1 }
+    );
+
+    // Create an empty result array
+    const combinedList = [];
+
+    // Loop through list1 and add objects from list2 and list3 based on commonField
+    appointmens.forEach((obj1) => {
+      // Find matching objects in list2 based on commonField
+      const matchingObj2 = users.find(
+        (obj2) => obj2._id.toString() === obj1.userId
+      );
+
+      // Combine the objects into a new object and push it to the result array
+      combinedList.push({
+        appointmen: obj1,
+        user: matchingObj2, // Use {} as a default in case there is no match
+      });
+    });
+
+    console.log(combinedList);
+
+    console.log(process.env.USER, process.env.EMAIL, process.env.PASS);
+
+    const transporter = nodemailer.createTransport({
+      host: "mailslurp.mx",
+      port: 2587,
+      auth: {
+        user: process.env.USER,
+        pass: process.env.PASS,
+      },
+    });
+
+    async function sendEmail(combinedList) {
+      console.log(combinedList?.user?.email);
+      const mailOptions = {
+        from: process.env.EMAIL,
+        to: combinedList?.user?.email,
+        subject: "Appointment Cancelled",
+        html: `
+      <html>
+        <body>
+          <p>Hello ${combinedList?.user?.name},</p>
+          <p>We are sorry to tell you that your appointment ${combinedList?.appointment?.appointmentId} has been cancelled due to upcoming holiday on ${date}</p>
+        </body>
+      </html>
+    `,
+      };
+
+      transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+          console.log("Error sending email:", error);
+        } else {
+          console.log("Email sent:", info.response);
+        }
+      });
+    }
+
+    combinedList.forEach(sendEmail);
+
+    res.status(200).json({
+      success: true,
+      message: "Appointment Cancelled successfully",
+      data: updatedAppointment,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "An error occurred while cancelling the appointment",
     });
   }
 });

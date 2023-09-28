@@ -68,7 +68,7 @@ const MobileGrooming = () => {
 
   const getOfficeTime = () => {
     axios
-      .post("/api/open/get-offie-time", { module: "vet" })
+      .post("/api/open/get-office-time", { module: "vet" })
       .then((response) => {
         console.log(
           response?.data?.data?.starttime,

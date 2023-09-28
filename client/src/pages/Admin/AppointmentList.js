@@ -11,18 +11,21 @@ import { Link } from "react-router-dom";
 
 import JsPDF from "jspdf";
 import "jspdf-autotable";
+import OfficeTimeCalculate from "../../components/OfficeTimeCalculate";
 
-function Appointmentlist(doctorId) {
+function Appointmentlist(doctorsId) {
   const [appointments, setAppointments] = useState([]);
   const [openappointments, setOpenAppointments] = useState([]);
   const [doctors, setDoctors] = useState([]);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [selectedDoctor, setSelectedDoctor] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [showReschudleModal, setShowReschudleModal] = useState(false);
+
+  const [showOpenReschudleModal, setShowOpenReschudleModal] = useState(false);
   const [pets, setPets] = useState([]);
 
   const [filter, setFilter] = useState(true);
-
 
   const [filterType, setFilterType] = useState("");
   let [onlyDate, setOnlyDate] = useState("");
@@ -31,9 +34,57 @@ function Appointmentlist(doctorId) {
   const [filteredData, setFilteredData] = useState([]);
   const [filteredGuestData, setFilteredGuestData] = useState([]);
 
+  const [doctorId, setDoctorId] = useState("");
+
+  const [doctor, setDoctor] = useState({});
+
+  const [appTime, setAppTime] = useState({});
+
+  const [appointmentTime, setAppointment] = useState({});
+
+  const [doctorTime, setDoctorTime] = useState("");
+
   const { RangePicker } = DatePicker;
 
   const dispatch = useDispatch();
+
+  const [time, setTime] = useState([]);
+
+  const handleChange = (event) => {
+    setAppTime(event.target.value);
+    console.log(event.target.value);
+  };
+
+  const getOfficeTime = () => {
+    axios
+      .post(
+        "/api/admin/get-office-time",
+        { module: "vet" },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      )
+      .then((response) => {
+        console.log(
+          response?.data?.data?.starttime,
+          response?.data?.data?.endtime,
+          response?.data?.data?.break
+        );
+        const data = OfficeTimeCalculate(
+          response?.data?.data?.starttime,
+          response?.data?.data?.endtime,
+          response?.data?.data?.break,
+          30
+        );
+
+        console.log(data);
+
+        setTime(data);
+      })
+      .catch((error) => console.error(error));
+  };
 
   const handleFilterType = (event) => {
     console.log(event.target.value);
@@ -90,6 +141,7 @@ function Appointmentlist(doctorId) {
   };
 
   const handleShowModal = (record) => {
+    console.log(record);
     setSelectedAppointment(record);
     setShowModal(true);
   };
@@ -100,8 +152,36 @@ function Appointmentlist(doctorId) {
     setShowModal(false);
   };
 
+  const handleShowReschudleModal = (record) => {
+    setSelectedAppointment(record);
+    setShowReschudleModal(true);
+  };
+
+  const handleCloseReschudleModal = () => {
+    setSelectedAppointment(null);
+    setSelectedDoctor(null);
+    setShowReschudleModal(false);
+  };
+
+  const handleShowOpenReschudleModal = (record) => {
+    setSelectedAppointment(record);
+    setShowOpenReschudleModal(true);
+  };
+
+  const handleCloseOenReschudleModal = () => {
+    setSelectedAppointment(null);
+    setSelectedDoctor(null);
+    setShowOpenReschudleModal(false);
+  };
+
   const handleDoctorSelect = (event) => {
+    console.log(event.target.value);
     setSelectedDoctor(event.target.value);
+    const doctorId = event.target.value;
+    getAppointmentInfo(event.target.value);
+
+    setDoctorId(doctorId);
+    console.log(doctorId);
   };
 
   const getDoctorsData = async () => {
@@ -161,6 +241,85 @@ function Appointmentlist(doctorId) {
       }
     } catch (error) {
       toast.error("Error assigning doctor to appointment");
+    }
+  };
+
+  const parseTime = (time1) => {
+    if (time1) {
+      const [time, period] = time1.split(" ");
+
+      let [hours, minutes] = time.split(":");
+      hours = parseInt(hours, 10);
+
+      if (period === "PM" && hours !== 12) {
+        hours += 12;
+      } else if (period === "AM" && hours === 12) {
+        hours = 0;
+      }
+
+      // Ensure hours and minutes are two digits
+      hours = hours < 10 ? "0" + hours : hours;
+      // minutes = minutes < 10 ? "0" + minutes : minutes;
+
+      return `${hours}:${minutes}`;
+    }
+  };
+
+  const reschudleAppointment = async () => {
+    try {
+      console.log(selectedAppointment, selectedDoctor, appTime);
+      const time = parseTime(appTime);
+      console.log(time);
+      const response = await axios.post(
+        "/api/admin/reschudle-appointment",
+        {
+          appointmentId: selectedAppointment?.appointment?._id,
+          doctorId: selectedDoctor,
+          time: time,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      // console.log(response);
+      if (response.data.success) {
+        toast.success(response.data.message);
+        getAppointmentsData();
+        handleCloseReschudleModal();
+      }
+    } catch (error) {
+      toast.error("Error reschudling the appointment");
+    }
+  };
+
+  const reschudleOpenAppointment = async () => {
+    try {
+      console.log(selectedAppointment, selectedDoctor, appTime);
+      const time = parseTime(appTime);
+      console.log(time);
+      const response = await axios.post(
+        "/api/admin/reschudle-open-appointment",
+        {
+          appointmentId: selectedAppointment?._id,
+          doctorId: selectedDoctor,
+          time: time,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      // console.log(response);
+      if (response.data.success) {
+        toast.success(response.data.message);
+        getAppointmentsData();
+        handleCloseOenReschudleModal();
+      }
+    } catch (error) {
+      toast.error("Error reschudling the appointment");
     }
   };
 
@@ -233,6 +392,10 @@ function Appointmentlist(doctorId) {
     };
 
     fetchDoctorDetails();
+    getOfficeTime();
+    console.log(time);
+    getAppointmentInfo(doctorId);
+    getDoctorInfo(doctorId);
   }, [selectedAppointment]);
 
   useEffect(() => {
@@ -243,6 +406,106 @@ function Appointmentlist(doctorId) {
     getPetsData();
     getOpenAppointmentsData();
   }, []);
+  const doctorAvailable = (startTime, endTime, timeList, appointments) => {
+    const data = OfficeTimeCalculate(startTime, endTime, 1, 0);
+    console.log(data);
+
+    // Convert list1 to a Set for faster lookup
+    const setList1 = new Set(timeList);
+
+    // Filter values from list2 that are present in list1
+    const filteredList = data.filter((value) => setList1.has(value));
+
+    // Filter out elements from firstList that are present in secondList
+    if (appointments.length > 0) {
+      const finalList = filteredList.filter(
+        (item) => !appointments.includes(item)
+      );
+      setDoctorTime(finalList);
+
+      return finalList;
+    }
+  };
+
+  const getAppointmentInfo = async (id) => {
+    try {
+      dispatch(showLoading());
+      console.log(doctorId);
+      const response = await axios.post(
+        "/api/user/get-appointments-by-doctor-id",
+        {
+          doctorId: id,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      dispatch(hideLoading());
+      if (response.data.success) {
+        console.log(response.data.data);
+        const appointments = response.data.data.map((item) => {
+          return timeFormat(item.time);
+        });
+        setAppointment(appointments);
+        getDoctorInfo(id, appointments);
+      }
+    } catch (error) {
+      console.log(error);
+      dispatch(hideLoading());
+    }
+  };
+
+  const timeFormat = (value) => {
+    let [hour, minute] = value.split(":").map(Number);
+    let amPm = "AM";
+    minute = String(minute).padStart(2, "0");
+    if (hour >= 12) {
+      amPm = "PM";
+      if (hour > 12) {
+        hour -= 12;
+      }
+    }
+    hour = String(hour);
+    return `${hour}:${minute} ${amPm}`;
+  };
+
+  const getDoctorInfo = async (id, appointments) => {
+    try {
+      dispatch(showLoading());
+      console.log(doctorId);
+      const response = await axios.post(
+        "/api/doctor/get-doctor-info-by-id",
+        {
+          doctorId: id,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      dispatch(hideLoading());
+      if (response.data.success) {
+        console.log(response.data.data);
+
+        doctorAvailable(
+          response?.data?.data?.starttime,
+          response?.data?.data?.endtime,
+          time,
+          appointments
+        );
+        setDoctor(response.data.data);
+      }
+    } catch (error) {
+      console.log(error);
+      dispatch(hideLoading());
+    }
+  };
+
   const opencolumns = [
     {
       title: "Service",
@@ -331,6 +594,13 @@ function Appointmentlist(doctorId) {
           <button
             type="button"
             className="btn btn-success btn-sm text-capitalize ml-2"
+            onClick={() => handleShowOpenReschudleModal(record)}
+          >
+            Reschedule
+          </button>
+          <button
+            type="button"
+            className="btn btn-success btn-sm text-capitalize ml-2"
             onClick={() => handleShowModal(record)}
           >
             View & Assign Doctor
@@ -391,9 +661,7 @@ function Appointmentlist(doctorId) {
     {
       title: "Time",
       dataIndex: "time",
-      render: (text, record) => (
-        <span>{moment(record?.time).format("LTS")}</span>
-      ),
+      render: (text, record) => <span>{record?.appointment?.time}</span>,
       responsive: ["xs", "md", "sm", "lg"],
     },
     {
@@ -429,6 +697,13 @@ function Appointmentlist(doctorId) {
               Cancel
             </button>
           )}
+          <button
+            type="button"
+            className="btn btn-success btn-sm text-capitalize ml-2"
+            onClick={() => handleShowReschudleModal(record)}
+          >
+            Reschedule
+          </button>
           <button
             type="button"
             className="btn btn-success btn-sm text-capitalize ml-2"
@@ -514,9 +789,8 @@ function Appointmentlist(doctorId) {
 
     console.log(filtered.length > 0 ? filtered : null);
 
-    setFilter(false)
+    setFilter(false);
   };
-
 
   const createPdfWithTable = async (data) => {
     const doc = new JsPDF();
@@ -525,7 +799,7 @@ function Appointmentlist(doctorId) {
 
     doc.setFontSize(20);
     doc.text(10, 40, "Appointments List (Registered Users)");
-    
+
     const headers = [
       "ParentName",
       "Doctor",
@@ -711,15 +985,17 @@ function Appointmentlist(doctorId) {
                 <div className="d-lg-flex justify-content-between align-items-center gap-4 mb-3">
                   <label className="text-left">Parent Name: </label>
                   <span className="text-right">
-                    {selectedAppointment &&
-                      selectedAppointment?.user?.firstName}
+                    {selectedAppointment && selectedAppointment?.user?.name}
                   </span>
                 </div>
                 <div className="d-lg-flex justify-content-between align-items-center gap-4 mb-3">
                   <label className="text-left">Assign Doctor: </label>
                   <span className="text-right">
                     {" "}
-                    <select className="form-control" onChange={handleDoctorSelect}>
+                    <select
+                      className="form-control"
+                      onChange={handleDoctorSelect}
+                    >
                       <option>--Select Doctor--</option>
                       {selectedAppointment &&
                         doctors.map((doctoro) => (
@@ -749,6 +1025,79 @@ function Appointmentlist(doctorId) {
             </Modal.Footer>
           </Modal>
         </div>
+
+        <div>
+          <Modal
+            show={showReschudleModal}
+            onHide={handleCloseReschudleModal}
+            size="lg"
+          >
+            <Modal.Header closeButton>
+              <Modal.Title>
+                <div className="d-lg-flex justify-content-between align-items-center">
+                  <span>Appointment Details</span>
+                  {/* {selectedAppointment && selectedAppointment._id} */}
+                </div>
+              </Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              <div className="col-md-12 ">
+                <div className="d-lg-flex justify-content-between align-items-center gap-4 mb-3">
+                  <label className="text-left">Parent Name: </label>
+                  <span className="text-right">
+                    {selectedAppointment && selectedAppointment?.user?.name}
+                  </span>
+                </div>
+                <div className="d-lg-flex justify-content-between align-items-center gap-4 mb-3">
+                  <label className="text-left">Assign Doctor: </label>
+                  <span className="text-right">
+                    {" "}
+                    <select
+                      className="form-control"
+                      onChange={handleDoctorSelect}
+                    >
+                      <option>--Select Doctor--</option>
+                      {selectedAppointment &&
+                        doctors.map((doctoro) => (
+                          <option key={doctoro._id} value={doctoro._id}>
+                            Dr. {doctoro?.firstName} {doctoro?.lastName}
+                          </option>
+                        ))}
+                    </select>
+                  </span>
+                </div>
+                <div className="d-lg-flex justify-content-between align-items-center gap-4 mb-3">
+                  <label htmlFor="time">Time:</label>
+
+                  <select
+                    className="form-control"
+                    id="time"
+                    name="time"
+                    onChange={handleChange}
+                  >
+                    {doctorTime.length > 0 ? (
+                      doctorTime.map((option, index) => (
+                        <option key={index} value={option}>
+                          {option}
+                        </option>
+                      ))
+                    ) : (
+                      <option>Fully Booked</option>
+                    )}
+                  </select>
+                </div>
+              </div>
+            </Modal.Body>
+            <Modal.Footer>
+              <Button variant="secondary" onClick={handleCloseReschudleModal}>
+                Close
+              </Button>
+              <Button variant="primary" onClick={reschudleAppointment}>
+                Save Changes
+              </Button>
+            </Modal.Footer>
+          </Modal>
+        </div>
       </div>
       <div className="col-md-12">
         <h6>Guest Appointments</h6>
@@ -772,6 +1121,82 @@ function Appointmentlist(doctorId) {
         ) : (
           <div className="text-center m-5">No result found</div>
         )}
+      </div>
+
+      <div>
+        <Modal
+          show={showOpenReschudleModal}
+          onHide={handleCloseOenReschudleModal}
+          size="lg"
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>
+              <div className="d-lg-flex justify-content-between align-items-center">
+                <span>Appointment Details</span>
+                {/* {selectedAppointment && selectedAppointment._id} */}
+              </div>
+            </Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <div className="col-md-12 ">
+              <div className="d-lg-flex justify-content-between align-items-center gap-4 mb-3">
+                <label className="text-left">Parent Name: </label>
+                <span className="text-right">
+                  {selectedAppointment &&
+                    selectedAppointment?.firstname +
+                      " " +
+                      selectedAppointment?.lastname}
+                </span>
+              </div>
+              <div className="d-lg-flex justify-content-between align-items-center gap-4 mb-3">
+                <label className="text-left">Assign Doctor: </label>
+                <span className="text-right">
+                  {" "}
+                  <select
+                    className="form-control"
+                    onChange={handleDoctorSelect}
+                  >
+                    <option>--Select Doctor--</option>
+                    {selectedAppointment &&
+                      doctors.map((doctoro) => (
+                        <option key={doctoro._id} value={doctoro._id}>
+                          Dr. {doctoro?.firstName} {doctoro?.lastName}
+                        </option>
+                      ))}
+                  </select>
+                </span>
+              </div>
+              <div className="d-lg-flex justify-content-between align-items-center gap-4 mb-3">
+                <label htmlFor="time">Time:</label>
+
+                <select
+                  className="form-control"
+                  id="time"
+                  name="time"
+                  onChange={handleChange}
+                >
+                  {doctorTime.length > 0 ? (
+                    doctorTime.map((option, index) => (
+                      <option key={index} value={option}>
+                        {option}
+                      </option>
+                    ))
+                  ) : (
+                    <option>Fully Booked</option>
+                  )}
+                </select>
+              </div>
+            </div>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={handleCloseOenReschudleModal}>
+              Close
+            </Button>
+            <Button variant="primary" onClick={reschudleOpenAppointment}>
+              Save Changes
+            </Button>
+          </Modal.Footer>
+        </Modal>
       </div>
     </Layout>
   );
