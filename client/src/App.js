@@ -67,6 +67,7 @@ import PaymentDecline from "./components/PaymentDecline";
 import NotFound from "./components/NotFound";
 import Payments from "./components/Payments";
 import OfficeTimmings from "./components/OfficeTimmings";
+import GroomerList from "./components/GroomerList";
 
 function App() {
   const { loading } = useSelector((state) => state.alerts);
@@ -286,6 +287,22 @@ function App() {
           element={
             <ProtectedRoute>
               <MobileGroomingList />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/groomerlist"
+          element={
+            <ProtectedRoute>
+              <GroomerList />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/reception/groomerlist"
+          element={
+            <ProtectedRoute>
+              <GroomerList />
             </ProtectedRoute>
           }
         />

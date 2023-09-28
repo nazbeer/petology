@@ -50,6 +50,24 @@ router.get("/get-all-doctors", authMiddleware, async (req, res) => {
   }
 });
 
+router.get("/get-all-groomer", authMiddleware, async (req, res) => {
+  try {
+    const groomers = await User.find({ isGroomer: true }); // Add the status filter
+    res.status(200).send({
+      message: "Groomers fetched successfully",
+      success: true,
+      data: groomers,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      message: "Error fetching groomers",
+      success: false,
+      error,
+    });
+  }
+});
+
 router.get("/get-all-approved-doctors", authMiddleware, async (req, res) => {
   try {
     const doctors = await Doctor.find({ status: "approved" }); // Add the status filter
@@ -573,6 +591,37 @@ router.post(
     }
   }
 );
+
+router.post("/change-groomer-status", authMiddleware, async (req, res) => {
+  try {
+    const { groomerId, status } = req.body;
+    console.log(groomerId, status)
+    const user = await User.findByIdAndUpdate(groomerId, {
+      status,
+    });
+    user.username = user?.name;
+    const unseenNotifications = user.unseenNotifications;
+    unseenNotifications.push({
+      type: "new-groomer-request-changed",
+      message: `Your Groomer account has been ${status}`,
+      onClickPath: "/notifications",
+    });
+    await user.save();
+
+    res.status(200).send({
+      message: "Groomer status updated successfully",
+      success: true,
+      data: user,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      message: "Error applying groomer account",
+      success: false,
+      error,
+    });
+  }
+});
 router.post(
   "/change-appointment-status/:id",
   authMiddleware,
@@ -837,6 +886,38 @@ router.post("/update-doctor/:doctorId", authMiddleware, async (req, res) => {
     return res.json({
       success: true,
       message: "Doctor information updated successfully",
+    });
+  } catch (error) {
+    console.error(error);
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
+  }
+});
+
+router.post("/update-groomer/:userId", authMiddleware, async (req, res) => {
+  try {
+    console.log(req.params)
+    const { userId } = req.params;
+    const updatedFields = req.body;
+
+    const groomer = await User.findById(userId);
+    if (!groomer) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Groomer not found" });
+    }
+
+    // Update doctor fields
+    for (const [key, value] of Object.entries(updatedFields)) {
+      groomer[key] = value;
+    }
+
+    await groomer.save();
+
+    return res.json({
+      success: true,
+      message: "Groomer information updated successfully",
     });
   } catch (error) {
     console.error(error);

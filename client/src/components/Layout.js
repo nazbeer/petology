@@ -82,6 +82,11 @@ function Layout({ children }) {
       icon: "ri-user-star-line",
     },
     {
+      name: "Groomers",
+      path: "/reception/groomerlist",
+      icon: "ri-user-star-line",
+    },
+    {
       name: "Pets",
       path: "/reception/petlist",
       icon: "ri-bear-smile-line",
@@ -196,6 +201,11 @@ function Layout({ children }) {
     {
       name: "Doctors",
       path: "/admin/doctorslist",
+      icon: "ri-user-star-line",
+    },
+    {
+      name: "Groomers",
+      path: "/admin/groomerlist",
       icon: "ri-user-star-line",
     },
     {
