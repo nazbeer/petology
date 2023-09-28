@@ -84,7 +84,9 @@ function MobGroomi() {
       title: "Service",
       dataIndex: "service",
       render: (text, record) => (
-        <span className="text-capitalize">{record.service}</span>
+        <span className="text-capitalize">
+          {record?.packs?.subService} - {record?.packs?.price} AED
+        </span>
       ),
     },
     {
