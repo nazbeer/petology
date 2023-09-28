@@ -1134,15 +1134,18 @@ router.get("/appointments/mobvet", authMiddleware, async (req, res) => {
     const populatedAppointments = await Promise.all(
       appointments.map(async (appointment) => {
         const userId = appointment.userId;
+        const serviceId = appointment.service;
         //  const doctorId = appointment.doctorId;
         // Assuming you have a User model for user details
         const user = await User.findOne({ _id: userId });
+        const packs = await packModel.findOne({ _id: serviceId });
         //   const doctor = await Doctor.findOne({ _id: doctorId });
         //  console.log("user:", user);
 
         return {
           ...appointment.toObject(),
           user,
+          packs
           //  doctor
         };
       })
@@ -1169,15 +1172,19 @@ router.get("/appointments/mobgroom", authMiddleware, async (req, res) => {
     const populatedAppointments = await Promise.all(
       appointments.map(async (appointment) => {
         const userId = appointment.userId;
+        const serviceId = appointment.service;
         //  const doctorId = appointment.doctorId;
         // Assuming you have a User model for user details
         const user = await User.findOne({ _id: userId });
+        const packs = await packModel.findOne({ _id: serviceId });
+
         //   const doctor = await Doctor.findOne({ _id: doctorId });
         //  console.log("user:", user);
 
         return {
           ...appointment.toObject(),
           user,
+          packs,
           //  doctor
         };
       })
