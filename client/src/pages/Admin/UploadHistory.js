@@ -44,6 +44,7 @@ const UploadHistory = () => {
     fetchHistoryRecords(userId);
   };
   const renderFile = (path) => {
+    console.log(path)
     const ext = path.split(".").pop().toLowerCase();
     const mainPath = path.split("/").pop().toLowerCase()
     const file = `http://localhost:5000/${mainPath}`

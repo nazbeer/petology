@@ -146,7 +146,7 @@ const Vet = () => {
     }));
   };
 
-  const doctorAvailable = (startTime, endTime, timeList) => {
+  const doctorAvailable = (startTime, endTime, timeList, appointments) => {
     const data = OfficeTimeCalculate(startTime, endTime, 1, 0);
     console.log(data);
 
@@ -157,13 +157,10 @@ const Vet = () => {
     const filteredList = data.filter((value) => setList1.has(value));
 
     // Filter out elements from firstList that are present in secondList
-    if (appointmentTime.length > 0) {
+    if (appointments.length > 0) {
       const finalList = filteredList.filter(
-        (item) => !appointmentTime.includes(item)
+        (item) => !appointments.includes(item)
       );
-      console.log(appointmentTime);
-      console.log(filteredList);
-      console.log(finalList);
       setDoctorTime(finalList);
 
       return finalList;
@@ -180,7 +177,7 @@ const Vet = () => {
       ...prevState,
       doctorId: doctorId,
     }));
-    getDoctorInfo(e.target.value);
+    // getDoctorInfo(e.target.value);
   };
 
   const getAppointmentInfo = async (id) => {
@@ -206,6 +203,7 @@ const Vet = () => {
           return timeFormat(item.time);
         });
         setAppointment(appointments);
+        getDoctorInfo(id, appointments);
       }
     } catch (error) {
       console.log(error);
@@ -227,7 +225,7 @@ const Vet = () => {
     return `${hour}:${minute} ${amPm}`;
   };
 
-  const getDoctorInfo = async (id) => {
+  const getDoctorInfo = async (id, appointments) => {
     try {
       dispatch(showLoading());
       console.log(doctorId);
@@ -250,7 +248,8 @@ const Vet = () => {
         doctorAvailable(
           response?.data?.data?.starttime,
           response?.data?.data?.endtime,
-          time
+          time,
+          appointments
         );
         setDoctor(response.data.data);
       }

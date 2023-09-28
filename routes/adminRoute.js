@@ -16,6 +16,8 @@ const DoctorLeave = require("../models/doctorLeaveModel");
 const UserappModel = require("../models/userappModel");
 const Paymentmodel = require("../models/Paymentmodel");
 const officetime = require("../models/OfficeTimeModel");
+const fs = require("fs");
+const path = require("path");
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, "uploads/"); // Directory where files will be stored
@@ -844,7 +846,7 @@ router.post(
 
       for (let i = 0; i < req.files.length; i++) {
         const file = req.files[i];
-        const filePath = "/uploads/" + file.originalname;
+        const filePath = "/uploads/" + file.filename;
         // This is the relative path to be saved
         //console.log(filePath);
         // Save the uploaded file's information to MongoDB
@@ -856,6 +858,29 @@ router.post(
           //   extension: path.extname(file.originalname)
           // }
           documentPath: filePath,
+        });
+        const sourceImagePath = req?.files[i].path;
+        const destinationImagePath = `${path.resolve(
+          __dirname,
+          ".."
+        )}/uploads/${req?.files[i].filename}`; // Replace with the destination image path
+
+        console.log(req?.files[i]);
+        console.log(sourceImagePath, destinationImagePath);
+
+        fs.readFile(sourceImagePath, (err, data) => {
+          if (err) {
+            console.error("Error reading source image:", err);
+          } else {
+            // Write the image data to the destination path
+            fs.writeFile(destinationImagePath, data, (err) => {
+              if (err) {
+                res.status(500).json({ error: "Server error" });
+              } else {
+                console.log("Image copied successfully!");
+              }
+            });
+          }
         });
         console.log("api ", historyRecord);
         await historyRecord.save();

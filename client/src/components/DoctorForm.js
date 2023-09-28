@@ -1,11 +1,11 @@
 import { Select, Button, Col, Form, Input, Row, TimePicker } from "antd";
 import moment from "moment";
-import React, {useState} from "react";
+import React, { useState } from "react";
 
 const { Option } = Select;
 
 function DoctorForm({ onFinish, initivalValues }) {
-  const [shift, setShift] = useState('day');
+  const [shift, setShift] = useState("day");
   const handleShiftChange = (value) => {
     setShift(value);
   };
@@ -64,7 +64,6 @@ function DoctorForm({ onFinish, initivalValues }) {
         </Col>
         <Col span={8} xs={24} sm={24} lg={8}>
           <Form.Item
-            
             label="Website"
             name="website"
             rules={[{ required: false }]}
@@ -107,24 +106,27 @@ function DoctorForm({ onFinish, initivalValues }) {
           </Form.Item>
         </Col>
         <Col span={8} xs={24} sm={24} lg={8}>
-          <Form.Item
-          
-            label="Consultation Fee"
-            name="feePerCunsultation"
-        
-          >
-            <Input placeholder="Consultation Fee" type="number" defaultValue={80} />
+          <Form.Item label="Consultation Fee" name="feePerCunsultation">
+            <Input
+              placeholder="Consultation Fee"
+              type="number"
+              defaultValue={80}
+            />
           </Form.Item>
         </Col>
-    
+
         <Col span={8} xs={24} sm={24} lg={8}>
-        
-            <Form.Item required label="Shift" name="shift" rules={[{ required: true }]}>
-          <Select onChange={handleShiftChange} >
-            <Option value="day">Day Shift</Option>
-            <Option value="night">Night Shift</Option>
-          </Select>
-        </Form.Item>
+          <Form.Item
+            required
+            label="Shift"
+            name="shift"
+            rules={[{ required: true }]}
+          >
+            <Select onChange={handleShiftChange}>
+              <Option value="9:00 - 18:00"> 9:00 - 18:00 </Option>
+              <Option value="13:00 - 22:00">13:00 - 22:00</Option>
+            </Select>
+          </Form.Item>
         </Col>
       </Row>
 
