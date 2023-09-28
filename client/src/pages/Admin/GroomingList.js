@@ -3,7 +3,7 @@ import { useDispatch } from "react-redux";
 import Layout from "../../components/Layout";
 import { showLoading, hideLoading } from "../../redux/alertsSlice";
 import axios from "axios";
-import { Table } from "antd";
+import { Table, DatePicker } from "antd";
 import { Button, Modal } from "react-bootstrap";
 import moment from "moment";
 import { Link } from "react-router-dom";
@@ -21,6 +21,7 @@ function GroomingList(doctorId) {
   const [appTime, setAppTime] = useState({});
   const [time, setTime] = useState([]);
   const [showOpenReschudleModal, setShowOpenReschudleModal] = useState(false);
+  const [date, setDate] = useState([]);
 
   const dispatch = useDispatch();
 
@@ -287,7 +288,7 @@ function GroomingList(doctorId) {
 
   const reschudleOpenAppointment = async () => {
     try {
-      console.log(selectedAppointment, selectedDoctor, appTime);
+      console.log(selectedAppointment, selectedDoctor, appTime, date);
       const time = parseTime(appTime);
       console.log(time);
       const response = await axios.post(
@@ -296,6 +297,7 @@ function GroomingList(doctorId) {
           appointmentId: selectedAppointment?._id,
           doctorId: selectedDoctor,
           time: time,
+          date,
         },
         {
           headers: {
@@ -533,7 +535,7 @@ function GroomingList(doctorId) {
   };
   const reschudleAppointment = async () => {
     try {
-      console.log(selectedAppointment, selectedAppointment?._id, appTime);
+      console.log(selectedAppointment, selectedAppointment?._id, appTime, date);
       const time = parseTime(appTime);
       console.log(time);
       const response = await axios.post(
@@ -541,6 +543,7 @@ function GroomingList(doctorId) {
         {
           appointmentId: selectedAppointment?._id,
           time: time,
+          date
         },
         {
           headers: {
@@ -661,7 +664,7 @@ function GroomingList(doctorId) {
           <Modal.Header closeButton>
             <Modal.Title>
               <div className="d-lg-flex justify-content-between align-items-center">
-                <span>Appointment Details</span>
+                <span>Appointment Reschedule</span>
                 {/* {selectedAppointment && selectedAppointment._id} */}
               </div>
             </Modal.Title>
@@ -677,6 +680,26 @@ function GroomingList(doctorId) {
                       selectedAppointment?.lastname}
                 </span>
               </div>
+
+              <div className="d-lg-flex justify-content-between align-items-center gap-4 mb-3">
+                  <label htmlFor="time">Date:</label>
+
+                  <DatePicker
+                    getPopupContainer={() =>
+                      document.getElementById("date-popup")
+                    }
+                    popupStyle={{
+                      position: "relative",
+                      width: "34%",
+                    }}
+                    style={{ width: "100%", zIndex: "1000 !important" }}
+                    onChange={setDate}
+                    disabledDate={(current) => {
+                      return moment().add(-1, "days") >= current;
+                    }}
+                  />
+                </div>
+                <div id="date-popup" />
 
               <div className="d-lg-flex justify-content-between align-items-center gap-4 mb-3">
                 <label htmlFor="time">Time:</label>
@@ -716,7 +739,7 @@ function GroomingList(doctorId) {
           <Modal.Header closeButton>
             <Modal.Title>
               <div className="d-lg-flex justify-content-between align-items-center">
-                <span>Appointment Details</span>
+                <span>Appointment Reschedule</span>
                 {/* {selectedAppointment && selectedAppointment._id} */}
               </div>
             </Modal.Title>
@@ -732,6 +755,25 @@ function GroomingList(doctorId) {
                       selectedAppointment?.lastname}
                 </span>
               </div>
+              <div className="d-lg-flex justify-content-between align-items-center gap-4 mb-3">
+                  <label htmlFor="time">Date:</label>
+
+                  <DatePicker
+                    getPopupContainer={() =>
+                      document.getElementById("date-popup")
+                    }
+                    popupStyle={{
+                      position: "relative",
+                      width: "34%",
+                    }}
+                    style={{ width: "100%", zIndex: "1000 !important" }}
+                    onChange={setDate}
+                    disabledDate={(current) => {
+                      return moment().add(-1, "days") >= current;
+                    }}
+                  />
+                </div>
+                <div id="date-popup" />
              
               <div className="d-lg-flex justify-content-between align-items-center gap-4 mb-3">
                 <label htmlFor="time">Time:</label>

@@ -3,31 +3,31 @@ import { useDispatch } from "react-redux";
 import Layout from "../../components/Layout";
 import { showLoading, hideLoading } from "../../redux/alertsSlice";
 import axios from "axios";
-import { Table } from "antd";
+import { Table, DatePicker } from "antd";
 import { Button, Modal } from "react-bootstrap";
 import moment from "moment";
-import { Link } from "react-router-dom";
 import { toast } from "react-hot-toast";
+import { Link } from "react-router-dom";
 import Geocode from "react-geocode";
 import OfficeTimeCalculate from "../../components/OfficeTimeCalculate";
 
+// Set your Google Maps API key here
 Geocode.setApiKey("AIzaSyAxdklbUsegbWsasCJpvfmin95xzIxiY3Y");
 const apiKey = "AIzaSyAxdklbUsegbWsasCJpvfmin95xzIxiY3Y";
 
-function MobileGroomingList(doctorId) {
+function MobileVetList(doctorId) {
   const [appointments, setAppointments] = useState([]);
   const [openappointments, setOpenAppointments] = useState([]);
   const [doctors, setDoctors] = useState([]);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
-  const [selectedDoctor, setSelectedDoctor] = useState(null);
-  const [showModal, setShowModal] = useState(false);
+
   const [pets, setPets] = useState([]);
 
   const [showReschudleModal, setShowReschudleModal] = useState(false);
   const [appTime, setAppTime] = useState({});
   const [time, setTime] = useState([]);
   const [showOpenReschudleModal, setShowOpenReschudleModal] = useState(false);
-
+  const [date, setDate] = useState([]);
 
   const dispatch = useDispatch();
 
@@ -43,7 +43,6 @@ function MobileGroomingList(doctorId) {
 
   const handleCloseReschudleModal = () => {
     setSelectedAppointment(null);
-    setSelectedDoctor(null);
     setShowReschudleModal(false);
   };
 
@@ -54,7 +53,6 @@ function MobileGroomingList(doctorId) {
 
   const handleCloseOenReschudleModal = () => {
     setSelectedAppointment(null);
-    setSelectedDoctor(null);
     setShowOpenReschudleModal(false);
   };
 
@@ -62,7 +60,7 @@ function MobileGroomingList(doctorId) {
     axios
       .post(
         "/api/admin/get-office-time",
-        { module: "groom" },
+        { module: "vet" },
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -110,7 +108,7 @@ function MobileGroomingList(doctorId) {
   };
   const reschudleAppointment = async () => {
     try {
-      console.log(selectedAppointment, selectedAppointment?.appointment?._id, appTime);
+      console.log(selectedAppointment, appTime, date);
       const time = parseTime(appTime);
       console.log(time);
       const response = await axios.post(
@@ -118,6 +116,7 @@ function MobileGroomingList(doctorId) {
         {
           appointmentId: selectedAppointment?.appointment?._id,
           time: time,
+          date: date,
         },
         {
           headers: {
@@ -135,6 +134,36 @@ function MobileGroomingList(doctorId) {
       toast.error("Error reschudling the appointment");
     }
   };
+
+  const reschudleOpenAppointment = async () => {
+    try {
+      console.log(selectedAppointment, appTime, date);
+      const time = parseTime(appTime);
+      console.log(time);
+      const response = await axios.post(
+        "/api/admin/reschudle-open-appointment",
+        {
+          appointmentId: selectedAppointment?._id,
+          time: time,
+          date: date,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      // console.log(response);
+      if (response.data.success) {
+        toast.success(response.data.message);
+        getAppointmentsData();
+        handleCloseOenReschudleModal();
+      }
+    } catch (error) {
+      toast.error("Error reschudling the appointment");
+    }
+  };
+
   const changeOpenAppointmentStatus = async (record, status) => {
     try {
       dispatch(showLoading());
@@ -152,10 +181,9 @@ function MobileGroomingList(doctorId) {
       dispatch(hideLoading());
       if (response.data.success) {
         toast.success(response.data.message);
-        // getOpenAppointmentsData();
+        //getOpenAppointmentsData();
       }
     } catch (error) {
-      //toast.error("Error changing appointment status");
       dispatch(hideLoading());
     }
   };
@@ -164,7 +192,7 @@ function MobileGroomingList(doctorId) {
       dispatch(showLoading());
 
       const response = await axios.post(
-        `/api/admin/change-appointment-status/${record._id}`, // Include the appointment ID in the URL
+        `/api/admin/change-appointment-status/${record._id}`,
         {
           status: status,
         },
@@ -180,7 +208,6 @@ function MobileGroomingList(doctorId) {
         getAppointmentsData();
       }
     } catch (error) {
-      // toast.error("Error changing appointment status");
       dispatch(hideLoading());
     }
   };
@@ -231,41 +258,13 @@ function MobileGroomingList(doctorId) {
       console.error(error);
     }
   };
-  const [doctorDetails, setDoctorDetails] = useState(null);
 
+  const [doctorDetails, setDoctorDetails] = useState(null);
   const [data, setData] = useState([]);
-  const reschudleOpenAppointment = async () => {
-    try {
-      console.log(selectedAppointment, selectedDoctor, appTime);
-      const time = parseTime(appTime);
-      console.log(time);
-      const response = await axios.post(
-        "/api/admin/reschudle-open-appointment",
-        {
-          appointmentId: selectedAppointment?._id,
-          doctorId: selectedDoctor,
-          time: time,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
-      // console.log(response);
-      if (response.data.success) {
-        toast.success(response.data.message);
-        getAppointmentsData();
-        handleCloseOenReschudleModal();
-      }
-    } catch (error) {
-      toast.error("Error reschudling the appointment");
-    }
-  };
   const fetchData = async () => {
     try {
       const response = await axios.get(
-        "/api/admin/get-all-mobgroom-appointments",
+        "/api/admin/get-all-mobvet-appointments",
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -274,7 +273,7 @@ function MobileGroomingList(doctorId) {
       );
 
       const modifiedData = [];
-      for (const item of response.data.data) {
+      for (const item of response?.data?.data) {
         const location = `${item.lat},${item.lng}`;
         const geocodeResponse = await axios.get(
           `https://maps.googleapis.com/maps/api/geocode/json?latlng=${location}&key=${apiKey}`
@@ -288,7 +287,7 @@ function MobileGroomingList(doctorId) {
           address,
         });
       }
-      console.log(modifiedData);
+
       setOpenAppointments(modifiedData);
     } catch (error) {
       console.error(error);
@@ -296,19 +295,18 @@ function MobileGroomingList(doctorId) {
   };
 
   useEffect(() => {
-    getOfficeTime()
     fetchData();
+    getOfficeTime();
   }, []);
 
   useEffect(() => {
-    // Fetch doctor details based on selected appointment
     const fetchDoctorDetails = async () => {
       try {
-        if (selectedAppointment && selectedAppointment.doctorInfo) {
+        if (selectedAppointment && selectedAppointment.doctor) {
           const response = await axios.get(
-            `/api/admin/doctordetails/${selectedAppointment?.doctorInfo._id}`
+            `/api/admin/doctordetails/${selectedAppointment.doctor._id}`
           );
-          console.log(response);
+
           if (response.data.success) {
             setDoctorDetails(response.data.data);
           }
@@ -329,30 +327,42 @@ function MobileGroomingList(doctorId) {
     getPetsData();
     // getOpenAppointmentsData();
   }, []);
-  const opencolumns = [
-    {
-      title: "Service",
-      dataIndex: "service",
-      responsive: ["xs", "md", "sm", "lg"],
-    },
 
-    {
-      title: "Pet",
-      dataIndex: "pet",
-      responsive: ["xs", "md", "sm", "lg"],
-    },
+  const opencolumns = [
     {
       title: "Appointment Date",
       dataIndex: "date",
-      render: (text, record) => (
-        <span>{moment(record?.date).format("LL")}</span>
-      ),
+      render: (text, record) => <span>{moment(record.date).format("LL")}</span>,
       responsive: ["xs", "md", "sm", "lg"],
     },
     {
       title: "Appointment Time",
       dataIndex: "time",
-      render: (text, record) => <span>{record?.time}</span>,
+      render: (text, record) => <span>{record.time}</span>,
+      responsive: ["xs", "md", "sm", "lg"],
+    },
+
+    {
+      title: "Doctor",
+      dataIndex: "doctor",
+      render: (text, record) => (
+        <span className="text-capitalize">{record.doctor}</span>
+      ),
+      responsive: ["xs", "md", "sm", "lg"],
+    },
+    {
+      title: "Services Requested",
+      dataIndex: "service",
+      responsive: ["xs", "md", "sm", "lg"],
+    },
+    {
+      title: "Pet Details",
+      dataIndex: "petdetails",
+      render: (text, record) => (
+        <span>
+          {record.pet} - {record.breed} ({record.size})
+        </span>
+      ),
       responsive: ["xs", "md", "sm", "lg"],
     },
     {
@@ -360,21 +370,22 @@ function MobileGroomingList(doctorId) {
       dataIndex: "parentName",
       render: (text, record) => (
         <span className="text-capitalize">
-          {record?.firstname} {record?.lastname}
+          {record.firstname} {record.lastname}
         </span>
       ),
       responsive: ["xs", "md", "sm", "lg"],
     },
+
     {
       title: "Mobile",
       dataIndex: "mobile",
-      render: (text, record) => <span>{record?.mobile}</span>,
+      render: (text, record) => <span>{record.mobile}</span>,
       responsive: ["xs", "md", "sm", "lg"],
     },
     {
       title: "Email Address",
       dataIndex: "email",
-      render: (text, record) => <span>{record?.email}</span>,
+      render: (text, record) => <span>{record.email}</span>,
       responsive: ["xs", "md", "sm", "lg"],
     },
     {
@@ -383,7 +394,7 @@ function MobileGroomingList(doctorId) {
       key: "location",
       render: (text, record) => (
         <a
-          href={`https://www.google.com/maps/search/?api=${apiKey}&query=${record?.lat},${record?.lng}`}
+          href={`https://www.google.com/maps/search/?api=${apiKey}&query=${record.lat},${record.lng}`}
           target="_blank"
           rel="noopener noreferrer"
         >
@@ -397,29 +408,11 @@ function MobileGroomingList(doctorId) {
       dataIndex: "address",
       key: "address",
       render: (text, record) => (
-        <p className="address-custom ">{record?.address}</p>
+        <p className="address-custom ">{record.address}</p>
       ),
 
       responsive: ["xs", "md", "sm", "lg"],
     },
-    // {
-    //   title: 'Doctor Details',
-    //   dataIndex: 'doctorDetails',
-    //   render: () => {
-    //     if (!doctorDetails) {
-    //       return null;
-    //     }
-    //     return (
-    //       <div>
-    //         <p>
-    //           Doctor Name: {doctorDetails.firstName} {doctorDetails.lastName}
-    //         </p>
-    //         <p>Specialization: {doctorDetails.specialization}</p>
-    //         {/* Add other doctor details as needed */}
-    //       </div>
-    //     );
-    //   },
-    // },
     {
       title: "Status",
       dataIndex: "status",
@@ -459,13 +452,6 @@ function MobileGroomingList(doctorId) {
               Cancel
             </button>
           )}
-          {/* <button
-            type="button"
-            className="btn btn-success btn-sm text-capitalize ml-2"
-            onClick={() => handleShowModal(record)}
-          >
-            View & Assign Doctor
-          </button> */}
         </div>
       ),
       responsive: ["xs", "md", "sm", "lg"],
@@ -520,15 +506,15 @@ function MobileGroomingList(doctorId) {
     {
       title: "Date",
       dataIndex: "date",
-      render: (text, record) => <span>{moment(record.date).format("LL")}</span>,
+      render: (text, record) => (
+        <span>{moment(record?.appointment?.date).format("LL")}</span>
+      ),
       responsive: ["xs", "md", "sm", "lg"],
     },
     {
       title: "Time",
       dataIndex: "time",
-      render: (text, record) => (
-        <span>{record?.appointment?.time}</span>
-      ),
+      render: (text, record) => <span>{record?.appointment?.time}</span>,
       responsive: ["xs", "md", "sm", "lg"],
     },
     {
@@ -582,7 +568,9 @@ function MobileGroomingList(doctorId) {
       <div className="col-md-12">
         <div className="row d-fixed d-lg-flex justify-content-between align-items-center">
           <div className="col-md-6  d-lg-flex gap-3 justify-content-right align-items-center">
-            <h6 className="page-header mb-0">Appointments List</h6>
+            <h6 className="page-header mb-0">
+              Appointments List (Registered Users)
+            </h6>
           </div>
           <div className="col-md-6 d-lg-flex d-md-flex d-sm-flex d-xs-flex gap-3 justify-content-end align-items-center">
             <Link to="/admin/appointmentlist">
@@ -596,12 +584,12 @@ function MobileGroomingList(doctorId) {
               </button>
             </Link>
             <Link to="/admin/mobilevetlist">
-              <button className="btn btn-warning btn-sm" type="button">
+              <button className="btn btn-success btn-sm" type="button">
                 Mobile Vet
               </button>
             </Link>
             <Link to="/admin/mobilegroominglist">
-              <button className="btn btn-success btn-sm" type="button">
+              <button className="btn btn-warning btn-sm" type="button">
                 Mobile Grooming
               </button>
             </Link>
@@ -614,10 +602,11 @@ function MobileGroomingList(doctorId) {
           responsive={true}
           scroll={{ x: true }}
         />
+
         <div></div>
       </div>
       <div className="col-md-12">
-        <h6>Open Appointment Lists</h6>
+        <h6>Guest Appointments</h6>
         <Table
           columns={opencolumns}
           dataSource={openappointments}
@@ -634,15 +623,32 @@ function MobileGroomingList(doctorId) {
           <Modal.Header closeButton>
             <Modal.Title>
               <div className="d-lg-flex justify-content-between align-items-center">
-                <span>Appointment Details</span>
+                <span>Appointment Reschedule</span>
                 {/* {selectedAppointment && selectedAppointment._id} */}
               </div>
             </Modal.Title>
           </Modal.Header>
           <Modal.Body>
             <div className="col-md-12 ">
-              
+              <div className="d-lg-flex justify-content-between align-items-center gap-4 mb-3">
+                <label htmlFor="time">Date:</label>
 
+                <DatePicker
+                  getPopupContainer={() =>
+                    document.getElementById("date-popup")
+                  }
+                  popupStyle={{
+                    position: "relative",
+                    width: "34%",
+                  }}
+                  style={{ width: "100%", zIndex: "1000 !important" }}
+                  onChange={setDate}
+                  disabledDate={(current) => {
+                    return moment().add(-1, "days") >= current;
+                  }}
+                />
+              </div>
+              <div id="date-popup" />
               <div className="d-lg-flex justify-content-between align-items-center gap-4 mb-3">
                 <label htmlFor="time">Time:</label>
 
@@ -671,7 +677,6 @@ function MobileGroomingList(doctorId) {
           </Modal.Footer>
         </Modal>
       </div>
-
       <div>
         <Modal
           show={showOpenReschudleModal}
@@ -681,7 +686,7 @@ function MobileGroomingList(doctorId) {
           <Modal.Header closeButton>
             <Modal.Title>
               <div className="d-lg-flex justify-content-between align-items-center">
-                <span>Appointment Details</span>
+                <span>Appointment Reschedule</span>
                 {/* {selectedAppointment && selectedAppointment._id} */}
               </div>
             </Modal.Title>
@@ -697,7 +702,27 @@ function MobileGroomingList(doctorId) {
                       selectedAppointment?.lastname}
                 </span>
               </div>
-              
+
+              <div className="d-lg-flex justify-content-between align-items-center gap-4 mb-3">
+                <label htmlFor="time">Date:</label>
+
+                <DatePicker
+                  getPopupContainer={() =>
+                    document.getElementById("date-popup")
+                  }
+                  popupStyle={{
+                    position: "relative",
+                    width: "34%",
+                  }}
+                  style={{ width: "100%", zIndex: "1000 !important" }}
+                  onChange={setDate}
+                  disabledDate={(current) => {
+                    return moment().add(-1, "days") >= current;
+                  }}
+                />
+              </div>
+              <div id="date-popup" />
+
               <div className="d-lg-flex justify-content-between align-items-center gap-4 mb-3">
                 <label htmlFor="time">Time:</label>
 
@@ -730,4 +755,4 @@ function MobileGroomingList(doctorId) {
   );
 }
 
-export default MobileGroomingList;
+export default MobileVetList;

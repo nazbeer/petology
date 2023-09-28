@@ -49,6 +49,7 @@ function Appointmentlist(doctorsId) {
   const dispatch = useDispatch();
 
   const [time, setTime] = useState([]);
+  const [date, setDate] = useState([]);
 
   const handleChange = (event) => {
     setAppTime(event.target.value);
@@ -267,7 +268,7 @@ function Appointmentlist(doctorsId) {
 
   const reschudleAppointment = async () => {
     try {
-      console.log(selectedAppointment, selectedDoctor, appTime);
+      console.log(selectedAppointment, selectedDoctor, appTime, date);
       const time = parseTime(appTime);
       console.log(time);
       const response = await axios.post(
@@ -276,6 +277,7 @@ function Appointmentlist(doctorsId) {
           appointmentId: selectedAppointment?.appointment?._id,
           doctorId: selectedDoctor,
           time: time,
+          date: date,
         },
         {
           headers: {
@@ -305,6 +307,7 @@ function Appointmentlist(doctorsId) {
           appointmentId: selectedAppointment?._id,
           doctorId: selectedDoctor,
           time: time,
+          date: date,
         },
         {
           headers: {
@@ -1067,6 +1070,25 @@ function Appointmentlist(doctorsId) {
                   </span>
                 </div>
                 <div className="d-lg-flex justify-content-between align-items-center gap-4 mb-3">
+                  <label htmlFor="time">Date:</label>
+
+                  <DatePicker
+                    getPopupContainer={() =>
+                      document.getElementById("date-popup")
+                    }
+                    popupStyle={{
+                      position: "relative",
+                      width: "34%",
+                    }}
+                    style={{ width: "100%", zIndex: "1000 !important" }}
+                    onChange={setDate}
+                    disabledDate={(current) => {
+                      return moment().add(-1, "days") >= current;
+                    }}
+                  />
+                </div>
+                <div id="date-popup" />
+                <div className="d-lg-flex justify-content-between align-items-center gap-4 mb-3">
                   <label htmlFor="time">Time:</label>
 
                   <select
@@ -1132,7 +1154,7 @@ function Appointmentlist(doctorsId) {
           <Modal.Header closeButton>
             <Modal.Title>
               <div className="d-lg-flex justify-content-between align-items-center">
-                <span>Appointment Details</span>
+                <span>Appointment Reschedule</span>
                 {/* {selectedAppointment && selectedAppointment._id} */}
               </div>
             </Modal.Title>
@@ -1167,9 +1189,29 @@ function Appointmentlist(doctorsId) {
                 </span>
               </div>
               <div className="d-lg-flex justify-content-between align-items-center gap-4 mb-3">
+                <label htmlFor="time">Date:</label>
+
+                <DatePicker
+                  getPopupContainer={() =>
+                    document.getElementById("date-popup")
+                  }
+                  popupStyle={{
+                    position: "relative",
+                    width: "34%",
+                  }}
+                  style={{ width: "100%", zIndex: "1000 !important" }}
+                  onChange={setDate}
+                  disabledDate={(current) => {
+                    return moment().add(-1, "days") >= current;
+                  }}
+                />
+              </div>
+              <div id="date-popup" />
+              <div className="d-lg-flex justify-content-between align-items-center gap-4 mb-3">
                 <label htmlFor="time">Time:</label>
 
                 <select
+                  bordered={false}
                   className="form-control"
                   id="time"
                   name="time"

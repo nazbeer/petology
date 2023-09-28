@@ -3,7 +3,7 @@ import { useDispatch } from "react-redux";
 import Layout from "../../components/Layout";
 import { showLoading, hideLoading } from "../../redux/alertsSlice";
 import axios from "axios";
-import { Table } from "antd";
+import { Table, DatePicker } from "antd";
 import { Button, Modal } from "react-bootstrap";
 import moment from "moment";
 import { Link } from "react-router-dom";
@@ -27,7 +27,7 @@ function MobileGroomingList(doctorId) {
   const [appTime, setAppTime] = useState({});
   const [time, setTime] = useState([]);
   const [showOpenReschudleModal, setShowOpenReschudleModal] = useState(false);
-
+  const [date, setDate] = useState([]);
 
   const dispatch = useDispatch();
 
@@ -110,7 +110,12 @@ function MobileGroomingList(doctorId) {
   };
   const reschudleAppointment = async () => {
     try {
-      console.log(selectedAppointment, selectedAppointment?.appointment?._id, appTime);
+      console.log(
+        selectedAppointment,
+        selectedAppointment?.appointment?._id,
+        appTime,
+        date
+      );
       const time = parseTime(appTime);
       console.log(time);
       const response = await axios.post(
@@ -118,6 +123,7 @@ function MobileGroomingList(doctorId) {
         {
           appointmentId: selectedAppointment?.appointment?._id,
           time: time,
+          date,
         },
         {
           headers: {
@@ -236,7 +242,7 @@ function MobileGroomingList(doctorId) {
   const [data, setData] = useState([]);
   const reschudleOpenAppointment = async () => {
     try {
-      console.log(selectedAppointment, selectedDoctor, appTime);
+      console.log(selectedAppointment, selectedDoctor, appTime, date);
       const time = parseTime(appTime);
       console.log(time);
       const response = await axios.post(
@@ -245,6 +251,7 @@ function MobileGroomingList(doctorId) {
           appointmentId: selectedAppointment?._id,
           doctorId: selectedDoctor,
           time: time,
+          date
         },
         {
           headers: {
@@ -296,7 +303,7 @@ function MobileGroomingList(doctorId) {
   };
 
   useEffect(() => {
-    getOfficeTime()
+    getOfficeTime();
     fetchData();
   }, []);
 
@@ -520,15 +527,13 @@ function MobileGroomingList(doctorId) {
     {
       title: "Date",
       dataIndex: "date",
-      render: (text, record) => <span>{moment(record.date).format("LL")}</span>,
+      render: (text, record) => <span>{moment(record?.appointment?.date).format("LL")}</span>,
       responsive: ["xs", "md", "sm", "lg"],
     },
     {
       title: "Time",
       dataIndex: "time",
-      render: (text, record) => (
-        <span>{record?.appointment?.time}</span>
-      ),
+      render: (text, record) => <span>{record?.appointment?.time}</span>,
       responsive: ["xs", "md", "sm", "lg"],
     },
     {
@@ -634,14 +639,32 @@ function MobileGroomingList(doctorId) {
           <Modal.Header closeButton>
             <Modal.Title>
               <div className="d-lg-flex justify-content-between align-items-center">
-                <span>Appointment Details</span>
+                <span>Appointment Reschedule</span>
                 {/* {selectedAppointment && selectedAppointment._id} */}
               </div>
             </Modal.Title>
           </Modal.Header>
           <Modal.Body>
             <div className="col-md-12 ">
-              
+              <div className="d-lg-flex justify-content-between align-items-center gap-4 mb-3">
+                <label htmlFor="time">Date:</label>
+
+                <DatePicker
+                  getPopupContainer={() =>
+                    document.getElementById("date-popup")
+                  }
+                  popupStyle={{
+                    position: "relative",
+                    width: "34%",
+                  }}
+                  style={{ width: "100%", zIndex: "1000 !important" }}
+                  onChange={setDate}
+                  disabledDate={(current) => {
+                    return moment().add(-1, "days") >= current;
+                  }}
+                />
+              </div>
+              <div id="date-popup" />
 
               <div className="d-lg-flex justify-content-between align-items-center gap-4 mb-3">
                 <label htmlFor="time">Time:</label>
@@ -681,7 +704,7 @@ function MobileGroomingList(doctorId) {
           <Modal.Header closeButton>
             <Modal.Title>
               <div className="d-lg-flex justify-content-between align-items-center">
-                <span>Appointment Details</span>
+                <span>Appointment Reschedule</span>
                 {/* {selectedAppointment && selectedAppointment._id} */}
               </div>
             </Modal.Title>
@@ -697,7 +720,25 @@ function MobileGroomingList(doctorId) {
                       selectedAppointment?.lastname}
                 </span>
               </div>
-              
+              <div className="d-lg-flex justify-content-between align-items-center gap-4 mb-3">
+                <label htmlFor="time">Date:</label>
+
+                <DatePicker
+                  getPopupContainer={() =>
+                    document.getElementById("date-popup")
+                  }
+                  popupStyle={{
+                    position: "relative",
+                    width: "34%",
+                  }}
+                  style={{ width: "100%", zIndex: "1000 !important" }}
+                  onChange={setDate}
+                  disabledDate={(current) => {
+                    return moment().add(-1, "days") >= current;
+                  }}
+                />
+              </div>
+              <div id="date-popup" />
               <div className="d-lg-flex justify-content-between align-items-center gap-4 mb-3">
                 <label htmlFor="time">Time:</label>
 

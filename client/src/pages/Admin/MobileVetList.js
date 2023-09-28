@@ -3,7 +3,7 @@ import { useDispatch } from "react-redux";
 import Layout from "../../components/Layout";
 import { showLoading, hideLoading } from "../../redux/alertsSlice";
 import axios from "axios";
-import { Table } from "antd";
+import { Table, DatePicker } from "antd";
 import { Button, Modal } from "react-bootstrap";
 import moment from "moment";
 import { toast } from "react-hot-toast";
@@ -27,6 +27,7 @@ function MobileVetList(doctorId) {
   const [appTime, setAppTime] = useState({});
   const [time, setTime] = useState([]);
   const [showOpenReschudleModal, setShowOpenReschudleModal] = useState(false);
+  const [date, setDate] = useState([]);
 
   const dispatch = useDispatch();
 
@@ -107,7 +108,7 @@ function MobileVetList(doctorId) {
   };
   const reschudleAppointment = async () => {
     try {
-      console.log(selectedAppointment, appTime);
+      console.log(selectedAppointment, appTime, date);
       const time = parseTime(appTime);
       console.log(time);
       const response = await axios.post(
@@ -115,6 +116,7 @@ function MobileVetList(doctorId) {
         {
           appointmentId: selectedAppointment?.appointment?._id,
           time: time,
+          date: date,
         },
         {
           headers: {
@@ -135,7 +137,7 @@ function MobileVetList(doctorId) {
 
   const reschudleOpenAppointment = async () => {
     try {
-      console.log(selectedAppointment, appTime);
+      console.log(selectedAppointment, appTime, date);
       const time = parseTime(appTime);
       console.log(time);
       const response = await axios.post(
@@ -143,6 +145,7 @@ function MobileVetList(doctorId) {
         {
           appointmentId: selectedAppointment?._id,
           time: time,
+          date: date,
         },
         {
           headers: {
@@ -503,7 +506,9 @@ function MobileVetList(doctorId) {
     {
       title: "Date",
       dataIndex: "date",
-      render: (text, record) => <span>{moment(record.date).format("LL")}</span>,
+      render: (text, record) => (
+        <span>{moment(record?.appointment?.date).format("LL")}</span>
+      ),
       responsive: ["xs", "md", "sm", "lg"],
     },
     {
@@ -618,13 +623,32 @@ function MobileVetList(doctorId) {
           <Modal.Header closeButton>
             <Modal.Title>
               <div className="d-lg-flex justify-content-between align-items-center">
-                <span>Appointment Details</span>
+                <span>Appointment Reschedule</span>
                 {/* {selectedAppointment && selectedAppointment._id} */}
               </div>
             </Modal.Title>
           </Modal.Header>
           <Modal.Body>
             <div className="col-md-12 ">
+              <div className="d-lg-flex justify-content-between align-items-center gap-4 mb-3">
+                <label htmlFor="time">Date:</label>
+
+                <DatePicker
+                  getPopupContainer={() =>
+                    document.getElementById("date-popup")
+                  }
+                  popupStyle={{
+                    position: "relative",
+                    width: "34%",
+                  }}
+                  style={{ width: "100%", zIndex: "1000 !important" }}
+                  onChange={setDate}
+                  disabledDate={(current) => {
+                    return moment().add(-1, "days") >= current;
+                  }}
+                />
+              </div>
+              <div id="date-popup" />
               <div className="d-lg-flex justify-content-between align-items-center gap-4 mb-3">
                 <label htmlFor="time">Time:</label>
 
@@ -662,7 +686,7 @@ function MobileVetList(doctorId) {
           <Modal.Header closeButton>
             <Modal.Title>
               <div className="d-lg-flex justify-content-between align-items-center">
-                <span>Appointment Details</span>
+                <span>Appointment Reschedule</span>
                 {/* {selectedAppointment && selectedAppointment._id} */}
               </div>
             </Modal.Title>
@@ -678,6 +702,26 @@ function MobileVetList(doctorId) {
                       selectedAppointment?.lastname}
                 </span>
               </div>
+
+              <div className="d-lg-flex justify-content-between align-items-center gap-4 mb-3">
+                <label htmlFor="time">Date:</label>
+
+                <DatePicker
+                  getPopupContainer={() =>
+                    document.getElementById("date-popup")
+                  }
+                  popupStyle={{
+                    position: "relative",
+                    width: "34%",
+                  }}
+                  style={{ width: "100%", zIndex: "1000 !important" }}
+                  onChange={setDate}
+                  disabledDate={(current) => {
+                    return moment().add(-1, "days") >= current;
+                  }}
+                />
+              </div>
+              <div id="date-popup" />
 
               <div className="d-lg-flex justify-content-between align-items-center gap-4 mb-3">
                 <label htmlFor="time">Time:</label>
