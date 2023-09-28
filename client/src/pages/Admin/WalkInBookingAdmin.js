@@ -162,7 +162,7 @@ const WalkInBookingAdmin = () => {
   const getOfficeTime = (module) => {
     axios
       .post(
-        "/api/admin/get-offie-time",
+        "/api/admin/get-office-time",
         { module: "vet" },
         {
           headers: {

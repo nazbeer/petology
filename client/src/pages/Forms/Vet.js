@@ -33,7 +33,7 @@ const Vet = () => {
   const getOfficeTime = () => {
     axios
       .post(
-        "/api/admin/get-offie-time",
+        "/api/admin/get-office-time",
         { module: "vet" },
         {
           headers: {
