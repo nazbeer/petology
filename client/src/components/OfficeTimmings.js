@@ -310,7 +310,7 @@ function OfficeTimmings() {
                     className="form-control"
                     id="break"
                     name="break"
-                    defaultValue="15"
+                    defaultValue="15 Minutes"
                     // value={groomTime.break}
                     onChange={onGroomBreakChange}
                     placeholder="Select break time"
@@ -361,6 +361,9 @@ function OfficeTimmings() {
             style={{ width: "100%" }}
             size="large"
             onChange={onChangeDate}
+            disabledDate={(current) => {
+              return moment().add(-1, "days") >= current;
+            }}
           />
         </div>
         <div className="d-flex justify-content-end me-3 mb-3 mt-3">

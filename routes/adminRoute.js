@@ -381,6 +381,64 @@ router.get("/get-all-appointments", authMiddleware, async (req, res) => {
   }
 });
 
+router.post(
+  "/get-all-module-appointments",
+  authMiddleware,
+  async (req, res) => {
+    try {
+      const appointmentList = await UserappModel.find({
+        module: req?.body?.module,
+      });
+      // console.log(appointmentList);
+      const userId = appointmentList.map((item) => item.userId);
+      const doctorId = appointmentList.map((item) => item.doctorId);
+      const users = await User.find(
+        { _id: { $in: userId } },
+        { name: 1, _id: 1 }
+      );
+      const doctors = await Doctor.find(
+        { _id: { $in: doctorId } },
+        { firstName: 1, lastName: 1, _id: 1, specialization: 1, status: 1 }
+      );
+
+      const combinedList = [];
+
+      // Loop through list1 and add objects from list2 and list3 based on commonField
+      appointmentList.forEach((obj1) => {
+        // Find matching objects in list2 based on commonField
+        const matchingObj2 = users.find(
+          (obj2) => obj2._id.toString() === obj1.userId
+        );
+
+        // Find matching objects in list3 based on commonField
+        const matchingObj3 = doctors.find(
+          (obj3) => obj3._id.toString() === obj1.doctorId
+        );
+        console.log(matchingObj2);
+        // Combine the objects into a new object and push it to the result array
+        combinedList.push({
+          appointment: obj1,
+          user: matchingObj2, // Use {} as a default in case there is no match
+          doctor: matchingObj3, // Use {} as a default in case there is no match
+        });
+      });
+
+      res.status(200).send({
+        message: "Appointment List fetched successfully",
+        success: true,
+        data: combinedList,
+      });
+    } catch (error) {
+      console.log(error);
+      res.status(500).send({
+        message: "Error fetching All Appointments",
+        success: false,
+        error,
+      });
+    }
+  }
+);
+
 router.post("/create-service", authMiddleware, async (req, res) => {
   const { serviceType, serviceName, subServiceName, price, pet, size } =
     req.body;

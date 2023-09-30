@@ -116,7 +116,7 @@ const Prescription = () => {
       "Description",
       "Next Appointment",
     ];
-    const datas = filteredData.map((item) => [
+    const datas = filteredData && filteredData.map((item) => [
       item?.appointment?.customId,
       item?.prescription?.prescription,
       item?.prescription?.description,
@@ -233,10 +233,10 @@ const Prescription = () => {
                       {prescriptions?.map((presc) => (
                         <tr key={presc?.prescription?._id}>
                           <td>{presc?.appointment?.customId}</td>
-                          <td>{presc?.prescription?.prescription}</td>
-                          <td>{presc?.prescription?.description}</td>
+                          <td>{presc?.prescription}</td>
+                          <td>{presc?.description}</td>
                           <td>
-                            {moment(presc?.prescription?.ndate).format("LL")}
+                            {moment(presc?.ndate).format("LL")}
                           </td>
                         </tr>
                       ))}

@@ -34,7 +34,7 @@ router.post("/get-doctor-info-by-id", authMiddleware, async (req, res) => {
       data: doctor,
     });
   } catch (error) {
-    console.log(error)
+    console.log(error);
     res
       .status(500)
       .send({ message: "Error getting doctor info", success: false, error });
@@ -372,8 +372,25 @@ router.get("/get-prescription", authMiddleware, async (req, res) => {
     // Fetch all prescriptions from the database
     const prescriptions = await Prescription.find({});
 
+    const populatedAppointments = await Promise.all(
+      prescriptions.map(async (prescription) => {
+        //  const doctorId = appointment.doctorId;
+        // Assuming you have a User model for user details
+        const appointment = await UserappModel.findOne({
+          _id: prescription.appointmentId,
+        });
+        //   const doctor = await Doctor.findOne({ _id: doctorId });
+        //  console.log("user:", user);
+        return {
+          ...prescription.toObject(),
+          appointment,
+          //  doctor
+        };
+      })
+    );
+
     // Send the prescriptions as a JSON response
-    res.json({ success: true, data: prescriptions });
+    res.json({ success: true, data: populatedAppointments });
   } catch (error) {
     // Handle errors and send an error response
     console.error(`Error fetching prescriptions: ${error.message}`);

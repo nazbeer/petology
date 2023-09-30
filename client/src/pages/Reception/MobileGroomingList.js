@@ -6,21 +6,25 @@ import axios from "axios";
 import { Table, DatePicker } from "antd";
 import { Button, Modal } from "react-bootstrap";
 import moment from "moment";
-import { toast } from "react-hot-toast";
 import { Link } from "react-router-dom";
+import { toast } from "react-hot-toast";
 import Geocode from "react-geocode";
 import OfficeTimeCalculate from "../../components/OfficeTimeCalculate";
 
-// Set your Google Maps API key here
+import JsPDF from "jspdf";
+import "jspdf-autotable";
+
 Geocode.setApiKey("AIzaSyAxdklbUsegbWsasCJpvfmin95xzIxiY3Y");
 const apiKey = "AIzaSyAxdklbUsegbWsasCJpvfmin95xzIxiY3Y";
 
-function MobileVetList(doctorId) {
+function MobileGroomingList(doctorId) {
+  const { RangePicker } = DatePicker;
   const [appointments, setAppointments] = useState([]);
   const [openappointments, setOpenAppointments] = useState([]);
   const [doctors, setDoctors] = useState([]);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
-
+  const [selectedDoctor, setSelectedDoctor] = useState(null);
+  const [showModal, setShowModal] = useState(false);
   const [pets, setPets] = useState([]);
 
   const [showReschudleModal, setShowReschudleModal] = useState(false);
@@ -28,6 +32,15 @@ function MobileVetList(doctorId) {
   const [time, setTime] = useState([]);
   const [showOpenReschudleModal, setShowOpenReschudleModal] = useState(false);
   const [date, setDate] = useState([]);
+
+  const [filter, setFilter] = useState(true);
+
+  const [filterType, setFilterType] = useState("");
+  let [onlyDate, setOnlyDate] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [filteredData, setFilteredData] = useState([]);
+  const [filteredGuestData, setFilteredGuestData] = useState([]);
 
   const dispatch = useDispatch();
 
@@ -43,6 +56,7 @@ function MobileVetList(doctorId) {
 
   const handleCloseReschudleModal = () => {
     setSelectedAppointment(null);
+    setSelectedDoctor(null);
     setShowReschudleModal(false);
   };
 
@@ -53,6 +67,7 @@ function MobileVetList(doctorId) {
 
   const handleCloseOenReschudleModal = () => {
     setSelectedAppointment(null);
+    setSelectedDoctor(null);
     setShowOpenReschudleModal(false);
   };
 
@@ -60,7 +75,7 @@ function MobileVetList(doctorId) {
     axios
       .post(
         "/api/admin/get-office-time",
-        { module: "vet" },
+        { module: "groom" },
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -108,7 +123,12 @@ function MobileVetList(doctorId) {
   };
   const reschudleAppointment = async () => {
     try {
-      console.log(selectedAppointment, appTime, date);
+      console.log(
+        selectedAppointment,
+        selectedAppointment?.appointment?._id,
+        appTime,
+        date
+      );
       const time = parseTime(appTime);
       console.log(time);
       const response = await axios.post(
@@ -116,7 +136,7 @@ function MobileVetList(doctorId) {
         {
           appointmentId: selectedAppointment?.appointment?._id,
           time: time,
-          date: date,
+          date,
         },
         {
           headers: {
@@ -134,36 +154,6 @@ function MobileVetList(doctorId) {
       toast.error("Error reschudling the appointment");
     }
   };
-
-  const reschudleOpenAppointment = async () => {
-    try {
-      console.log(selectedAppointment, appTime, date);
-      const time = parseTime(appTime);
-      console.log(time);
-      const response = await axios.post(
-        "/api/admin/reschudle-open-appointment",
-        {
-          appointmentId: selectedAppointment?._id,
-          time: time,
-          date: date,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
-      // console.log(response);
-      if (response.data.success) {
-        toast.success(response.data.message);
-        getAppointmentsData();
-        handleCloseOenReschudleModal();
-      }
-    } catch (error) {
-      toast.error("Error reschudling the appointment");
-    }
-  };
-
   const changeOpenAppointmentStatus = async (record, status) => {
     try {
       dispatch(showLoading());
@@ -181,9 +171,10 @@ function MobileVetList(doctorId) {
       dispatch(hideLoading());
       if (response.data.success) {
         toast.success(response.data.message);
-        //getOpenAppointmentsData();
+        // getOpenAppointmentsData();
       }
     } catch (error) {
+      //toast.error("Error changing appointment status");
       dispatch(hideLoading());
     }
   };
@@ -192,7 +183,7 @@ function MobileVetList(doctorId) {
       dispatch(showLoading());
 
       const response = await axios.post(
-        `/api/admin/change-appointment-status/${record._id}`,
+        `/api/admin/change-appointment-status/${record._id}`, // Include the appointment ID in the URL
         {
           status: status,
         },
@@ -208,6 +199,7 @@ function MobileVetList(doctorId) {
         getAppointmentsData();
       }
     } catch (error) {
+      // toast.error("Error changing appointment status");
       dispatch(hideLoading());
     }
   };
@@ -245,11 +237,15 @@ function MobileVetList(doctorId) {
 
   const getAppointmentsData = async () => {
     try {
-      const response = await axios.get("/api/user/get-all-appointments", {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
+      const response = await axios.post(
+        "/api/admin/get-all-module-appointments",
+        { module: "mobile_grooming" },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
 
       if (response.data.success) {
         setAppointments(response.data.data);
@@ -258,13 +254,42 @@ function MobileVetList(doctorId) {
       console.error(error);
     }
   };
-
   const [doctorDetails, setDoctorDetails] = useState(null);
+
   const [data, setData] = useState([]);
+  const reschudleOpenAppointment = async () => {
+    try {
+      console.log(selectedAppointment, selectedDoctor, appTime, date);
+      const time = parseTime(appTime);
+      console.log(time);
+      const response = await axios.post(
+        "/api/admin/reschudle-open-appointment",
+        {
+          appointmentId: selectedAppointment?._id,
+          doctorId: selectedDoctor,
+          time: time,
+          date,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      // console.log(response);
+      if (response.data.success) {
+        toast.success(response.data.message);
+        getAppointmentsData();
+        handleCloseOenReschudleModal();
+      }
+    } catch (error) {
+      toast.error("Error reschudling the appointment");
+    }
+  };
   const fetchData = async () => {
     try {
       const response = await axios.get(
-        "/api/admin/get-all-mobvet-appointments",
+        "/api/admin/get-all-mobgroom-appointments",
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -273,7 +298,7 @@ function MobileVetList(doctorId) {
       );
 
       const modifiedData = [];
-      for (const item of response?.data?.data) {
+      for (const item of response.data.data) {
         const location = `${item.lat},${item.lng}`;
         const geocodeResponse = await axios.get(
           `https://maps.googleapis.com/maps/api/geocode/json?latlng=${location}&key=${apiKey}`
@@ -287,7 +312,7 @@ function MobileVetList(doctorId) {
           address,
         });
       }
-
+      console.log(modifiedData);
       setOpenAppointments(modifiedData);
     } catch (error) {
       console.error(error);
@@ -295,18 +320,19 @@ function MobileVetList(doctorId) {
   };
 
   useEffect(() => {
-    fetchData();
     getOfficeTime();
+    fetchData();
   }, []);
 
   useEffect(() => {
+    // Fetch doctor details based on selected appointment
     const fetchDoctorDetails = async () => {
       try {
-        if (selectedAppointment && selectedAppointment.doctor) {
+        if (selectedAppointment && selectedAppointment.doctorInfo) {
           const response = await axios.get(
-            `/api/admin/doctordetails/${selectedAppointment.doctor._id}`
+            `/api/admin/doctordetails/${selectedAppointment?.doctorInfo._id}`
           );
-
+          console.log(response);
           if (response.data.success) {
             setDoctorDetails(response.data.data);
           }
@@ -327,42 +353,30 @@ function MobileVetList(doctorId) {
     getPetsData();
     // getOpenAppointmentsData();
   }, []);
-
   const opencolumns = [
+    {
+      title: "Service",
+      dataIndex: "service",
+      responsive: ["xs", "md", "sm", "lg"],
+    },
+
+    {
+      title: "Pet",
+      dataIndex: "pet",
+      responsive: ["xs", "md", "sm", "lg"],
+    },
     {
       title: "Appointment Date",
       dataIndex: "date",
-      render: (text, record) => <span>{moment(record.date).format("LL")}</span>,
+      render: (text, record) => (
+        <span>{moment(record?.date).format("LL")}</span>
+      ),
       responsive: ["xs", "md", "sm", "lg"],
     },
     {
       title: "Appointment Time",
       dataIndex: "time",
-      render: (text, record) => <span>{record.time}</span>,
-      responsive: ["xs", "md", "sm", "lg"],
-    },
-
-    {
-      title: "Doctor",
-      dataIndex: "doctor",
-      render: (text, record) => (
-        <span className="text-capitalize">{record.doctor}</span>
-      ),
-      responsive: ["xs", "md", "sm", "lg"],
-    },
-    {
-      title: "Services Requested",
-      dataIndex: "service",
-      responsive: ["xs", "md", "sm", "lg"],
-    },
-    {
-      title: "Pet Details",
-      dataIndex: "petdetails",
-      render: (text, record) => (
-        <span>
-          {record.pet} - {record.breed} ({record.size})
-        </span>
-      ),
+      render: (text, record) => <span>{record?.time}</span>,
       responsive: ["xs", "md", "sm", "lg"],
     },
     {
@@ -370,22 +384,21 @@ function MobileVetList(doctorId) {
       dataIndex: "parentName",
       render: (text, record) => (
         <span className="text-capitalize">
-          {record.firstname} {record.lastname}
+          {record?.firstname} {record?.lastname}
         </span>
       ),
       responsive: ["xs", "md", "sm", "lg"],
     },
-
     {
       title: "Mobile",
       dataIndex: "mobile",
-      render: (text, record) => <span>{record.mobile}</span>,
+      render: (text, record) => <span>{record?.mobile}</span>,
       responsive: ["xs", "md", "sm", "lg"],
     },
     {
       title: "Email Address",
       dataIndex: "email",
-      render: (text, record) => <span>{record.email}</span>,
+      render: (text, record) => <span>{record?.email}</span>,
       responsive: ["xs", "md", "sm", "lg"],
     },
     {
@@ -394,7 +407,7 @@ function MobileVetList(doctorId) {
       key: "location",
       render: (text, record) => (
         <a
-          href={`https://www.google.com/maps/search/?api=${apiKey}&query=${record.lat},${record.lng}`}
+          href={`https://www.google.com/maps/search/?api=${apiKey}&query=${record?.lat},${record?.lng}`}
           target="_blank"
           rel="noopener noreferrer"
         >
@@ -408,11 +421,29 @@ function MobileVetList(doctorId) {
       dataIndex: "address",
       key: "address",
       render: (text, record) => (
-        <p className="address-custom ">{record.address}</p>
+        <p className="address-custom ">{record?.address}</p>
       ),
 
       responsive: ["xs", "md", "sm", "lg"],
     },
+    // {
+    //   title: 'Doctor Details',
+    //   dataIndex: 'doctorDetails',
+    //   render: () => {
+    //     if (!doctorDetails) {
+    //       return null;
+    //     }
+    //     return (
+    //       <div>
+    //         <p>
+    //           Doctor Name: {doctorDetails.firstName} {doctorDetails.lastName}
+    //         </p>
+    //         <p>Specialization: {doctorDetails.specialization}</p>
+    //         {/* Add other doctor details as needed */}
+    //       </div>
+    //     );
+    //   },
+    // },
     {
       title: "Status",
       dataIndex: "status",
@@ -452,56 +483,50 @@ function MobileVetList(doctorId) {
               Cancel
             </button>
           )}
+          {/* <button
+            type="button"
+            className="btn btn-success btn-sm text-capitalize ml-2"
+            onClick={() => handleShowModal(record)}
+          >
+            View & Assign Doctor
+          </button> */}
         </div>
       ),
       responsive: ["xs", "md", "sm", "lg"],
     },
   ];
   const usercolumns = [
+    // {
+    //     title: "Id",
+    //     dataIndex: "_id",
+    // },
     {
       title: "Parent Name",
       dataIndex: "parentname",
       render: (text, record) => <span>{record?.user?.name}</span>,
       responsive: ["xs", "md", "sm", "lg"],
     },
-    {
-      title: "Doctor",
-      dataIndex: "name",
-      render: (text, record) => (
-        <span>
-          {record?.doctor?.name ||
-            record?.doctor?.firstName + " " + record?.doctor?.lastName}
-        </span>
-      ),
-      responsive: ["xs", "md", "sm", "lg"],
-    },
-
-    {
-      title: "Specialization",
-      dataIndex: "specialization",
-      render: (text, record) => <span>{record?.doctor?.specialization}</span>,
-    },
-
     // {
-    //   title: 'Location',
-    //   dataIndex: 'location',
-    //   key: 'location',
+    //   title: "Doctor",
+    //   dataIndex: "name",
     //   render: (text, record) => (
-    //     <a
-    //       href={`https://www.google.com/maps/search/?api=${apiKey}&query=${record.lat},${record.lng}`}
-    //       target="_blank"
-    //       rel="noopener noreferrer"
-    //       className="text-dark text-decoration-none"
-    //     >
-    //       View on Google Maps
-    //     </a>
+    //     <span>
+    //       {record?.doctorInfo?.name ||
+    //         record?.doctorInfo?.firstName + " " + record?.doctorInfo?.lastName}
+    //     </span>
     //   ),
-    //   responsive: ["xs", "md","sm", "lg"],
+    //   responsive: ["xs", "md", "sm", "lg"],
     // },
+    {
+      title: "Pet Name",
+      dataIndex: "petName",
+      render: (text, record) => <span>{record?.appointment?.petName}</span>,
+    },
     // {
-    //   title: 'Address',
-    //   dataIndex: 'address',
-    //   key: 'address',
+    //   title: "Specialization",
+    //   dataIndex: "specialization",
+    //   render: (text, record) => <span>{record?.doctorInfo?.specialization}</span>,
+    //   responsive: ["xs", "md", "sm", "lg"],
     // },
     {
       title: "Date",
@@ -531,16 +556,9 @@ function MobileVetList(doctorId) {
       dataIndex: "actions",
       render: (text, record) => (
         <div className="d-flex justify-content-evenly align-items-center gap-3">
-          <button
-            type="button"
-            className="btn btn-success btn-sm text-capitalize ml-2"
-            onClick={() => handleShowReschudleModal(record)}
-          >
-            Reschedule
-          </button>
-          {record?.appointment?.status === "pending" ||
-          record?.appointment?.status === "Pending" ||
-          record?.appointment?.status === "blocked" ? (
+          {record.status === "pending" ||
+          record.status === "Pending" ||
+          record.status === "blocked" ? (
             <button
               type="button"
               className="btn btn-warning btn-sm text-capitalize"
@@ -557,20 +575,185 @@ function MobileVetList(doctorId) {
               Cancel
             </button>
           )}
+
+          {/* <button
+              type="button"
+              className="btn btn-success btn-sm text-capitalize ml-2"
+              onClick={() => handleShowModal(record)}
+            >
+              View & Assign Doctor
+            </button> */}
         </div>
       ),
       responsive: ["xs", "md", "sm", "lg"],
     },
   ];
 
+  const handleFilterType = (event) => {
+    console.log(event.target.value);
+    setFilterType(event.target.value);
+  };
+
+  const onChangeDate = (date, dateString) => {
+    setOnlyDate(moment(dateString).format("LL"));
+
+    console.log(moment(dateString).format("LL"));
+  };
+
+  const onChangeRange = (date, dateString) => {
+    setStartDate(moment(dateString[0]).format("LL"));
+    setEndDate(moment(dateString[1]).format("LL"));
+    console.log(
+      moment(dateString[0]).format("LL"),
+      moment(dateString[1]).format("LL")
+    );
+  };
+
+  const handleFilter = () => {
+    onlyDate = new Date(onlyDate);
+    const startDateObj = new Date(startDate);
+    const endDateObj = new Date(endDate);
+
+    const filtered = appointments.filter((item) => {
+      console.log(item);
+      const itemDate = new Date(item?.appointment?.date);
+      console.log(
+        onlyDate.toDateString(),
+        startDateObj.toDateString(),
+        endDateObj.toDateString(),
+        itemDate.toDateString()
+      );
+      if (filterType === "Date") {
+        return itemDate.toDateString() === onlyDate.toDateString();
+      } else {
+        // Date range filter
+        console.log(
+          itemDate.toDateString(),
+          startDateObj.toDateString(),
+          endDateObj.toDateString()
+        );
+
+        return (
+          itemDate.toDateString() >= startDateObj.toDateString() &&
+          itemDate.toDateString() <= endDateObj.toDateString()
+        );
+      }
+    });
+
+    const filteredGuest = openappointments.filter((item) => {
+      console.log(item);
+      const itemDate = new Date(item?.date);
+      console.log(
+        onlyDate.toDateString(),
+        startDateObj.toDateString(),
+        endDateObj.toDateString(),
+        itemDate.toDateString()
+      );
+      if (filterType === "Date") {
+        return itemDate.toDateString() === onlyDate.toDateString();
+      } else {
+        // Date range filter
+        return (
+          itemDate.toDateString() >= startDateObj.toDateString() &&
+          itemDate.toDateString() <= endDateObj.toDateString()
+        );
+      }
+    });
+
+    console.log(filtered);
+
+    setFilteredData(filtered.length > 0 ? filtered : null);
+    setFilteredGuestData(filteredGuest.length > 0 ? filteredGuest : null);
+
+    console.log(filtered.length > 0 ? filtered : null);
+
+    setFilter(false);
+  };
+
+  const createPdfWithTable = async (data) => {
+    const doc = new JsPDF();
+    doc.setFontSize(30);
+    doc.text(70, 20, "Appointments");
+
+    doc.setFontSize(20);
+    doc.text(10, 40, "Appointments List (Registered Users)");
+
+    const headers = [
+      "ParentName",
+      "Doctor",
+      "Specialization",
+      "Date",
+      "Status",
+      "Time",
+    ];
+    const datas = filteredData && filteredData.map((item) => [
+      item?.user?.name,
+      `${item?.doctor?.firstName} ${item?.doctor?.lastName}`,
+      item?.doctor?.specialization,
+
+      moment(item?.appointment?.date).format("LL"),
+      item?.appointment?.status,
+     item?.appointment?.time,
+    ]);
+    console.log(datas);
+
+    doc.autoTable({
+      head: [headers],
+      body: datas,
+      theme: "striped",
+      margin: { top: 50 },
+    });
+
+    const headers1 = [
+      "Service",
+      "Requested",
+      "Pet",
+      "Date",
+      "Time",
+      "Mobile",
+      "Status",
+    ];
+    const datas1 = filteredGuestData && filteredGuestData.map((item) => [
+      item?.module,
+      item?.service,
+      item?.pet,
+      moment(item?.date).format("LL"),
+      item?.time,
+      item?.mobile,
+      item?.status,
+    ]);
+    const tableHeight = doc.autoTable.previous.finalY;
+
+    doc.setFontSize(20);
+    doc.text(10, tableHeight + 20, "Guest Appointments");
+    doc.autoTable({
+      startY: tableHeight + 30,
+      head: [headers1],
+      body: datas1,
+      theme: "striped",
+    });
+
+    const pdfBytes = doc.save("appointments.pdf");
+
+    const blob = new Blob([pdfBytes], { type: "application/pdf" });
+    const url = URL.createObjectURL(blob);
+
+    // Create a temporary link element to trigger the download
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "appointments.pdf";
+    a.click();
+
+    // Clean up
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <Layout>
       <div className="col-md-12">
         <div className="row d-fixed d-lg-flex justify-content-between align-items-center">
           <div className="col-md-6  d-lg-flex gap-3 justify-content-right align-items-center">
-            <h6 className="page-header mb-0">
-              Appointments List (Registered Users)
-            </h6>
+            <h6 className="page-header mb-0">Appointments List</h6>
           </div>
           <div className="col-md-6 d-lg-flex d-md-flex d-sm-flex d-xs-flex gap-3 justify-content-end align-items-center">
             <Link to="/admin/appointmentlist">
@@ -584,36 +767,113 @@ function MobileVetList(doctorId) {
               </button>
             </Link>
             <Link to="/admin/mobilevetlist">
-              <button className="btn btn-success btn-sm" type="button">
+              <button className="btn btn-warning btn-sm" type="button">
                 Mobile Vet
               </button>
             </Link>
             <Link to="/admin/mobilegroominglist">
-              <button className="btn btn-warning btn-sm" type="button">
+              <button className="btn btn-success btn-sm" type="button">
                 Mobile Grooming
               </button>
             </Link>
           </div>
         </div>
         <hr />
-        <Table
-          columns={usercolumns}
-          dataSource={appointments}
-          responsive={true}
-          scroll={{ x: true }}
-        />
+        <div className="row">
+          <div className="mb-2 col">
+            <select
+              className="form-control"
+              id="break"
+              name="break"
+              value={filterType}
+              onChange={handleFilterType}
+            >
+              <option defaultValue="">Select Filter...</option>
+              <option value="Date">Date</option>
+              <option value="Range">Range</option>
+              {/* <option value="Weekly">Weekly</option>
+              <option value="Montly">Montly</option> */}
+            </select>
+          </div>
+          {filterType === "Range" && (
+            <div className="mb-2 col">
+              <RangePicker onChange={onChangeRange} style={{ width: "100%" }} />
+            </div>
+          )}
+          {filterType === "Date" && (
+            <div className="mb-2 col">
+              <DatePicker
+                onChange={onChangeDate}
+                size="large"
+                style={{ width: "100%" }}
+              />
+            </div>
+          )}
+          <div className="mt-1 col">
+            <button
+              type="submit"
+              className="btn btn-success btn-sm me-3"
+              onClick={handleFilter}
+            >
+              Filter
+            </button>
+            <button
+              type="submit"
+              className="btn btn-success btn-sm"
+              onClick={createPdfWithTable}
+              disabled={filter}
+            >
+              Export to PDF
+            </button>
+          </div>
+        </div>
+        {filteredData !== null ? (
+          filteredData.length > 0 ? (
+            <Table
+              columns={usercolumns}
+              dataSource={filteredData}
+              responsive={true}
+              scroll={{ x: true }}
+            />
+          ) : (
+            <Table
+              columns={usercolumns}
+              dataSource={appointments}
+              responsive={true}
+              scroll={{ x: true }}
+            />
+          )
+        ) : (
+          <div className="text-center m-5">No result found</div>
+        )}
 
         <div></div>
       </div>
-      <div className="col-md-12">
-        <h6>Guest Appointments</h6>
-        <Table
-          columns={opencolumns}
-          dataSource={openappointments}
-          responsive={true}
-          scroll={{ x: true }}
-        />
-      </div>
+      {filteredGuestData !== null ? (
+        filteredGuestData.length > 0 ? (
+          <div className="col-md-12">
+            <h6>Open Appointment Lists</h6>
+            <Table
+              columns={opencolumns}
+              dataSource={filteredGuestData}
+              responsive={true}
+              scroll={{ x: true }}
+            />
+          </div>
+        ) : (
+          <div className="col-md-12">
+            <h6>Open Appointment Lists</h6>
+            <Table
+              columns={opencolumns}
+              dataSource={openappointments}
+              responsive={true}
+              scroll={{ x: true }}
+            />
+          </div>
+        )
+      ) : (
+        <div className="text-center m-5">No result found</div>
+      )}
       <div>
         <Modal
           show={showReschudleModal}
@@ -649,6 +909,7 @@ function MobileVetList(doctorId) {
                 />
               </div>
               <div id="date-popup" />
+
               <div className="d-lg-flex justify-content-between align-items-center gap-4 mb-3">
                 <label htmlFor="time">Time:</label>
 
@@ -677,6 +938,7 @@ function MobileVetList(doctorId) {
           </Modal.Footer>
         </Modal>
       </div>
+
       <div>
         <Modal
           show={showOpenReschudleModal}
@@ -702,7 +964,6 @@ function MobileVetList(doctorId) {
                       selectedAppointment?.lastname}
                 </span>
               </div>
-
               <div className="d-lg-flex justify-content-between align-items-center gap-4 mb-3">
                 <label htmlFor="time">Date:</label>
 
@@ -722,7 +983,6 @@ function MobileVetList(doctorId) {
                 />
               </div>
               <div id="date-popup" />
-
               <div className="d-lg-flex justify-content-between align-items-center gap-4 mb-3">
                 <label htmlFor="time">Time:</label>
 
@@ -755,4 +1015,4 @@ function MobileVetList(doctorId) {
   );
 }
 
-export default MobileVetList;
+export default MobileGroomingList;

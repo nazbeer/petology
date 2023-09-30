@@ -811,14 +811,14 @@ function Appointmentlist(doctorsId) {
       "Status",
       "Time",
     ];
-    const datas = filteredData.map((item) => [
+    const datas = filteredData && filteredData.map((item) => [
       item?.user?.name,
       `${item?.doctor?.firstName} ${item?.doctor?.lastName}`,
       item?.doctor?.specialization,
 
       moment(item?.appointment?.date).format("LL"),
       item?.appointment?.status,
-      moment(item?.appointment?.createdAt).format("LTS"),
+     item?.appointment?.time,
     ]);
     console.log(datas);
 
@@ -838,12 +838,12 @@ function Appointmentlist(doctorsId) {
       "Mobile",
       "Status",
     ];
-    const datas1 = filteredGuestData?.map((item) => [
+    const datas1 = filteredGuestData && filteredGuestData.map((item) => [
       item?.module,
       item?.service,
       item?.pet,
       moment(item?.date).format("LL"),
-      moment(item?.createdAt).format("LTS"),
+      item?.time,
       item?.mobile,
       item?.status,
     ]);

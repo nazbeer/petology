@@ -409,7 +409,7 @@ function Payments() {
       "Transaction ID",
       "Amount",
     ];
-    const datas = filteredData.map((item) => [
+    const datas = filteredData && filteredData.map((item) => [
       item?.appointment?.customId,
 
       moment(item?.payment?.createdAt).format("LL"),

@@ -448,7 +448,7 @@ function DoctorsList() {
       "Created At",
       "Status",
     ];
-    const datas = filteredData.map((item) => [
+    const datas = filteredData && filteredData.map((item) => [
       ` Dr. ${item?.firstName} ${item?.lastName}`,
       item?.phoneNumber,
       item?.specialization,
