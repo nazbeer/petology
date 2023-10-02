@@ -668,10 +668,26 @@ function Appointmentlist(doctorsId) {
       responsive: ["xs", "md", "sm", "lg"],
     },
     {
+      title: "Payment Status",
+      dataIndex: "payment status",
+      render: (text, record) => (
+        <span className="text-capitalize">{record?.payment?.status}</span>
+      ),
+      responsive: ["xs", "md", "sm", "lg"],
+    },
+    {
+      title: "Amount",
+      dataIndex: "payment status",
+      render: (text, record) => (
+        <span className="text-capitalize">{record?.payment?.amount} AED</span>
+      ),
+      responsive: ["xs", "md", "sm", "lg"],
+    },
+    {
       title: "Status",
       dataIndex: "status",
       render: (text, record) => (
-        <span className="text-capitalize">{record?.doctor?.status}</span>
+        <span className="text-capitalize">{record?.appointment?.status}</span>
       ),
       responsive: ["xs", "md", "sm", "lg"],
     },
@@ -681,9 +697,17 @@ function Appointmentlist(doctorsId) {
       dataIndex: "actions",
       render: (text, record) => (
         <div className="d-flex justify-content-evenly align-items-center gap-3">
-          {record.status === "pending" ||
-          record?.status === "Pending" ||
-          record?.status === "blocked" ? (
+          {record?.appointment?.status === "user cancelled" ? (
+            <button
+              type="button"
+              className="btn btn-danger btn-sm text-capitalize"
+              onClick={() => changeAppointmentStatus(record, "blocked")}
+              disabled
+            >
+              Cancelled
+            </button>
+          ) : record?.appointment?.status === "pending" ||
+            record?.appointment?.status === "blocked" ? (
             <button
               type="button"
               className="btn btn-warning btn-sm text-capitalize"
@@ -700,6 +724,18 @@ function Appointmentlist(doctorsId) {
               Cancel
             </button>
           )}
+          {/* <button
+            className="btn btn-success btn-sm ms-2"
+            // onClick={() => cancelAppointment(record?._id)}
+            disabled={refund(record?.appointment?.createdAt, record?.appointment?.status)}
+            style={{
+              display: `${
+                refund(record?.appointment?.createdAt, record?.appointment?.status) ? "none" : ""
+              }  `,
+            }}
+          >
+            Refund
+          </button> */}
           <button
             type="button"
             className="btn btn-success btn-sm text-capitalize ml-2"
@@ -719,6 +755,32 @@ function Appointmentlist(doctorsId) {
       responsive: ["xs", "md", "sm", "lg"],
     },
   ];
+  const cancel = (status) => {
+    if (status === "blocked" || status === "user cancelled") {
+      return true;
+    } else return false;
+  };
+
+  const refund = (date, status) => {
+    const targetDate = new Date(date);
+
+    // Calculate the date 7 days from now
+    const sevenDaysLater = new Date();
+    sevenDaysLater.setDate(sevenDaysLater.getDate() - 7);
+    console.log(targetDate, sevenDaysLater);
+
+    // Check if the current date is 7 days or more after the target date
+    const isMoreThanSevenDays = targetDate > sevenDaysLater;
+
+    if (
+      isMoreThanSevenDays &&
+      (status === "blocked" || status === "user cancelled")
+    ) {
+      return false;
+    } else {
+      return true;
+    }
+  };
   const onChangeDate = (date, dateString) => {
     setOnlyDate(moment(dateString).format("LL"));
 
@@ -811,15 +873,17 @@ function Appointmentlist(doctorsId) {
       "Status",
       "Time",
     ];
-    const datas = filteredData && filteredData.map((item) => [
-      item?.user?.name,
-      `${item?.doctor?.firstName} ${item?.doctor?.lastName}`,
-      item?.doctor?.specialization,
+    const datas =
+      filteredData &&
+      filteredData.map((item) => [
+        item?.user?.name,
+        `${item?.doctor?.firstName} ${item?.doctor?.lastName}`,
+        item?.doctor?.specialization,
 
-      moment(item?.appointment?.date).format("LL"),
-      item?.appointment?.status,
-     item?.appointment?.time,
-    ]);
+        moment(item?.appointment?.date).format("LL"),
+        item?.appointment?.status,
+        item?.appointment?.time,
+      ]);
     console.log(datas);
 
     doc.autoTable({
@@ -838,15 +902,17 @@ function Appointmentlist(doctorsId) {
       "Mobile",
       "Status",
     ];
-    const datas1 = filteredGuestData && filteredGuestData.map((item) => [
-      item?.module,
-      item?.service,
-      item?.pet,
-      moment(item?.date).format("LL"),
-      item?.time,
-      item?.mobile,
-      item?.status,
-    ]);
+    const datas1 =
+      filteredGuestData &&
+      filteredGuestData.map((item) => [
+        item?.module,
+        item?.service,
+        item?.pet,
+        moment(item?.date).format("LL"),
+        item?.time,
+        item?.mobile,
+        item?.status,
+      ]);
     const tableHeight = doc.autoTable.previous.finalY;
 
     doc.setFontSize(20);
