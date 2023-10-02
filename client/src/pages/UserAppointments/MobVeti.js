@@ -5,7 +5,16 @@ import { useNavigate } from "react-router-dom";
 import { showLoading, hideLoading } from "../../redux/alertsSlice";
 import { toast } from "react-hot-toast";
 import axios from "axios";
-import { Modal, Form, Input, DatePicker, Button, Table, Radio } from "antd";
+import {
+  Modal,
+  Form,
+  Input,
+  DatePicker,
+  Button,
+  Table,
+  Radio,
+  Tooltip,
+} from "antd";
 import moment from "moment";
 
 import { PDFDocument, rgb } from "pdf-lib";
@@ -218,7 +227,9 @@ function MobVeti() {
       title: "Status",
       dataIndex: "status",
       render: (text, record) => (
-        <span className="text-capitalize">{record.status}</span>
+        <span className="text-capitalize">
+          {record?.status === "blocked" ? "Cancelled" : record?.status}
+        </span>
       ),
     },
     {
@@ -242,17 +253,65 @@ function MobVeti() {
         <div>
           <button
             className="btn btn-danger btn-sm"
-            onClick={() => cancelAppointment(record._id)}
-            disabled={cancelledAppointments.includes(record._id)}
+            onClick={() => cancelAppointment(record?._id)}
+            disabled={cancel(record?.status)}
           >
-            {cancelledAppointments.includes(record._id)
-              ? "Cancelled"
-              : "Cancel"}
+            {cancel(record?.status) ? "Cancelled" : "Cancel"}
+          </button>
+          <button
+            className="btn btn-success btn-sm ms-2"
+            // onClick={() => cancelAppointment(record?._id)}
+            disabled={refund(record?.createdAt, record?.status)}
+            style={{
+              display: `${
+                refund(record?.createdAt, record?.status) ? "none" : ""
+              }  `,
+            }}
+          >
+            Refund
           </button>
         </div>
       ),
     },
+    {
+      render: (text, record) => (
+        <Tooltip
+          // placement="top"
+          title="Payment only be refunded before 24 Hours"
+          // arrow={mergedArrow}
+        >
+          <i className="ri-question-mark"></i>
+        </Tooltip>
+      ),
+    },
   ];
+
+  const cancel = (status) => {
+    if (status === "Blocked" || status === "User Cancelled") {
+      return true;
+    } else return false;
+  };
+
+  const refund = (date, status) => {
+    const targetDate = new Date(date);
+
+    // Calculate the date 7 days from now
+    const sevenDaysLater = new Date();
+    sevenDaysLater.setDate(sevenDaysLater.getDate() - 7);
+    console.log(targetDate, sevenDaysLater);
+
+    // Check if the current date is 7 days or more after the target date
+    const isMoreThanSevenDays = targetDate > sevenDaysLater;
+
+    if (
+      isMoreThanSevenDays &&
+      (status === "blocked" || status === "user cancelled")
+    ) {
+      return false;
+    } else {
+      return true;
+    }
+  };
 
   const handleSubmit = async (e) => {
     // e.preventDefault();

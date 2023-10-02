@@ -36,6 +36,7 @@ const Veterinary = () => {
   const [appointment, setAppointment] = useState({});
 
   const [doctorTime, setDoctorTime] = useState("");
+  const [packs, setPacks] = useState("");
 
   const getOfficeTime = () => {
     axios
@@ -63,6 +64,7 @@ const Veterinary = () => {
   useEffect(() => {
     getAppointmentInfo(doctorId);
     getDoctorInfo(doctorId);
+
     axios
       .get("http://localhost:5000/api/open/get-all-approved-doctors", {
         // headers: {
@@ -70,6 +72,19 @@ const Veterinary = () => {
         // },
       })
       .then((response) => setDoctorList(response.data.data))
+      .catch((error) => console.error(error));
+
+    axios
+      .post(
+        "http://localhost:5000/api/open/get-pack-by-module",
+        { module: "Veterinary" },
+        {
+          // headers: {
+          //   Authorization: `Bearer ${localStorage.getItem("token")}`,
+          // },
+        }
+      )
+      .then((response) => setPacks(response.data.data))
       .catch((error) => console.error(error));
 
     getOfficeTime();
@@ -218,11 +233,15 @@ const Veterinary = () => {
                       name="service"
                       onChange={handleChange}
                     >
-                      <option>Select Service...</option>
-                      <option value={service.service}>Micro Chipping</option>
-                      <option value={service.service}>Vaccination</option>
-
-                      <option value={service.service}>Consultation</option>
+                      <option defaultValue="">Select Service...</option>
+                      {packs.length > 0 &&
+                        packs.map((data, key) => {
+                          return (
+                            <option key={data.key} value={data._id}>
+                              {data.subService} - Price: {data.price} AED
+                            </option>
+                          );
+                        })}
                     </select>
                   </div>
                 </div>
@@ -333,7 +352,12 @@ const Veterinary = () => {
                       type="date"
                       id="date"
                       name="date"
-                      min={new Date().toISOString().split('T')[0]}
+                      min={new Date().toISOString().split("T")[0]}
+                      max={
+                        new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+                          .toISOString()
+                          .split("T")[0]
+                      }
                       value={service.date}
                       onChange={handleChange}
                       required

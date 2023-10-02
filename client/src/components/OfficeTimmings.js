@@ -265,7 +265,7 @@ function OfficeTimmings() {
                     className="form-control"
                     id="break"
                     name="break"
-                    defaultValue="15 Minutes"
+                    // defaultValue="15 Minutes"
                     // value={groomTime.break}
                     onChange={onVetBreakChange}
                     placeholder="Select break time"
@@ -310,7 +310,7 @@ function OfficeTimmings() {
                     className="form-control"
                     id="break"
                     name="break"
-                    defaultValue="15 Minutes"
+                    // defaultValue="15 Minutes"
                     // value={groomTime.break}
                     onChange={onGroomBreakChange}
                     placeholder="Select break time"

@@ -26,7 +26,7 @@ function DoctorAppointments() {
   const getAppointmentsData = async () => {
     try {
       dispatch(showLoading());
-      const response = await axios.get("/api/doctor/appointments/veterinary", {
+      const response = await axios.get("/api/doctor/appointments-by-doctor-id", {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
@@ -89,25 +89,25 @@ function DoctorAppointments() {
     {
       title: "Id",
       dataIndex: "customID",
-      render: (text, record) => <span>{record.customId}</span>,
+      render: (text, record) => <span>{record?.customId}</span>,
     },
     {
       title: "Patient",
       dataIndex: "name",
-      render: (text, record) => <span>{record.user.name}</span>,
+      render: (text, record) => <span>{record?.user?.name}</span>,
     },
 
     {
       title: "Phone",
       dataIndex: "phoneNumber",
-      render: (text, record) => <span>{record.doctor?.phoneNumber}</span>,
+      render: (text, record) => <span>{record?.user?.mobile}</span>,
     },
     {
       title: "Pet",
       dataIndex: "pet",
       render: (text, record) => (
         <span className="text-capitalize">
-          {record.pet} - {record.size} - {record.breed}
+          {record?.pet} - {record?.size} - {record?.breed}
         </span>
       ),
     },
@@ -116,7 +116,7 @@ function DoctorAppointments() {
       dataIndex: "createdAt",
       render: (text, record) => (
         <span>
-          {moment(record.date).format("DD MMM, YYYY")}
+          {moment(record?.date).format("DD MMM, YYYY")}
           {" | "}
           {record.time}
         </span>
@@ -127,7 +127,7 @@ function DoctorAppointments() {
       title: "Status",
       dataIndex: "status",
       render: (text, record) => (
-        <span className="text-capitalize">{record.status}</span>
+        <span className="text-capitalize">{record?.status}</span>
       ),
     },
     {
@@ -166,7 +166,7 @@ function DoctorAppointments() {
             ))}
           <Button
             type="primary"
-            onClick={() => showAddPrescriptionModal(record._id)}
+            onClick={() => showAddPrescriptionModal(record?._id)}
           >
             Add Prescription
           </Button>

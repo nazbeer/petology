@@ -8,6 +8,8 @@ import OfficeTimeCalculate from "../../components/OfficeTimeCalculate";
 
 const Grooming = () => {
   const [time, setTime] = useState([]);
+  const [packs, setPacks] = useState("");
+
   const [service, setService] = useState({
     module: "Grooming",
     service: "",
@@ -24,6 +26,19 @@ const Grooming = () => {
   });
 
   useEffect(() => {
+    axios
+      .post(
+        "http://localhost:5000/api/open/get-pack-by-module",
+        { module: "Grooming" },
+        {
+          // headers: {
+          //   Authorization: `Bearer ${localStorage.getItem("token")}`,
+          // },
+        }
+      )
+      .then((response) => setPacks(response.data.data))
+      .catch((error) => console.error(error));
+
     getOfficeTime();
     console.log(time);
   }, []);
@@ -99,8 +114,14 @@ const Grooming = () => {
                       onChange={handleChange}
                     >
                       <option defaultValue="">Select Service...</option>
-                      <option value="Hair Cut">Hair Cut</option>
-                      <option value="Bath & Blow Dry">Bath & Blow Dry</option>
+                      {packs.length > 0 &&
+                        packs.map((data, key) => {
+                          return (
+                            <option key={data.key} value={data._id}>
+                              {data.subService} - Price: {data.price} AED
+                            </option>
+                          );
+                        })}
                     </select>
                   </div>
                   <div className="mb-2">
@@ -166,7 +187,12 @@ const Grooming = () => {
                       type="date"
                       id="date"
                       name="date"
-                      min={new Date().toISOString().split('T')[0]}
+                      min={new Date().toISOString().split("T")[0]}
+                      max={
+                        new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+                          .toISOString()
+                          .split("T")[0]
+                      }
                       value={service.date}
                       onChange={handleChange}
                       required

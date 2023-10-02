@@ -25,6 +25,7 @@ const Groom = () => {
     mobile: "",
     userId: "",
   });
+  const [packs, setPacks] = useState({});
 
   const getOfficeTime = () => {
     axios
@@ -77,6 +78,22 @@ const Groom = () => {
           userId: userId,
           module: "grooming",
         });
+      })
+      .catch((error) => console.error(error));
+
+    axios
+      .post(
+        "/api/user/get-pack-by-module",
+        { module: "Grooming" },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      )
+      .then((response) => {
+        setPacks(response.data.data);
+        console.log(response.data.data);
       })
       .catch((error) => console.error(error));
 
@@ -198,17 +215,22 @@ const Groom = () => {
               </div>
 
               <div className="mb-2">
-                <label htmlFor="service">Choose Service: </label>
+                <label htmlFor="service">Choose Package: </label>
                 <select
-                  className="form-control p-0"
+                  className="form-control"
                   id="service"
                   name="service"
-                  multiple
                   onChange={handleChange}
-                  style={{ height: "45px" }}
                 >
-                  <option value="Hair Cut">Hair Cut</option>
-                  <option value="Bath & Blow Dry">Bath & Blow Dry</option>
+                  <option>Select Package...</option>
+                  {packs.length > 0 &&
+                    packs.map((data, key) => {
+                      return (
+                        <option key={data.key} value={data._id}>
+                          {data.subService} - Price: {data.price} AED
+                        </option>
+                      );
+                    })}
                 </select>
               </div>
 
@@ -231,6 +253,11 @@ const Groom = () => {
                   id="date"
                   name="date"
                   min={new Date().toISOString().split("T")[0]}
+                  max={
+                    new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+                      .toISOString()
+                      .split("T")[0]
+                  }
                   value={service.date}
                   onChange={handleChange}
                   required

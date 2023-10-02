@@ -904,7 +904,10 @@ router.post(
       }
 
       // Check if the appointment is already cancelled
-      if (appointment.status === "cancelled") {
+      if (
+        appointment.status === "cancelled" ||
+        appointment.status === "user cancelled"
+      ) {
         return res.status(400).json({
           success: false,
           message: "Appointment is already cancelled",
@@ -912,7 +915,7 @@ router.post(
       }
 
       // Update the appointment status to "cancelled"
-      appointment.status = "cancelled";
+      appointment.status = "user cancelled";
       await appointment.save();
 
       return res.json({
@@ -1012,13 +1015,27 @@ router.post("/user-book-appointment", authMiddleware, async (req, res) => {
         }
       });
     }
-
     const doctor = await Doctor.findOne({ _id: req.body.doctorId });
+    console.log(req.body.service)
+    const service = await packModel.findOne({ _id: req.body.service });
+    let amount = Number(service.price);
 
+    if (req.body.module === "veterinary") {
+      amount = amount + doctor.feePerCunsultation;
+    }
+
+    const payment = new Paymentmodel({
+      userId: req?.body?.userId,
+      appointmentId: savedAppointment?._id,
+      amount: amount,
+      status: "success",
+    });
+
+    await payment.save();
     res.json({
       success: true,
       message: "Appointment booked successfully",
-      data: { savedAppointment, doctor },
+      data: { savedAppointment, doctor, payment },
     });
   } catch (error) {
     console.error(error);
@@ -1121,6 +1138,48 @@ router.get("/appointments/veterinary", authMiddleware, async (req, res) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 });
+
+router.post("/appointments-by-user-id", authMiddleware, async (req, res) => {
+  console.log(req?.body?.userId);
+  try {
+    // const moduleType = req.params.module;
+
+    // Fetch appointments for the specified module
+    const appointments = await UserappModel.find({
+      userId: req?.body?.userId,
+      module: req?.body?.module,
+    });
+    console.log("appointments", appointments);
+
+    // If appointments are found, you can fetch user details only
+    const populatedAppointments = await Promise.all(
+      appointments.map(async (appointment) => {
+        const userId = appointment.userId;
+        const doctorId = appointment.doctorId;
+        // Assuming you have a User model for user details
+        const user = await User.findOne({ _id: userId });
+        const doctor = await Doctor.findOne({ _id: doctorId });
+        const payment = await Paymentmodel.findOne({
+          appointmentId: appointment._id,
+        });
+        // console.log("user:", user);
+
+        return {
+          ...appointment.toObject(),
+          user,
+          doctor,
+          payment,
+        };
+      })
+    );
+
+    console.log("populated Appointments:", populatedAppointments);
+    res.json({ success: true, data: populatedAppointments });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+});
 router.get("/appointments/mobvet", authMiddleware, async (req, res) => {
   try {
     // const moduleType = req.params.module;
@@ -1145,7 +1204,7 @@ router.get("/appointments/mobvet", authMiddleware, async (req, res) => {
         return {
           ...appointment.toObject(),
           user,
-          packs
+          packs,
           //  doctor
         };
       })
@@ -1378,6 +1437,25 @@ router.get("/get-all-pay-by-userid", authMiddleware, async (req, res) => {
     res
       .status(500)
       .send({ message: "Error in Fetching Payment", success: false, error });
+  }
+});
+
+router.post("/get-pack-by-module", authMiddleware, async (req, res) => {
+  try {
+    const packs = await packModel.find({ serviceType: req.body.module });
+    console.log(packs);
+    res.status(200).send({
+      message: "Pack List fetched successfully",
+      success: true,
+      data: packs,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({
+      message: "Error Fetching Pack list",
+      success: false,
+      error,
+    });
   }
 });
 

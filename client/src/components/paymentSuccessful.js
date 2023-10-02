@@ -238,7 +238,7 @@ function PaymentSuccessful() {
               </div>
               <div className="col">
                 <p className="text-end mb-4 fw-bold">
-                  {state?.appointments?.doctor?.feePerCunsultation || 80} AED
+                  {state?.appointments?.payment?.amount} AED
                 </p>
               </div>
             </div>
