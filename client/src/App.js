@@ -68,6 +68,7 @@ import NotFound from "./components/NotFound";
 import Payments from "./components/Payments";
 import OfficeTimmings from "./components/OfficeTimmings";
 import GroomerList from "./components/GroomerList";
+import ReceptionistList from "./pages/Admin/ReceptionistList";
 
 function App() {
   const { loading } = useSelector((state) => state.alerts);
@@ -330,6 +331,14 @@ function App() {
             </ProtectedRoute>
           }
         />
+         <Route
+          path="/admin/receptionistlist"
+          element={
+            <ProtectedRoute>
+              <ReceptionistList />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/doctor/prescriptions"
           element={
@@ -472,7 +481,7 @@ function App() {
           path="/reception/addservices"
           element={
             <ProtectedRoute>
-              <RecAddService />
+              <AddPack />
             </ProtectedRoute>
           }
         />

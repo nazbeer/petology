@@ -68,6 +68,24 @@ router.get("/get-all-groomer", authMiddleware, async (req, res) => {
   }
 });
 
+router.get("/get-all-reception", authMiddleware, async (req, res) => {
+  try {
+    const groomers = await User.find({ isNurse: true }); // Add the status filter
+    res.status(200).send({
+      message: "Receptionistd fetched successfully",
+      success: true,
+      data: groomers,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      message: "Error Fetching Receptionistd",
+      success: false,
+      error,
+    });
+  }
+});
+
 router.get("/get-all-approved-doctors", authMiddleware, async (req, res) => {
   try {
     const doctors = await Doctor.find({ status: "approved" }); // Add the status filter
@@ -305,7 +323,7 @@ router.get(
   authMiddleware,
   async (req, res) => {
     try {
-      const mobgroomapplist = await MobileGroomApp.find({});
+      const mobgroomapplist = await UserappModel.find({});
       console.log(mobgroomapplist);
       res.status(200).send({
         message: "Appointment List fetched successfully",
@@ -680,6 +698,37 @@ router.post("/change-groomer-status", authMiddleware, async (req, res) => {
     });
   }
 });
+
+router.post("/change-reception-status", authMiddleware, async (req, res) => {
+  try {
+    const { receptionId, status } = req.body;
+    console.log(receptionId, status);
+    const user = await User.findByIdAndUpdate(receptionId, {
+      status,
+    });
+    user.username = user?.name;
+    const unseenNotifications = user.unseenNotifications;
+    unseenNotifications.push({
+      type: "new-receptionist-request-changed",
+      message: `Your Reception account has been ${status}`,
+      onClickPath: "/notifications",
+    });
+    await user.save();
+
+    res.status(200).send({
+      message: "Receptionist status updated successfully",
+      success: true,
+      data: user,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      message: "Error applying Receptionist account",
+      success: false,
+      error,
+    });
+  }
+});
 router.post(
   "/change-appointment-status/:id",
   authMiddleware,
@@ -984,6 +1033,37 @@ router.post("/update-groomer/:userId", authMiddleware, async (req, res) => {
       .json({ success: false, message: "Internal server error" });
   }
 });
+
+router.post("/update-reception/:userId", authMiddleware, async (req, res) => {
+  try {
+    console.log(req.params);
+    const { userId } = req.params;
+    const updatedFields = req.body;
+
+    const reception = await User.findById(userId);
+    if (!reception) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Reception not found" });
+    }
+
+    for (const [key, value] of Object.entries(updatedFields)) {
+      reception[key] = value;
+    }
+
+    await reception.save();
+
+    return res.json({
+      success: true,
+      message: "Reception information updated successfully",
+    });
+  } catch (error) {
+    console.error(error);
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
+  }
+});
 router.get("/get-admin-profile/:userId", authMiddleware, async (req, res) => {
   try {
     const { userId } = req.params;
@@ -1238,6 +1318,25 @@ router.get("/get-all-vet-packs", authMiddleware, async (req, res) => {
   }
 });
 
+router.get("/get-all-packs", authMiddleware, async (req, res) => {
+  try {
+    const vet = await packModel.find();
+    console.log(vet);
+    res.status(200).send({
+      message: "Pack List fetched successfully",
+      success: true,
+      data: vet,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({
+      message: "Error Fetching Pack list",
+      success: false,
+      error,
+    });
+  }
+});
+
 router.get("/get-all-groom-packs", authMiddleware, async (req, res) => {
   try {
     const groom = await packModel.find({ serviceType: "Grooming" });
@@ -1256,7 +1355,6 @@ router.get("/get-all-groom-packs", authMiddleware, async (req, res) => {
     });
   }
 });
-
 
 router.get("/get-all-pay", authMiddleware, async (req, res) => {
   try {

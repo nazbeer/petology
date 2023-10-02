@@ -535,6 +535,22 @@ function MobileVetList(doctorId) {
       responsive: ["xs", "md", "sm", "lg"],
     },
     {
+      title: "Payment Status",
+      dataIndex: "payment status",
+      render: (text, record) => (
+        <span className="text-capitalize">{record?.payment?.status}</span>
+      ),
+      responsive: ["xs", "md", "sm", "lg"],
+    },
+    {
+      title: "Amount",
+      dataIndex: "payment status",
+      render: (text, record) => (
+        <span className="text-capitalize">{record?.payment?.amount} AED</span>
+      ),
+      responsive: ["xs", "md", "sm", "lg"],
+    },
+    {
       title: "Status",
       dataIndex: "status",
       render: (text, record) => (
@@ -555,9 +571,17 @@ function MobileVetList(doctorId) {
           >
             Reschedule
           </button>
-          {record?.appointment?.status === "pending" ||
-          record?.appointment?.status === "Pending" ||
-          record?.appointment?.status === "blocked" ? (
+          {record?.appointment?.status === "user cancelled" ? (
+            <button
+              type="button"
+              className="btn btn-danger btn-sm text-capitalize"
+              onClick={() => changeAppointmentStatus(record, "blocked")}
+              disabled
+            >
+              Cancelled
+            </button>
+          ) : record?.appointment?.status === "pending" ||
+            record?.appointment?.status === "blocked" ? (
             <button
               type="button"
               className="btn btn-warning btn-sm text-capitalize"
@@ -677,15 +701,17 @@ function MobileVetList(doctorId) {
       "Status",
       "Time",
     ];
-    const datas = filteredData && filteredData.map((item) => [
-      item?.user?.name,
-      `${item?.doctor?.firstName} ${item?.doctor?.lastName}`,
-      item?.doctor?.specialization,
+    const datas =
+      filteredData &&
+      filteredData.map((item) => [
+        item?.user?.name,
+        `${item?.doctor?.firstName} ${item?.doctor?.lastName}`,
+        item?.doctor?.specialization,
 
-      moment(item?.appointment?.date).format("LL"),
-      item?.appointment?.status,
-     item?.appointment?.time,
-    ]);
+        moment(item?.appointment?.date).format("LL"),
+        item?.appointment?.status,
+        item?.appointment?.time,
+      ]);
     console.log(datas);
 
     doc.autoTable({
@@ -704,15 +730,17 @@ function MobileVetList(doctorId) {
       "Mobile",
       "Status",
     ];
-    const datas1 = filteredGuestData && filteredGuestData.map((item) => [
-      item?.module,
-      item?.service,
-      item?.pet,
-      moment(item?.date).format("LL"),
-      item?.time,
-      item?.mobile,
-      item?.status,
-    ]);
+    const datas1 =
+      filteredGuestData &&
+      filteredGuestData.map((item) => [
+        item?.module,
+        item?.service,
+        item?.pet,
+        moment(item?.date).format("LL"),
+        item?.time,
+        item?.mobile,
+        item?.status,
+      ]);
     const tableHeight = doc.autoTable.previous.finalY;
 
     doc.setFontSize(20);

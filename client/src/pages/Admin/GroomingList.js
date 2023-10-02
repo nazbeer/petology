@@ -229,6 +229,7 @@ function GroomingList(doctorId) {
       );
 
       if (response.data.success) {
+        console.log(response.data.data)
         setAppointments(response.data.data);
       }
     } catch (error) {
@@ -395,20 +396,21 @@ function GroomingList(doctorId) {
       dataIndex: "actions",
       render: (text, record) => (
         <div className="d-flex justify-content-evenly align-items-center gap-3">
-          <button
-            type="button"
-            className="btn btn-success btn-sm text-capitalize ml-2"
-            onClick={() => handleShowOpenReschudleModal(record)}
-          >
-            Reschedule
-          </button>
-          {record.status === "pending" ||
-          record.status === "Pending" ||
-          record.status === "blocked" ? (
+          {record?.appointment?.status === "user cancelled" ? (
+            <button
+              type="button"
+              className="btn btn-danger btn-sm text-capitalize"
+              onClick={() => changeAppointmentStatus(record, "blocked")}
+              disabled
+            >
+              Cancelled
+            </button>
+          ) : record?.appointment?.status === "pending" ||
+            record?.appointment?.status === "blocked" ? (
             <button
               type="button"
               className="btn btn-warning btn-sm text-capitalize"
-              onClick={() => changeOpenAppointmentStatus(record, "approved")}
+              onClick={() => changeAppointmentStatus(record, "approved")}
             >
               Approve
             </button>
@@ -416,11 +418,18 @@ function GroomingList(doctorId) {
             <button
               type="button"
               className="btn btn-danger btn-sm text-capitalize"
-              onClick={() => changeOpenAppointmentStatus(record, "blocked")}
+              onClick={() => changeAppointmentStatus(record, "blocked")}
             >
               Cancel
             </button>
           )}
+          <button
+            type="button"
+            className="btn btn-success btn-sm text-capitalize"
+            onClick={() => handleShowOpenReschudleModal(record)}
+          >
+            Reschedule
+          </button>
           {/* <button
             type="button"
             className="btn btn-success btn-sm text-capitalize ml-2"
@@ -481,6 +490,22 @@ function GroomingList(doctorId) {
       responsive: ["xs", "md", "sm", "lg"],
     },
     {
+      title: "Payment Status",
+      dataIndex: "payment status",
+      render: (text, record) => (
+        <span className="text-capitalize">{record?.payment?.status}</span>
+      ),
+      responsive: ["xs", "md", "sm", "lg"],
+    },
+    {
+      title: "Amount",
+      dataIndex: "payment status",
+      render: (text, record) => (
+        <span className="text-capitalize">{record?.payment?.amount} AED</span>
+      ),
+      responsive: ["xs", "md", "sm", "lg"],
+    },
+    {
       title: "Status",
       dataIndex: "status",
       render: (text, record) => (
@@ -494,9 +519,17 @@ function GroomingList(doctorId) {
       dataIndex: "actions",
       render: (text, record) => (
         <div className="d-flex justify-content-evenly align-items-center gap-3">
-          {record.status === "pending" ||
-          record.status === "Pending" ||
-          record.status === "blocked" ? (
+          {record?.appointment?.status === "user cancelled" ? (
+            <button
+              type="button"
+              className="btn btn-danger btn-sm text-capitalize"
+              onClick={() => changeAppointmentStatus(record, "blocked")}
+              disabled
+            >
+              Cancelled
+            </button>
+          ) : record?.appointment?.status === "pending" ||
+            record?.appointment?.status === "blocked" ? (
             <button
               type="button"
               className="btn btn-warning btn-sm text-capitalize"
@@ -513,6 +546,13 @@ function GroomingList(doctorId) {
               Cancel
             </button>
           )}
+          <button
+            type="button"
+            className="btn btn-success btn-sm text-capitalize"
+            onClick={() => handleShowOpenReschudleModal(record)}
+          >
+            Reschedule
+          </button>
 
           {/* <button
               type="button"
@@ -673,16 +713,18 @@ function GroomingList(doctorId) {
       "Status",
       "Time",
     ];
-    const datas = filteredData && filteredData.map((item) => [
-      item?.user?.name,
-      item?.appointment?.petName,
-      // `${item?.doctor?.firstName} ${item?.doctor?.lastName}`,
-      // item?.doctor?.specialization,
+    const datas =
+      filteredData &&
+      filteredData.map((item) => [
+        item?.user?.name,
+        item?.appointment?.petName,
+        // `${item?.doctor?.firstName} ${item?.doctor?.lastName}`,
+        // item?.doctor?.specialization,
 
-      moment(item?.appointment?.date).format("LL"),
-      item?.appointment?.status,
-      item?.appointment?.time,
-    ]);
+        moment(item?.appointment?.date).format("LL"),
+        item?.appointment?.status,
+        item?.appointment?.time,
+      ]);
     console.log(datas);
 
     doc.autoTable({
@@ -701,15 +743,17 @@ function GroomingList(doctorId) {
       "Mobile",
       "Status",
     ];
-    const datas1 = filteredGuestData && filteredGuestData.map((item) => [
-      item?.module,
-      item?.service,
-      item?.pet,
-      moment(item?.date).format("LL"),
-      item?.time,
-      item?.mobile,
-      item?.status,
-    ]);
+    const datas1 =
+      filteredGuestData &&
+      filteredGuestData.map((item) => [
+        item?.module,
+        item?.service,
+        item?.pet,
+        moment(item?.date).format("LL"),
+        item?.time,
+        item?.mobile,
+        item?.status,
+      ]);
     const tableHeight = doc.autoTable.previous.finalY;
 
     doc.setFontSize(20);

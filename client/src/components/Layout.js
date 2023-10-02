@@ -96,11 +96,11 @@ function Layout({ children }) {
     //   path:"/admin/addpet",
     //   icon:'ri-bear-smile-line'
     // },
-    {
-      name: "Break Time",
-      path: "/reception/breaktime",
-      icon: "ri-time-line",
-    },
+    // {
+    //   name: "Break Time",
+    //   path: "/reception/breaktime",
+    //   icon: "ri-time-line",
+    // },
     // {
     //   name:"Add Service",
     //   path:"/admin/addservice",
@@ -108,7 +108,7 @@ function Layout({ children }) {
     // },
     {
       name: "Services List",
-      path: "/reception/servicelist",
+      path: "/reception/addservices",
       icon: "ri-booklet-fill",
     },
     {
@@ -206,6 +206,11 @@ function Layout({ children }) {
     {
       name: "Groomers",
       path: "/admin/groomerlist",
+      icon: "ri-user-star-line",
+    },
+    {
+      name: "Receptionist",
+      path: "/admin/receptionistlist",
       icon: "ri-user-star-line",
     },
     {

@@ -671,6 +671,7 @@ router.get("/get-all-appointments", authMiddleware, async (req, res) => {
   try {
     const appointmentList = await UserappModel.find({});
     // console.log(appointmentList);
+    const appointmentId = appointmentList.map((item) => item._id);
     const userId = appointmentList.map((item) => item.userId);
     const doctorId = appointmentList.map((item) => item.doctorId);
     const users = await User.find(
@@ -681,6 +682,10 @@ router.get("/get-all-appointments", authMiddleware, async (req, res) => {
       { _id: { $in: doctorId } },
       { firstName: 1, lastName: 1, _id: 1, specialization: 1, status: 1 }
     );
+
+    const payments = await Paymentmodel.find({
+      appointmentId: { $in: appointmentId },
+    });
 
     const combinedList = [];
 
@@ -695,12 +700,16 @@ router.get("/get-all-appointments", authMiddleware, async (req, res) => {
       const matchingObj3 = doctors.find(
         (obj3) => obj3._id.toString() === obj1.doctorId
       );
+      const matchingObj4 = payments.find(
+        (obj4) => obj4.appointmentId === obj1._id.toString()
+      );
       console.log(matchingObj2);
       // Combine the objects into a new object and push it to the result array
       combinedList.push({
         appointment: obj1,
-        user: matchingObj2, // Use {} as a default in case there is no match
-        doctor: matchingObj3, // Use {} as a default in case there is no match
+        user: matchingObj2,
+        doctor: matchingObj3,
+        payment: matchingObj4,
       });
     });
 
@@ -804,7 +813,7 @@ router.get("/get-all-pet", authMiddleware, async (req, res) => {
 });
 router.get("/get-all-users", authMiddleware, async (req, res) => {
   try {
-    const users = await User.find();
+    const users = await User.find({ isUser: true });
     //const users = await User.find({status:req.body.status});
     res.status(200).send({
       message: "Users list fetched succcessfully",
@@ -1016,7 +1025,7 @@ router.post("/user-book-appointment", authMiddleware, async (req, res) => {
       });
     }
     const doctor = await Doctor.findOne({ _id: req.body.doctorId });
-    console.log(req.body.service)
+    console.log(req.body.service);
     const service = await packModel.findOne({ _id: req.body.service });
     let amount = Number(service.price);
 
