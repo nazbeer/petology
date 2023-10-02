@@ -149,7 +149,7 @@ const MobileGrooming = () => {
                       <option value="">Select Service...</option>
                       {servicesList.map((service) => (
                         <option key={service._id} value={service.subService}>
-                          {service.subService}
+                          {service.subService} - Price: {service.price} AED
                         </option>
                       ))}
                     </select>
@@ -233,6 +233,7 @@ const MobileGrooming = () => {
                       id="date"
                       name="date"
                       min={new Date().toISOString().split('T')[0]}
+                      max={(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)).toISOString().split('T')[0]}
                       value={service.date}
                       onChange={handleChange}
                       required

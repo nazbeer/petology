@@ -25,7 +25,7 @@ const appointmentSchema = new mongoose.Schema(
     lat: { type: String, required: true, default: "null" },
     lng: { type: String, required: true, default: "null" },
     isWalkin: { type: Boolean, required: false, default: false },
-    status: { type: String, default: "approved" },
+    status: { type: String, default: "pending" },
     customId: { type: String, required: false, unique: true },
   },
   {

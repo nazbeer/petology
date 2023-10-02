@@ -370,7 +370,10 @@ router.post("/addprescription", authMiddleware, async (req, res) => {
 router.get("/get-prescription", authMiddleware, async (req, res) => {
   try {
     // Fetch all prescriptions from the database
-    const prescriptions = await Prescription.find({});
+    console.log(req?.body?.userId);
+    const prescriptions = await Prescription.find({
+      userId: req?.body?.userId,
+    });
 
     const populatedAppointments = await Promise.all(
       prescriptions.map(async (prescription) => {
@@ -379,12 +382,19 @@ router.get("/get-prescription", authMiddleware, async (req, res) => {
         const appointment = await UserappModel.findOne({
           _id: prescription.appointmentId,
         });
-        //   const doctor = await Doctor.findOne({ _id: doctorId });
-        //  console.log("user:", user);
+        const user = await User.findOne({
+          _id: prescription.userId,
+        });
+
+        const doctor = await Doctor.findOne({
+          _id: prescription?.doctorId,
+        });
+
         return {
           ...prescription.toObject(),
           appointment,
-          //  doctor
+          user,
+          doctor,
         };
       })
     );
@@ -397,12 +407,69 @@ router.get("/get-prescription", authMiddleware, async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
+
+router.post("/edit-prescription", authMiddleware, async (req, res) => {
+  try {
+    const { prescriptionId, prescription, description } = req.body;
+
+    const editPrescription = await Prescription.findByIdAndUpdate(prescriptionId, {
+      prescription,
+      description,
+    });
+    await editPrescription.save();
+
+    res.json({
+      success: true,
+      message: "Prescription Edited Successfully",
+      data: editPrescription,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
 router.get("/appointments/veterinary", authMiddleware, async (req, res) => {
   try {
     // const moduleType = req.params.module;
 
     // Fetch appointments for the specified module
     const appointments = await UserappModel.find({ module: "veterinary" });
+    // console.log('vdt:',appointments);
+    // If appointments are found, you can fetch user details only
+    const populatedAppointments = await Promise.all(
+      appointments.map(async (appointment) => {
+        const userId = appointment.userId;
+        const doctorId = appointment.doctorId;
+        // Assuming you have a User model for user details
+        // console.log('ids', userId, doctorId)
+        const user = await User.findOne({ _id: userId });
+        const doctor = await Doctor.findOne({ _id: doctorId });
+        //  console.log("user:", user);
+
+        return {
+          ...appointment.toObject(),
+          user,
+          doctor,
+        };
+      })
+    );
+
+    // console.log("populated Appointments:", populatedAppointments);
+    res.json({ success: true, data: populatedAppointments });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
+router.get("/appointments-by-doctor-id", authMiddleware, async (req, res) => {
+  try {
+    // const moduleType = req.params.module;
+
+    // Fetch appointments for the specified module
+    console.log(req?.body?.userId);
+    const appointments = await UserappModel.find({
+      doctorId: req?.body?.userId,
+    });
     // console.log('vdt:',appointments);
     // If appointments are found, you can fetch user details only
     const populatedAppointments = await Promise.all(

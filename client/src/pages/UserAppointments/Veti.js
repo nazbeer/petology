@@ -1,11 +1,20 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
 import { showLoading, hideLoading } from "../../redux/alertsSlice";
 import { toast } from "react-hot-toast";
 import axios from "axios";
-import { Modal, Form, Input, DatePicker, Button, Table, Radio } from "antd";
+import {
+  Modal,
+  Form,
+  Input,
+  DatePicker,
+  Button,
+  Table,
+  Radio,
+  Tooltip,
+} from "antd";
 import moment from "moment";
 
 import { PDFDocument, rgb } from "pdf-lib";
@@ -33,6 +42,19 @@ function Veti() {
 
   const [font, setFonts] = useState("");
   const [watermarkImage, setWatermarkImage] = useState(null);
+
+  const [arrow, setArrow] = useState("Show");
+  const mergedArrow = useMemo(() => {
+    if (arrow === "Hide") {
+      return false;
+    }
+    if (arrow === "Show") {
+      return true;
+    }
+    return {
+      pointAtCenter: true,
+    };
+  }, [arrow]);
 
   useEffect(() => {
     const loadImage = async () => {
@@ -99,11 +121,15 @@ function Veti() {
   const getAppointmentsData = async () => {
     try {
       dispatch(showLoading());
-      const response = await axios.get(`/api/user/appointments/veterinary`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
+      const response = await axios.post(
+        `/api/user/appointments-by-user-id`,
+        { module: "veterinary" },
+        {
+          headers: {
+            authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
       console.log("response", response.data);
       dispatch(hideLoading());
       if (response.data.success) {
@@ -210,7 +236,7 @@ function Veti() {
       title: "Status",
       dataIndex: "status",
       render: (text, record) => (
-        <span className="text-capitalize">{record?.status}</span>
+        <span className="text-capitalize">{record?.status === 'blocked' ? 'Cancelled' : record?.status}</span>
       ),
     },
     {
@@ -235,16 +261,65 @@ function Veti() {
           <button
             className="btn btn-danger btn-sm"
             onClick={() => cancelAppointment(record?._id)}
-            disabled={cancelledAppointments.includes(record?._id)}
+            disabled={cancel(record?.status)}
           >
-            {cancelledAppointments.includes(record?._id)
-              ? "Cancelled"
-              : "Cancel"}
+            {cancel(record?.status) ? "Cancelled" : "Cancel"}
+          </button>
+
+          <button
+            className="btn btn-success btn-sm ms-2"
+            // onClick={() => cancelAppointment(record?._id)}
+            disabled={refund(record?.createdAt, record?.status)}
+            style={{
+              display: `${
+                refund(record?.createdAt, record?.status) ? "none" : ""
+              }  `,
+            }}
+          >
+            Refund
           </button>
         </div>
       ),
     },
+    {
+      render: (text, record) => (
+        <Tooltip
+          // placement="top"
+          title="Payment only be refunded before 24 Hours"
+          // arrow={mergedArrow}
+        >
+          <i className="ri-question-mark"></i>
+        </Tooltip>
+      ),
+    },
   ];
+
+  const cancel = (status) => {
+    if (status === "blocked" || status === "user cancelled") {
+      return true;
+    } else return false;
+  };
+
+  const refund = (date, status) => {
+    const targetDate = new Date(date);
+
+    // Calculate the date 7 days from now
+    const sevenDaysLater = new Date();
+    sevenDaysLater.setDate(sevenDaysLater.getDate() - 7);
+    console.log(targetDate, sevenDaysLater);
+
+    // Check if the current date is 7 days or more after the target date
+    const isMoreThanSevenDays = targetDate > sevenDaysLater;
+
+    if (
+      isMoreThanSevenDays &&
+      (status === "blocked" || status === "user cancelled")
+    ) {
+      return false;
+    } else {
+      return true;
+    }
+  };
 
   const showPrescriptionModal = (appointmentId) => {
     getPrescriptionsData(appointmentId);
@@ -477,7 +552,7 @@ function Veti() {
             </div>
             <Form.Item>
               <div className="d-flex row">
-                <div className="col-11">
+                <div className="col-9">
                   <Radio.Group name="radiogroup" defaultValue={1}>
                     <Radio value={1} onChange={handleNext}>
                       {" "}
@@ -493,8 +568,10 @@ function Veti() {
                     type="button"
                     className="btn btn-success btn-sm cusrsor-pointer"
                     onClick={createPDF}
+                    style={{ width: 130 }}
                   >
                     <i className="ri-download-line"></i>
+                    Export to PDF
                   </button>
                 </div>
               </div>

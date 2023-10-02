@@ -291,6 +291,8 @@ const MobVet = () => {
                   id="date"
                   name="date"
                   min={new Date().toISOString().split('T')[0]}
+                  max={(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)).toISOString().split('T')[0]}
+
                   value={service.date}
                   onChange={handleChange}
                   required

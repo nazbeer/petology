@@ -12,6 +12,7 @@ const mobgroomappModel = require("../models/mobgroomappModel");
 const Pack = require("../models/packModel");
 const UserappModel = require("../models/userappModel");
 const officetime = require("../models/OfficeTimeModel");
+const packModel = require("../models/packModel");
 router.get("/get-all-appointments", async (req, res) => {
   try {
     const appointmentList = await OpenAppointment.find({})
@@ -273,6 +274,25 @@ router.post("/get-office-time", async (req, res) => {
     console.log(error);
     res.status(500).send({
       message: "Error in Fetching Office time",
+      success: false,
+      error,
+    });
+  }
+});
+
+router.post("/get-pack-by-module", async (req, res) => {
+  try {
+    const packs = await packModel.find({ serviceType: req.body.module });
+    console.log(packs);
+    res.status(200).send({
+      message: "Pack List fetched successfully",
+      success: true,
+      data: packs,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({
+      message: "Error Fetching Pack list",
       success: false,
       error,
     });

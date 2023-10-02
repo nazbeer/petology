@@ -22,6 +22,8 @@ const Vet = () => {
 
   const [doctor, setDoctor] = useState({});
 
+  const [packs, setPacks] = useState({});
+
   const [appointmentTime, setAppointment] = useState({});
 
   const [doctorTime, setDoctorTime] = useState("");
@@ -71,6 +73,22 @@ const Vet = () => {
       .then((response) => setDoctorList(response.data.data))
       .catch((error) => console.error(error));
 
+    axios
+      .post(
+        "/api/user/get-pack-by-module",
+        { module: "Veterinary" },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      )
+      .then((response) => {
+        setPacks(response.data.data);
+        console.log(response.data.data);
+      })
+      .catch((error) => console.error(error));
+
     getOfficeTime();
     console.log(time);
   }, []);
@@ -98,7 +116,7 @@ const Vet = () => {
     userId: "",
     // password:''
   });
-  console.log(localStorage.getItem("token"));
+  console.log(service.service);
   useEffect(() => {
     getAppointmentInfo(doctorId);
     getDoctorInfo(doctorId);
@@ -259,11 +277,41 @@ const Vet = () => {
     }
   };
 
+  const createPayment = async (userId, appointmentId, amount) => {
+    try {
+      dispatch(showLoading());
+      console.log(doctorId);
+      const response = await axios.post(
+        "/api/user/pay",
+        {
+          userId: userId,
+          appointmentId: appointmentId,
+          amount: amount,
+          status: "paid",
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      dispatch(hideLoading());
+      if (response.data.success) {
+        console.log(response.data.data);
+      }
+    } catch (error) {
+      console.log(error);
+      dispatch(hideLoading());
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     console.log(service?.doctorId);
 
     try {
+      console.log(service);
       const response = await axios.post(
         "/api/user/user-book-appointment",
         service,
@@ -360,19 +408,22 @@ const Vet = () => {
                 </div>
               </div>
               <div className="mb-2">
-                <label htmlFor="service">Choose Service: </label>
+                <label htmlFor="service">Choose Package: </label>
                 <select
-                  className="form-control p-0"
+                  className="form-control"
                   id="service"
                   name="service"
-                  multiple
                   onChange={handleChange}
-                  style={{ height: "120px" }}
                 >
-                  <option value={service.service}>Micro Chipping</option>
-                  <option value={service.service}>Vaccination</option>
-
-                  <option value={service.service}>Consultation</option>
+                  <option>Select Package...</option>
+                  {packs.length > 0 &&
+                    packs.map((data, key) => {
+                      return (
+                        <option key={data.key} value={data._id}>
+                          {data.subService} - Price: {data.price} AED
+                        </option>
+                      );
+                    })}
                 </select>
               </div>
               <div className="mb-2">
@@ -462,7 +513,12 @@ const Vet = () => {
                   id="date"
                   name="date"
                   value={service.date}
-                  min={new Date().toISOString().split('T')[0]}
+                  min={new Date().toISOString().split("T")[0]}
+                  max={
+                    new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+                      .toISOString()
+                      .split("T")[0]
+                  }
                   onChange={handleChange}
                   required
                 />

@@ -17,6 +17,7 @@ const MobileVet = () => {
   const [time, setTime] = useState([]);
   const [autocomplete, setAutocomplete] = useState(null);
   const [location, setLocation] = useState({ lat: 25.2048, lng: 55.2708 });
+  const [packs, setPacks] = useState("");
   const [service, setService] = useState({
     doctor: "Any",
     service: "Mobile Veterinary",
@@ -36,6 +37,19 @@ const MobileVet = () => {
   });
 
   useEffect(() => {
+    axios
+      .post(
+        "http://localhost:5000/api/open/get-pack-by-module",
+        { module: "Mobile Veterinary" },
+        {
+          // headers: {
+          //   Authorization: `Bearer ${localStorage.getItem("token")}`,
+          // },
+        }
+      )
+      .then((response) => setPacks(response.data.data))
+      .catch((error) => console.error(error));
+
     getOfficeTime();
     console.log(time);
   }, []);
@@ -127,11 +141,16 @@ const MobileVet = () => {
                       id="service"
                       name="service"
                       onChange={handleChange}
-                      disabled
                     >
-                      <option value="Mobile Veterinary">
-                        Mobile Veterinary
-                      </option>
+                      <option defaultValue="">Select Service...</option>
+                      {packs.length > 0 &&
+                        packs.map((data, key) => {
+                          return (
+                            <option key={data.key} value={data._id}>
+                              {data.subService} - Price: {data.price} AED
+                            </option>
+                          );
+                        })}
                     </select>
                   </div>
 
@@ -198,7 +217,12 @@ const MobileVet = () => {
                       type="date"
                       id="date"
                       name="date"
-                      min={new Date().toISOString().split('T')[0]}
+                      min={new Date().toISOString().split("T")[0]}
+                      max={
+                        new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+                          .toISOString()
+                          .split("T")[0]
+                      }
                       value={service.date}
                       onChange={handleChange}
                       required
