@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Form, Input, DatePicker, TimePicker, Select, Button } from "antd";
 import { toast } from "react-hot-toast";
-import moment from 'moment';
+import moment from "moment";
 
 const PrescriptionForm = ({ selectedAppointmentId, onClose }) => {
   const [selectedAppointment, setSelectedAppointment] = useState(null);
@@ -32,25 +32,29 @@ const PrescriptionForm = ({ selectedAppointmentId, onClose }) => {
       }
     });
 
-    axios.get(`/api/doctor/get-all-users/${selectedAppointmentId}`, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-    }).then((response) => {
-      if (response.data.success) {
-        setUsers(response.data.data);
-      }
-    });
+    axios
+      .get(`/api/doctor/get-all-users/${selectedAppointmentId}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      })
+      .then((response) => {
+        if (response.data.success) {
+          setUsers(response.data.data);
+        }
+      });
 
-    axios.get("/api/pet/get-all-pets", {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-    }).then((response) => {
-      if (response.data.success) {
-        setPets(response.data.data);
-      }
-    });
+    axios
+      .get("/api/pet/get-all-pets", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      })
+      .then((response) => {
+        if (response.data.success) {
+          setPets(response.data.data);
+        }
+      });
   }, [selectedAppointmentId]);
 
   const handleSubmit = async (values) => {
@@ -105,19 +109,30 @@ const PrescriptionForm = ({ selectedAppointmentId, onClose }) => {
         </Select>
       </Form.Item>
 
-      <Form.Item label="Prescription" name="prescription" rules={[{ required: true }]}>
+      <Form.Item
+        label="Prescription"
+        name="prescription"
+        rules={[{ required: true }]}
+      >
         <Input.TextArea rows={4} />
       </Form.Item>
 
-      <Form.Item label="Description" name="description" rules={[{ required: true }]}>
+      <Form.Item
+        label="Description"
+        name="description"
+        rules={[{ required: true }]}
+      >
         <Input.TextArea rows={4} />
       </Form.Item>
 
       <Form.Item label="Next Appointment Date" name="ndate">
-        <DatePicker style={{ width: "100%" }} />
+        <DatePicker
+          style={{ width: "100%" }}
+          disabledDate={(current) => {
+            return moment().add(-1, "days") >= current;
+          }}
+        />
       </Form.Item>
-
-    
 
       <Form.Item>
         <Button type="primary" htmlType="submit">

@@ -32,6 +32,7 @@ const UploadHistory = () => {
     try {
       const response = await axios.get(`/api/admin/history/${userId}`);
       if (response.data.success) {
+        console.log(response.data.data)
         setHistoryRecords(response.data.data);
       }
     } catch (error) {
@@ -44,11 +45,11 @@ const UploadHistory = () => {
     fetchHistoryRecords(userId);
   };
   const renderFile = (path) => {
-    console.log(path)
+    // console.log(path);
     const ext = path.split(".").pop().toLowerCase();
-    const mainPath = path.split("/").pop().toLowerCase()
-    const file = `http://localhost:5000/${mainPath}`
-    console.log(file);
+    const mainPath = path.split("/").pop().toLowerCase();
+    const file = `http://localhost:5000/${mainPath}`;
+    // console.log(file);
     // If it's an image
     if (["jpg", "jpeg", "png", "gif"].includes(ext)) {
       return (
@@ -136,6 +137,20 @@ const UploadHistory = () => {
     {
       title: "ID",
       dataIndex: "_id",
+    },
+    {
+      title: "User Name",
+      dataIndex: "name",
+      render: (text, record) => (
+        <span className="text-capitalize">{record?.user?.name}</span>
+      ),
+    },
+    {
+      title: "Pet Name",
+      dataIndex: "petname",
+      render: (text, record) => (
+        <span className="text-capitalize">{record?.pet?.petName}</span>
+      ),
     },
     {
       title: "Patient History",

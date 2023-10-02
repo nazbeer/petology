@@ -4,7 +4,11 @@ import { Form, Input, DatePicker, TimePicker, Select, Button } from "antd";
 import { toast } from "react-hot-toast";
 import moment from "moment";
 
-const PrescriptionForm = ({ selectedAppointmentId, onClose, appointmentData }) => {
+const PrescriptionForm = ({
+  selectedAppointmentId,
+  onClose,
+  appointmentData,
+}) => {
   const [form] = Form.useForm();
 
   const [selectedAppointment, setSelectedAppointment] = useState(null);
@@ -15,17 +19,17 @@ const PrescriptionForm = ({ selectedAppointmentId, onClose, appointmentData }) =
   useEffect(() => {
     form.setFieldsValue({
       appointmentId: selectedAppointmentId,
-      customID:appointmentData?.customId,
+      customID: appointmentData?.customId,
       userId: appointmentData?.user?.userId,
       userName: appointmentData?.user?.name,
       petName: appointmentData?.user?.pet,
       petId: appointmentData?.petInfo?.pet,
-      doctorId:`${appointmentData?.doctor?.firstName} ${appointmentData?.doctor?.lastName}`,
+      doctorId: `${appointmentData?.doctor?.firstName} ${appointmentData?.doctor?.lastName}`,
       doctorName: `${appointmentData?.doctorInfo?.firstName} ${appointmentData?.doctorInfo?.lastName}`,
     });
   }, [selectedAppointmentId, appointmentData]);
 
- // console.log(appointmentData?.petInfo);
+  // console.log(appointmentData?.petInfo);
   useEffect(() => {
     if (selectedAppointmentId) {
       axios
@@ -41,26 +45,20 @@ const PrescriptionForm = ({ selectedAppointmentId, onClose, appointmentData }) =
           }
         });
     }
-
-   
   }, [selectedAppointmentId]);
 
   const handleSubmit = async (values) => {
     try {
-      const response = await axios.post(
-        "/api/doctor/addprescription",
-        values, 
-        {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          }
-      );
-      console.log('Response', response );
+      const response = await axios.post("/api/doctor/addprescription", values, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+      console.log("Response", response);
       if (response.data.success) {
         toast.success("Prescription added successfully");
         //form.resetFields();
-       // onClose();
+        // onClose();
       }
     } catch (error) {
       toast.error("Error adding prescription");
@@ -68,10 +66,8 @@ const PrescriptionForm = ({ selectedAppointmentId, onClose, appointmentData }) =
   };
 
   return (
-   
-
     <Form form={form} onFinish={handleSubmit} layout="vertical" width={800}>
-      <Form.Item label="Appointment ID" name="customID" >
+      <Form.Item label="Appointment ID" name="customID">
         <Input disabled />
       </Form.Item>
       <Form.Item label="Appointment ID" name="appointmentId" hidden>
@@ -82,10 +78,10 @@ const PrescriptionForm = ({ selectedAppointmentId, onClose, appointmentData }) =
       </Form.Item>
 
       <Form.Item label="User" name="userName" rules={[{ required: true }]}>
-        <Input  disabled />
+        <Input disabled />
       </Form.Item>
 
-      <Form.Item label="Pet" name="petName"  >
+      <Form.Item label="Pet" name="petName">
         <Input value="Dog" placeholder="Dog" disabled />
       </Form.Item>
 
@@ -97,7 +93,7 @@ const PrescriptionForm = ({ selectedAppointmentId, onClose, appointmentData }) =
         <Input disabled />
       </Form.Item> */}
       <Form.Item label="Doctor" name="doctorId">
-        <Input value={form.getFieldValue('doctorId')} disabled />
+        <Input value={form.getFieldValue("doctorId")} disabled />
       </Form.Item>
       <Form.Item
         label="Prescription"
@@ -116,9 +112,13 @@ const PrescriptionForm = ({ selectedAppointmentId, onClose, appointmentData }) =
       </Form.Item>
 
       <Form.Item label="Next Appointment Date" name="ndate">
-        <DatePicker style={{ width: "100%" }} />
+        <DatePicker
+          style={{ width: "100%" }}
+          disabledDate={(current) => {
+            return moment().add(-1, "days") >= current;
+          }}
+        />
       </Form.Item>
-
 
       <Form.Item>
         <Button type="primary" htmlType="submit">

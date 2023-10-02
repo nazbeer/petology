@@ -109,7 +109,7 @@ const GroomerList = () => {
     doc.setFontSize(20);
 
     const headers = ["Name", "Email", "Phone", "Created At", "Status"];
-    const datas = filteredData.map((item) => [
+    const datas = filteredData && filteredData.map((item) => [
       item?.name,
       item?.email,
       item?.mobile,

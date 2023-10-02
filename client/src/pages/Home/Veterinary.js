@@ -333,6 +333,7 @@ const Veterinary = () => {
                       type="date"
                       id="date"
                       name="date"
+                      min={new Date().toISOString().split('T')[0]}
                       value={service.date}
                       onChange={handleChange}
                       required

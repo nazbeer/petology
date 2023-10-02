@@ -80,7 +80,7 @@ const Groom = () => {
       })
       .catch((error) => console.error(error));
 
-      getOfficeTime()
+    getOfficeTime();
   }, []);
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -230,6 +230,7 @@ const Groom = () => {
                   type="date"
                   id="date"
                   name="date"
+                  min={new Date().toISOString().split("T")[0]}
                   value={service.date}
                   onChange={handleChange}
                   required

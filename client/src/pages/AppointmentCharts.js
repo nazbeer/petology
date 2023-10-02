@@ -183,11 +183,15 @@ const AppointmentCharts = () => {
     animationEnabled: true,
     theme: "light2",
     title: {
-      text: "Monthly Sum of Amount",
+      text: "",
     },
     axisX: {
       interval: 1,
+      title: 'Months',
       labels: payments.map((item) => item.x), // Month names
+    },
+    axisY: {
+      title: 'Amount'
     },
 
     data: [

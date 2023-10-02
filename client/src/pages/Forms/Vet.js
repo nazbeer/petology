@@ -462,6 +462,7 @@ const Vet = () => {
                   id="date"
                   name="date"
                   value={service.date}
+                  min={new Date().toISOString().split('T')[0]}
                   onChange={handleChange}
                   required
                 />

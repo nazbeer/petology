@@ -153,12 +153,12 @@ router.post(
 
 router.post("/reschudle-appointment", authMiddleware, async (req, res) => {
   try {
-    const { appointmentId, doctorId, time } = req.body;
+    const { appointmentId, doctorId, time, date } = req.body;
 
     // Find the appointment by ID and update the doctorId
     const updatedAppointment = await UserappModel.findByIdAndUpdate(
       appointmentId,
-      { doctorId, time },
+      { doctorId, time, date },
       { new: true } // Return the updated appointment
     );
 
@@ -177,26 +177,26 @@ router.post("/reschudle-appointment", authMiddleware, async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: "Doctor assigned successfully",
+      message: "Appointment reschduled successfully",
       data: updatedAppointment,
     });
   } catch (error) {
     console.error(error);
     res.status(500).json({
       success: false,
-      message: "An error occurred while assigning the doctor",
+      message: "An error occurred while reschuling the appointment",
     });
   }
 });
 
 router.post("/reschudle-open-appointment", authMiddleware, async (req, res) => {
   try {
-    const { appointmentId, doctorId, time } = req.body;
+    const { appointmentId, doctorId, time, date } = req.body;
 
     // Find the appointment by ID and update the doctorId
     const updatedAppointment = await openappointmentModel.findByIdAndUpdate(
       appointmentId,
-      { doctorId, time },
+      { doctorId, time, date },
       { new: true } // Return the updated appointment
     );
 
@@ -215,26 +215,26 @@ router.post("/reschudle-open-appointment", authMiddleware, async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: "Doctor assigned successfully",
+      message: "Appointment reschduled successfully",
       data: updatedAppointment,
     });
   } catch (error) {
     console.error(error);
     res.status(500).json({
       success: false,
-      message: "An error occurred while assigning the doctor",
+      message: "An error occurred while reschuling the appointment",
     });
   }
 });
 
 router.post("/reschudle-appointment-time", authMiddleware, async (req, res) => {
   try {
-    const { appointmentId, doctorId, time } = req.body;
+    const { appointmentId, doctorId, time, date } = req.body;
 
     // Find the appointment by ID and update the doctorId
     const updatedAppointment = await UserappModel.findByIdAndUpdate(
       appointmentId,
-      { time },
+      { time, date },
       { new: true } // Return the updated appointment
     );
 
@@ -253,14 +253,14 @@ router.post("/reschudle-appointment-time", authMiddleware, async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: "Doctor assigned successfully",
+      message: "Appointment reschduled  successfully",
       data: updatedAppointment,
     });
   } catch (error) {
     console.error(error);
     res.status(500).json({
       success: false,
-      message: "An error occurred while assigning the doctor",
+      message: "An error occurred while reschuling the appointment",
     });
   }
 });
@@ -380,6 +380,64 @@ router.get("/get-all-appointments", authMiddleware, async (req, res) => {
     });
   }
 });
+
+router.post(
+  "/get-all-module-appointments",
+  authMiddleware,
+  async (req, res) => {
+    try {
+      const appointmentList = await UserappModel.find({
+        module: req?.body?.module,
+      });
+      // console.log(appointmentList);
+      const userId = appointmentList.map((item) => item.userId);
+      const doctorId = appointmentList.map((item) => item.doctorId);
+      const users = await User.find(
+        { _id: { $in: userId } },
+        { name: 1, _id: 1 }
+      );
+      const doctors = await Doctor.find(
+        { _id: { $in: doctorId } },
+        { firstName: 1, lastName: 1, _id: 1, specialization: 1, status: 1 }
+      );
+
+      const combinedList = [];
+
+      // Loop through list1 and add objects from list2 and list3 based on commonField
+      appointmentList.forEach((obj1) => {
+        // Find matching objects in list2 based on commonField
+        const matchingObj2 = users.find(
+          (obj2) => obj2._id.toString() === obj1.userId
+        );
+
+        // Find matching objects in list3 based on commonField
+        const matchingObj3 = doctors.find(
+          (obj3) => obj3._id.toString() === obj1.doctorId
+        );
+        console.log(matchingObj2);
+        // Combine the objects into a new object and push it to the result array
+        combinedList.push({
+          appointment: obj1,
+          user: matchingObj2, // Use {} as a default in case there is no match
+          doctor: matchingObj3, // Use {} as a default in case there is no match
+        });
+      });
+
+      res.status(200).send({
+        message: "Appointment List fetched successfully",
+        success: true,
+        data: combinedList,
+      });
+    } catch (error) {
+      console.log(error);
+      res.status(500).send({
+        message: "Error fetching All Appointments",
+        success: false,
+        error,
+      });
+    }
+  }
+);
 
 router.post("/create-service", authMiddleware, async (req, res) => {
   const { serviceType, serviceName, subServiceName, price, pet, size } =
@@ -595,7 +653,7 @@ router.post(
 router.post("/change-groomer-status", authMiddleware, async (req, res) => {
   try {
     const { groomerId, status } = req.body;
-    console.log(groomerId, status)
+    console.log(groomerId, status);
     const user = await User.findByIdAndUpdate(groomerId, {
       status,
     });
@@ -897,7 +955,7 @@ router.post("/update-doctor/:doctorId", authMiddleware, async (req, res) => {
 
 router.post("/update-groomer/:userId", authMiddleware, async (req, res) => {
   try {
-    console.log(req.params)
+    console.log(req.params);
     const { userId } = req.params;
     const updatedFields = req.body;
 
@@ -1027,7 +1085,23 @@ router.get("/history/:userId", async (req, res) => {
   try {
     const userId = req.params.userId;
     const historyRecords = await HistoryModel.find({ userId });
-    res.json({ success: true, data: historyRecords });
+    const populatedAppointments = await Promise.all(
+      historyRecords.map(async (historyRecord) => {
+        //  const doctorId = appointment.doctorId;
+        // Assuming you have a User model for user details
+        const user = await User.findOne({ _id: userId });
+        const pet = await User.findOne({ userId: userId });
+        //   const doctor = await Doctor.findOne({ _id: doctorId });
+        //  console.log("user:", user);
+        return {
+          ...historyRecord.toObject(),
+          user,
+          pet,
+          //  doctor
+        };
+      })
+    );
+    res.json({ success: true, data: populatedAppointments });
   } catch (error) {
     console.error("Error fetching history records:", error);
     res.status(500).json({ success: false, message: "Server error" });

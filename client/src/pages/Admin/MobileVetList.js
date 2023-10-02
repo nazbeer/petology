@@ -3,7 +3,7 @@ import { useDispatch } from "react-redux";
 import Layout from "../../components/Layout";
 import { showLoading, hideLoading } from "../../redux/alertsSlice";
 import axios from "axios";
-import { Table } from "antd";
+import { Table, DatePicker } from "antd";
 import { Button, Modal } from "react-bootstrap";
 import moment from "moment";
 import { toast } from "react-hot-toast";
@@ -11,11 +11,15 @@ import { Link } from "react-router-dom";
 import Geocode from "react-geocode";
 import OfficeTimeCalculate from "../../components/OfficeTimeCalculate";
 
+import JsPDF from "jspdf";
+import "jspdf-autotable";
+
 // Set your Google Maps API key here
 Geocode.setApiKey("AIzaSyAxdklbUsegbWsasCJpvfmin95xzIxiY3Y");
 const apiKey = "AIzaSyAxdklbUsegbWsasCJpvfmin95xzIxiY3Y";
 
 function MobileVetList(doctorId) {
+  const { RangePicker } = DatePicker;
   const [appointments, setAppointments] = useState([]);
   const [openappointments, setOpenAppointments] = useState([]);
   const [doctors, setDoctors] = useState([]);
@@ -27,6 +31,16 @@ function MobileVetList(doctorId) {
   const [appTime, setAppTime] = useState({});
   const [time, setTime] = useState([]);
   const [showOpenReschudleModal, setShowOpenReschudleModal] = useState(false);
+  const [date, setDate] = useState([]);
+
+  const [filter, setFilter] = useState(true);
+
+  const [filterType, setFilterType] = useState("");
+  let [onlyDate, setOnlyDate] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [filteredData, setFilteredData] = useState([]);
+  const [filteredGuestData, setFilteredGuestData] = useState([]);
 
   const dispatch = useDispatch();
 
@@ -107,7 +121,7 @@ function MobileVetList(doctorId) {
   };
   const reschudleAppointment = async () => {
     try {
-      console.log(selectedAppointment, appTime);
+      console.log(selectedAppointment, appTime, date);
       const time = parseTime(appTime);
       console.log(time);
       const response = await axios.post(
@@ -115,6 +129,7 @@ function MobileVetList(doctorId) {
         {
           appointmentId: selectedAppointment?.appointment?._id,
           time: time,
+          date: date,
         },
         {
           headers: {
@@ -135,7 +150,7 @@ function MobileVetList(doctorId) {
 
   const reschudleOpenAppointment = async () => {
     try {
-      console.log(selectedAppointment, appTime);
+      console.log(selectedAppointment, appTime, date);
       const time = parseTime(appTime);
       console.log(time);
       const response = await axios.post(
@@ -143,6 +158,7 @@ function MobileVetList(doctorId) {
         {
           appointmentId: selectedAppointment?._id,
           time: time,
+          date: date,
         },
         {
           headers: {
@@ -242,11 +258,15 @@ function MobileVetList(doctorId) {
 
   const getAppointmentsData = async () => {
     try {
-      const response = await axios.get("/api/user/get-all-appointments", {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
+      const response = await axios.post(
+        "/api/admin/get-all-module-appointments",
+        { module: "mobile_veterinary" },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
 
       if (response.data.success) {
         setAppointments(response.data.data);
@@ -503,7 +523,9 @@ function MobileVetList(doctorId) {
     {
       title: "Date",
       dataIndex: "date",
-      render: (text, record) => <span>{moment(record.date).format("LL")}</span>,
+      render: (text, record) => (
+        <span>{moment(record?.appointment?.date).format("LL")}</span>
+      ),
       responsive: ["xs", "md", "sm", "lg"],
     },
     {
@@ -558,6 +580,165 @@ function MobileVetList(doctorId) {
     },
   ];
 
+  const handleFilterType = (event) => {
+    console.log(event.target.value);
+    setFilterType(event.target.value);
+  };
+
+  const onChangeDate = (date, dateString) => {
+    setOnlyDate(moment(dateString).format("LL"));
+
+    console.log(moment(dateString).format("LL"));
+  };
+
+  const onChangeRange = (date, dateString) => {
+    setStartDate(moment(dateString[0]).format("LL"));
+    setEndDate(moment(dateString[1]).format("LL"));
+    console.log(
+      moment(dateString[0]).format("LL"),
+      moment(dateString[1]).format("LL")
+    );
+  };
+
+  const handleFilter = () => {
+    onlyDate = new Date(onlyDate);
+    const startDateObj = new Date(startDate);
+    const endDateObj = new Date(endDate);
+
+    const filtered = appointments.filter((item) => {
+      console.log(item);
+      const itemDate = new Date(item?.appointment?.date);
+      console.log(
+        onlyDate.toDateString(),
+        startDateObj.toDateString(),
+        endDateObj.toDateString(),
+        itemDate.toDateString()
+      );
+      if (filterType === "Date") {
+        return itemDate.toDateString() === onlyDate.toDateString();
+      } else {
+        // Date range filter
+        console.log(
+          itemDate.toDateString(),
+          startDateObj.toDateString(),
+          endDateObj.toDateString()
+        );
+
+        return (
+          itemDate.toDateString() >= startDateObj.toDateString() &&
+          itemDate.toDateString() <= endDateObj.toDateString()
+        );
+      }
+    });
+
+    const filteredGuest = openappointments.filter((item) => {
+      console.log(item);
+      const itemDate = new Date(item?.date);
+      console.log(
+        onlyDate.toDateString(),
+        startDateObj.toDateString(),
+        endDateObj.toDateString(),
+        itemDate.toDateString()
+      );
+      if (filterType === "Date") {
+        return itemDate.toDateString() === onlyDate.toDateString();
+      } else {
+        // Date range filter
+        return (
+          itemDate.toDateString() >= startDateObj.toDateString() &&
+          itemDate.toDateString() <= endDateObj.toDateString()
+        );
+      }
+    });
+
+    console.log(filtered);
+
+    setFilteredData(filtered.length > 0 ? filtered : null);
+    setFilteredGuestData(filteredGuest.length > 0 ? filteredGuest : null);
+
+    console.log(filtered.length > 0 ? filtered : null);
+
+    setFilter(false);
+  };
+
+  const createPdfWithTable = async (data) => {
+    const doc = new JsPDF();
+    doc.setFontSize(30);
+    doc.text(70, 20, "Appointments");
+
+    doc.setFontSize(20);
+    doc.text(10, 40, "Appointments List (Registered Users)");
+
+    const headers = [
+      "ParentName",
+      "Doctor",
+      "Specialization",
+      "Date",
+      "Status",
+      "Time",
+    ];
+    const datas = filteredData && filteredData.map((item) => [
+      item?.user?.name,
+      `${item?.doctor?.firstName} ${item?.doctor?.lastName}`,
+      item?.doctor?.specialization,
+
+      moment(item?.appointment?.date).format("LL"),
+      item?.appointment?.status,
+     item?.appointment?.time,
+    ]);
+    console.log(datas);
+
+    doc.autoTable({
+      head: [headers],
+      body: datas,
+      theme: "striped",
+      margin: { top: 50 },
+    });
+
+    const headers1 = [
+      "Service",
+      "Requested",
+      "Pet",
+      "Date",
+      "Time",
+      "Mobile",
+      "Status",
+    ];
+    const datas1 = filteredGuestData && filteredGuestData.map((item) => [
+      item?.module,
+      item?.service,
+      item?.pet,
+      moment(item?.date).format("LL"),
+      item?.time,
+      item?.mobile,
+      item?.status,
+    ]);
+    const tableHeight = doc.autoTable.previous.finalY;
+
+    doc.setFontSize(20);
+    doc.text(10, tableHeight + 20, "Guest Appointments");
+    doc.autoTable({
+      startY: tableHeight + 30,
+      head: [headers1],
+      body: datas1,
+      theme: "striped",
+    });
+
+    const pdfBytes = doc.save("appointments.pdf");
+
+    const blob = new Blob([pdfBytes], { type: "application/pdf" });
+    const url = URL.createObjectURL(blob);
+
+    // Create a temporary link element to trigger the download
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "appointments.pdf";
+    a.click();
+
+    // Clean up
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <Layout>
       <div className="col-md-12">
@@ -591,24 +772,101 @@ function MobileVetList(doctorId) {
           </div>
         </div>
         <hr />
-        <Table
-          columns={usercolumns}
-          dataSource={appointments}
-          responsive={true}
-          scroll={{ x: true }}
-        />
+        <div className="row">
+          <div className="mb-2 col">
+            <select
+              className="form-control"
+              id="break"
+              name="break"
+              value={filterType}
+              onChange={handleFilterType}
+            >
+              <option defaultValue="">Select Filter...</option>
+              <option value="Date">Date</option>
+              <option value="Range">Range</option>
+              {/* <option value="Weekly">Weekly</option>
+              <option value="Montly">Montly</option> */}
+            </select>
+          </div>
+          {filterType === "Range" && (
+            <div className="mb-2 col">
+              <RangePicker onChange={onChangeRange} style={{ width: "100%" }} />
+            </div>
+          )}
+          {filterType === "Date" && (
+            <div className="mb-2 col">
+              <DatePicker
+                onChange={onChangeDate}
+                size="large"
+                style={{ width: "100%" }}
+              />
+            </div>
+          )}
+          <div className="mt-1 col">
+            <button
+              type="submit"
+              className="btn btn-success btn-sm me-3"
+              onClick={handleFilter}
+            >
+              Filter
+            </button>
+            <button
+              type="submit"
+              className="btn btn-success btn-sm"
+              onClick={createPdfWithTable}
+              disabled={filter}
+            >
+              Export to PDF
+            </button>
+          </div>
+        </div>
+        {filteredData !== null ? (
+          filteredData.length > 0 ? (
+            <Table
+              columns={usercolumns}
+              dataSource={filteredData}
+              responsive={true}
+              scroll={{ x: true }}
+            />
+          ) : (
+            <Table
+              columns={usercolumns}
+              dataSource={appointments}
+              responsive={true}
+              scroll={{ x: true }}
+            />
+          )
+        ) : (
+          <div className="text-center m-5">No result found</div>
+        )}
 
         <div></div>
       </div>
-      <div className="col-md-12">
-        <h6>Guest Appointments</h6>
-        <Table
-          columns={opencolumns}
-          dataSource={openappointments}
-          responsive={true}
-          scroll={{ x: true }}
-        />
-      </div>
+      {filteredGuestData !== null ? (
+        filteredGuestData.length > 0 ? (
+          <div className="col-md-12">
+            <h6>Open Appointment Lists</h6>
+            <Table
+              columns={opencolumns}
+              dataSource={filteredGuestData}
+              responsive={true}
+              scroll={{ x: true }}
+            />
+          </div>
+        ) : (
+          <div className="col-md-12">
+            <h6>Open Appointment Lists</h6>
+            <Table
+              columns={opencolumns}
+              dataSource={openappointments}
+              responsive={true}
+              scroll={{ x: true }}
+            />
+          </div>
+        )
+      ) : (
+        <div className="text-center m-5">No result found</div>
+      )}
       <div>
         <Modal
           show={showReschudleModal}
@@ -618,13 +876,32 @@ function MobileVetList(doctorId) {
           <Modal.Header closeButton>
             <Modal.Title>
               <div className="d-lg-flex justify-content-between align-items-center">
-                <span>Appointment Details</span>
+                <span>Appointment Reschedule</span>
                 {/* {selectedAppointment && selectedAppointment._id} */}
               </div>
             </Modal.Title>
           </Modal.Header>
           <Modal.Body>
             <div className="col-md-12 ">
+              <div className="d-lg-flex justify-content-between align-items-center gap-4 mb-3">
+                <label htmlFor="time">Date:</label>
+
+                <DatePicker
+                  getPopupContainer={() =>
+                    document.getElementById("date-popup")
+                  }
+                  popupStyle={{
+                    position: "relative",
+                    width: "34%",
+                  }}
+                  style={{ width: "100%", zIndex: "1000 !important" }}
+                  onChange={setDate}
+                  disabledDate={(current) => {
+                    return moment().add(-1, "days") >= current;
+                  }}
+                />
+              </div>
+              <div id="date-popup" />
               <div className="d-lg-flex justify-content-between align-items-center gap-4 mb-3">
                 <label htmlFor="time">Time:</label>
 
@@ -662,7 +939,7 @@ function MobileVetList(doctorId) {
           <Modal.Header closeButton>
             <Modal.Title>
               <div className="d-lg-flex justify-content-between align-items-center">
-                <span>Appointment Details</span>
+                <span>Appointment Reschedule</span>
                 {/* {selectedAppointment && selectedAppointment._id} */}
               </div>
             </Modal.Title>
@@ -678,6 +955,26 @@ function MobileVetList(doctorId) {
                       selectedAppointment?.lastname}
                 </span>
               </div>
+
+              <div className="d-lg-flex justify-content-between align-items-center gap-4 mb-3">
+                <label htmlFor="time">Date:</label>
+
+                <DatePicker
+                  getPopupContainer={() =>
+                    document.getElementById("date-popup")
+                  }
+                  popupStyle={{
+                    position: "relative",
+                    width: "34%",
+                  }}
+                  style={{ width: "100%", zIndex: "1000 !important" }}
+                  onChange={setDate}
+                  disabledDate={(current) => {
+                    return moment().add(-1, "days") >= current;
+                  }}
+                />
+              </div>
+              <div id="date-popup" />
 
               <div className="d-lg-flex justify-content-between align-items-center gap-4 mb-3">
                 <label htmlFor="time">Time:</label>

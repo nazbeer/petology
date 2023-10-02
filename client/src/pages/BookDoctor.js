@@ -208,6 +208,9 @@ function BookDoctor() {
                     setDate(moment(value).format("DD-MM-YYYY"));
                     setIsAvailable(false);
                   }}
+                  disabledDate={(current) => {
+                    return moment().add(-1, "days") >= current;
+                  }}
                 />
                 <TimePicker
                   format="HH:mm"

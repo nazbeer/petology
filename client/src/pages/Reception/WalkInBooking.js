@@ -11,13 +11,32 @@ import Footer from "../../frontend_components/Footer";
 import Layout from "../../components/Layout";
 import OfficeTimeCalculate from "../../components/OfficeTimeCalculate";
 
-const WalkInBooking = () => {
+const WalkInBookingAdmin = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const [doctorList, setDoctorList] = useState([]);
-
   const [time, setTime] = useState([]);
+  const [service, setService] = useState({
+    module: "Veterinary",
+    // doctor:'',
+    doctorId: "",
+    breed: "",
+    service: "",
+    package: "",
+    age: "",
+    petName: "",
+    pet: "",
+    date: "",
+    time: "",
+    firstname: "",
+    lastname: "",
+    email: "",
+    mobile: "",
+    userId: "",
+    isWalkin: true,
+    // password:''
+  });
 
   const [doctorId, setDoctorId] = useState("");
 
@@ -140,7 +159,7 @@ const WalkInBooking = () => {
     }
   };
 
-  const getOfficeTime = () => {
+  const getOfficeTime = (module) => {
     axios
       .post(
         "/api/admin/get-office-time",
@@ -167,7 +186,6 @@ const WalkInBooking = () => {
         setTime(data);
       })
       .catch((error) => console.error(error));
-    getOfficeTime();
   };
   useEffect(() => {
     getAppointmentInfo(doctorId);
@@ -183,26 +201,6 @@ const WalkInBooking = () => {
 
     getOfficeTime();
   }, []);
-  const [service, setService] = useState({
-    module: "Veterinary",
-    // doctor:'',
-    doctorId: "",
-    breed: "",
-    service: "",
-    package: "",
-    age: "",
-    petName: "",
-    pet: "",
-    date: "",
-    time: "",
-    firstname: "",
-    lastname: "",
-    email: "",
-    mobile: "",
-    userId: "",
-    isWalkin: true,
-    // password:''
-  });
 
   const [vetPackage, setVetPackage] = useState([]);
   const [grromPackage, setGroomPackage] = useState([]);
@@ -469,6 +467,7 @@ const WalkInBooking = () => {
                         type="date"
                         id="date"
                         name="date"
+                        min={new Date().toISOString().split('T')[0]}
                         value={service.date}
                         onChange={handleChange}
                         required
@@ -569,4 +568,4 @@ const WalkInBooking = () => {
   );
 };
 
-export default WalkInBooking;
+export default WalkInBookingAdmin;

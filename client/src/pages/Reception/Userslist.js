@@ -371,7 +371,7 @@ function Userslist() {
       "User Type",
       "Created At",
     ];
-    const datas = filteredData.map((item) => [
+    const datas = filteredData && filteredData.map((item) => [
       item?.name,
       item?.email,
       item?.mobile,
