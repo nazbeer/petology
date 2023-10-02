@@ -120,7 +120,7 @@ function Appointmentlist(doctorsId) {
       dispatch(showLoading());
 
       const response = await axios.post(
-        `/api/admin/change-appointment-status/${record._id}`, // Include the appointment ID in the URL
+        `/api/admin/change-appointment-status/${record?.appointment?._id}`, // Include the appointment ID in the URL
         {
           status: status,
         },
@@ -580,6 +580,7 @@ function Appointmentlist(doctorsId) {
           record?.status === "blocked" ? (
             <button
               type="button"
+              style={{ width: 90 }}
               className="btn btn-warning btn-sm text-capitalize"
               onClick={() => changeOpenAppointmentStatus(record, "approved")}
             >
@@ -588,6 +589,7 @@ function Appointmentlist(doctorsId) {
           ) : (
             <button
               type="button"
+              style={{ width: 90 }}
               className="btn btn-danger btn-sm text-capitalize"
               onClick={() => changeOpenAppointmentStatus(record, "blocked")}
             >
@@ -597,6 +599,7 @@ function Appointmentlist(doctorsId) {
           <button
             type="button"
             className="btn btn-success btn-sm text-capitalize ml-2"
+            style={{ width: 90 }}
             onClick={() => handleShowOpenReschudleModal(record)}
           >
             Reschedule
@@ -700,6 +703,7 @@ function Appointmentlist(doctorsId) {
           {record?.appointment?.status === "user cancelled" ? (
             <button
               type="button"
+              style={{ width: 90 }}
               className="btn btn-danger btn-sm text-capitalize"
               onClick={() => changeAppointmentStatus(record, "blocked")}
               disabled
@@ -709,6 +713,7 @@ function Appointmentlist(doctorsId) {
           ) : record?.appointment?.status === "pending" ||
             record?.appointment?.status === "blocked" ? (
             <button
+              style={{ width: 90 }}
               type="button"
               className="btn btn-warning btn-sm text-capitalize"
               onClick={() => changeAppointmentStatus(record, "approved")}
@@ -719,6 +724,7 @@ function Appointmentlist(doctorsId) {
             <button
               type="button"
               className="btn btn-danger btn-sm text-capitalize"
+              style={{ width: 90 }}
               onClick={() => changeAppointmentStatus(record, "blocked")}
             >
               Cancel

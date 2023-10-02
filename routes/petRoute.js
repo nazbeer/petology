@@ -5,14 +5,28 @@ const authMiddleware = require("../middlewares/authMiddleware");
 const multer = require("multer");
 const fs = require("fs");
 const path = require("path");
-
+const User = require("../models/userModel");
 router.get("/get-all-pets", authMiddleware, async (req, res) => {
   try {
-    const pet = await Pet.find({});
+    const pets = await Pet.find({});
+    const populatedPets = await Promise.all(
+      pets.map(async (pet) => {
+        const userId = pet.userId;
+
+        // Assuming you have a User model for user details
+        const user = await User.findOne({ _id: userId });
+        //   console.log("user:", user);
+
+        return {
+          ...pet.toObject(),
+          user,
+        };
+      })
+    );
     res.status(200).send({
       success: true,
       message: "All pets fetched successfully.",
-      data: pet,
+      data: populatedPets,
     });
   } catch (error) {
     res.status(500).send({

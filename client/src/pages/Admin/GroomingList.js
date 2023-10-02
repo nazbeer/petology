@@ -119,7 +119,7 @@ function GroomingList(doctorId) {
       dispatch(showLoading());
 
       const response = await axios.post(
-        `/api/admin/change-appointment-status/${record._id}`, // Include the appointment ID in the URL
+        `/api/admin/change-appointment-status/${record?.appointment?._id}`, // Include the appointment ID in the URL
         {
           status: status,
         },
@@ -399,6 +399,7 @@ function GroomingList(doctorId) {
           {record?.appointment?.status === "user cancelled" ? (
             <button
               type="button"
+              style={{ width: 90 }}
               className="btn btn-danger btn-sm text-capitalize"
               onClick={() => changeAppointmentStatus(record, "blocked")}
               disabled
@@ -409,6 +410,7 @@ function GroomingList(doctorId) {
             record?.appointment?.status === "blocked" ? (
             <button
               type="button"
+              style={{ width: 90 }}
               className="btn btn-warning btn-sm text-capitalize"
               onClick={() => changeAppointmentStatus(record, "approved")}
             >
@@ -417,6 +419,7 @@ function GroomingList(doctorId) {
           ) : (
             <button
               type="button"
+              style={{ width: 90 }}
               className="btn btn-danger btn-sm text-capitalize"
               onClick={() => changeAppointmentStatus(record, "blocked")}
             >
@@ -425,6 +428,7 @@ function GroomingList(doctorId) {
           )}
           <button
             type="button"
+
             className="btn btn-success btn-sm text-capitalize"
             onClick={() => handleShowOpenReschudleModal(record)}
           >
@@ -522,6 +526,7 @@ function GroomingList(doctorId) {
           {record?.appointment?.status === "user cancelled" ? (
             <button
               type="button"
+              style={{ width: 90 }}
               className="btn btn-danger btn-sm text-capitalize"
               onClick={() => changeAppointmentStatus(record, "blocked")}
               disabled
@@ -540,6 +545,7 @@ function GroomingList(doctorId) {
           ) : (
             <button
               type="button"
+              style={{ width: 90 }}
               className="btn btn-danger btn-sm text-capitalize"
               onClick={() => changeAppointmentStatus(record, "blocked")}
             >

@@ -183,7 +183,7 @@ function MobileGroomingList(doctorId) {
       dispatch(showLoading());
 
       const response = await axios.post(
-        `/api/admin/change-appointment-status/${record._id}`, // Include the appointment ID in the URL
+        `/api/admin/change-appointment-status/${record?.appointment?._id}`, // Include the appointment ID in the URL
         {
           status: status,
         },
@@ -248,7 +248,7 @@ function MobileGroomingList(doctorId) {
       );
 
       if (response.data.success) {
-        console.log(response.data.data)
+        console.log(response.data.data);
         setAppointments(response.data.data);
       }
     } catch (error) {
@@ -470,6 +470,7 @@ function MobileGroomingList(doctorId) {
           record?.status === "blocked" ? (
             <button
               type="button"
+              style={{ width: 90 }}
               className="btn btn-warning btn-sm text-capitalize"
               onClick={() => changeOpenAppointmentStatus(record, "approved")}
             >
@@ -478,6 +479,7 @@ function MobileGroomingList(doctorId) {
           ) : (
             <button
               type="button"
+              style={{ width: 90 }}
               className="btn btn-danger btn-sm text-capitalize"
               onClick={() => changeOpenAppointmentStatus(record, "blocked")}
             >
@@ -573,9 +575,10 @@ function MobileGroomingList(doctorId) {
       dataIndex: "actions",
       render: (text, record) => (
         <div className="d-flex justify-content-evenly align-items-center gap-3">
-           {record?.appointment?.status === "user cancelled" ? (
+          {record?.appointment?.status === "user cancelled" ? (
             <button
               type="button"
+              style={{ width: 90 }}
               className="btn btn-danger btn-sm text-capitalize"
               onClick={() => changeAppointmentStatus(record, "blocked")}
               disabled
@@ -586,6 +589,7 @@ function MobileGroomingList(doctorId) {
             record?.appointment?.status === "blocked" ? (
             <button
               type="button"
+              style={{ width: 90 }}
               className="btn btn-warning btn-sm text-capitalize"
               onClick={() => changeAppointmentStatus(record, "approved")}
             >
@@ -594,6 +598,7 @@ function MobileGroomingList(doctorId) {
           ) : (
             <button
               type="button"
+              style={{ width: 90 }}
               className="btn btn-danger btn-sm text-capitalize"
               onClick={() => changeAppointmentStatus(record, "blocked")}
             >
@@ -712,16 +717,18 @@ function MobileGroomingList(doctorId) {
       "Status",
       "Time",
     ];
-    const datas = filteredData && filteredData.map((item) => [
-      item?.user?.name,
-      item?.appointment?.petName,
-      // `${item?.doctor?.firstName} ${item?.doctor?.lastName}`,
-      // item?.doctor?.specialization,
+    const datas =
+      filteredData &&
+      filteredData.map((item) => [
+        item?.user?.name,
+        item?.appointment?.petName,
+        // `${item?.doctor?.firstName} ${item?.doctor?.lastName}`,
+        // item?.doctor?.specialization,
 
-      moment(item?.appointment?.date).format("LL"),
-      item?.appointment?.status,
-     item?.appointment?.time,
-    ]);
+        moment(item?.appointment?.date).format("LL"),
+        item?.appointment?.status,
+        item?.appointment?.time,
+      ]);
     console.log(datas);
 
     doc.autoTable({
@@ -740,15 +747,17 @@ function MobileGroomingList(doctorId) {
       "Mobile",
       "Status",
     ];
-    const datas1 = filteredGuestData && filteredGuestData.map((item) => [
-      item?.module,
-      item?.service,
-      item?.pet,
-      moment(item?.date).format("LL"),
-      item?.time,
-      item?.mobile,
-      item?.status,
-    ]);
+    const datas1 =
+      filteredGuestData &&
+      filteredGuestData.map((item) => [
+        item?.module,
+        item?.service,
+        item?.pet,
+        moment(item?.date).format("LL"),
+        item?.time,
+        item?.mobile,
+        item?.status,
+      ]);
     const tableHeight = doc.autoTable.previous.finalY;
 
     doc.setFontSize(20);

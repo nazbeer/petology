@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { Table, Spin } from "antd";
+import { LoadingOutlined } from "@ant-design/icons";
 
 const DoctorsPetlist = () => {
   const navigate = useNavigate();
   const [pets, setPets] = useState([]);
 
-  const [date, setDate] = useState('');
+  const [date, setDate] = useState("");
 
-  const [filteredlist, setFilteredlist] = useState([]); // Initially, it's the same as the initial list
+  const [filteredlist, setFilteredlist] = useState([]); 
+  const [loading, setLoading] = useState(true);
 
   const handleFilter = () => {
     // You can adjust the filter criteria as needed
@@ -23,7 +26,7 @@ const DoctorsPetlist = () => {
       console.log(filteredItems);
 
       setFilteredlist(filteredItems.length > 0 ? filteredItems : null);
-    } 
+    }
   };
 
   const handleChange = (e) => {
@@ -33,6 +36,7 @@ const DoctorsPetlist = () => {
   };
   const getData = async () => {
     try {
+      setLoading(true);
       //     dispatch(showLoading())
       const response = await axios.get("/api/pet/get-all-pets", {
         headers: {
@@ -44,13 +48,76 @@ const DoctorsPetlist = () => {
         console.log(response.data.success);
 
         setPets(response.data.data);
+        setLoading(false);
         // const approvedD = response.data;
         // setApprovedDoctors(approvedD);
       }
     } catch (error) {
+      setLoading(false);
       //       dispatch(hideLoading())
     }
   };
+
+  const columns = [
+    {
+      title: "Pet",
+      dataIndex: "pet",
+      render: (text, record) => <span>{record?.pet}</span>,
+      responsive: ["xs", "md", "sm", "lg"],
+    },
+    {
+      title: "PetName",
+      dataIndex: "petName",
+      render: (text, record) => <span>{record?.petName}</span>,
+      responsive: ["xs", "md", "sm", "lg"],
+    },
+    {
+      title: "User Name",
+      dataIndex: "userName",
+      render: (text, record) => <span>{record?.user?.name}</span>,
+      responsive: ["xs", "md", "sm", "lg"],
+    },
+    {
+      title: "size",
+      dataIndex: "size",
+      render: (text, record) => <span>{record?.size}</span>,
+      responsive: ["xs", "md", "sm", "lg"],
+    },
+
+    {
+      title: "breed",
+      dataIndex: "breed",
+      render: (text, record) => <span>{record?.breed}</span>,
+      responsive: ["xs", "md", "sm", "lg"],
+    },
+    {
+      title: "Actions",
+      dataIndex: "actions",
+      render: (text, record) => (
+        <div className="d-flex justify-content-around align-items-center gap-2">
+          <button
+            className="btn btn-success btn-sm"
+            type="button"
+            onClick={() => navigate(`/book-appointment/${record?._id}`)}
+          >
+            <i className="ri-eye-line"></i>
+          </button>
+        </div>
+      ),
+      responsive: ["xs", "md", "sm", "lg"],
+    },
+  ];
+
+  const customLoader = (
+    <div style={{ textAlign: "center", margin: "50px auto" }}>
+      <Spin
+        indicator={
+          <LoadingOutlined style={{ fontSize: 48, color: "#1890ff" }} spin />
+        }
+      />
+      <p style={{ marginTop: "10px" }}>Loading...</p>
+    </div>
+  );
 
   useEffect(() => {
     getData();
@@ -82,7 +149,28 @@ const DoctorsPetlist = () => {
           </div>
         </div>
       </div>
-      <div className="table-responsive-sm">
+      {loading ? (
+        customLoader // Use the custom loader
+      ) : filteredlist !== null ? (
+        filteredlist.length > 0 ? (
+          <Table
+            columns={columns}
+            dataSource={filteredlist}
+            responsive={true}
+            scroll={{ x: true }}
+          />
+        ) : (
+          <Table
+            columns={columns}
+            dataSource={pets}
+            responsive={true}
+            scroll={{ x: true }}
+          />
+        )
+      ) : (
+        <div className="text-center m-5">No result found</div>
+      )}
+      {/* <div className="table-responsive-sm">
         <table className="table table-striped">
           <thead>
             <tr>
@@ -93,8 +181,9 @@ const DoctorsPetlist = () => {
             </tr>
           </thead>
           <tbody>
-            { filteredlist !== null ? (filteredlist.length > 0
-              ? filteredlist.map((pet, key) => (
+            {filteredlist !== null ? (
+              filteredlist.length > 0 ? (
+                filteredlist.map((pet, key) => (
                   <tr key={pet.key}>
                     <td>{pet.pet}</td>
                     <td>{pet.size}</td>
@@ -109,8 +198,9 @@ const DoctorsPetlist = () => {
                       </button>
                     </td>
                   </tr>
-                 
-                )) : (pets.map((pet, key) => (
+                ))
+              ) : (
+                pets.map((pet, key) => (
                   <tr key={pet.key}>
                     <td>{pet.pet}</td>
                     <td>{pet.size}</td>
@@ -125,11 +215,14 @@ const DoctorsPetlist = () => {
                       </button>
                     </td>
                   </tr>
-                ))))
-              :  <div>No result found</div>}
+                ))
+              )
+            ) : (
+              <div>No result found</div>
+            )}
           </tbody>
         </table>
-      </div>
+      </div> */}
     </div>
   );
 };

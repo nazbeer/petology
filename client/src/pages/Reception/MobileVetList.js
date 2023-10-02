@@ -205,7 +205,7 @@ function MobileVetList(doctorId) {
       dispatch(showLoading());
 
       const response = await axios.post(
-        `/api/admin/change-appointment-status/${record._id}`,
+        `/api/admin/change-appointment-status/${record?.appointment?._id}`,
         {
           status: status,
         },
@@ -455,6 +455,7 @@ function MobileVetList(doctorId) {
           record?.status === "blocked" ? (
             <button
               type="button"
+              style={{ width: 90 }}
               className="btn btn-warning btn-sm text-capitalize"
               onClick={() => changeOpenAppointmentStatus(record, "approved")}
             >
@@ -463,6 +464,7 @@ function MobileVetList(doctorId) {
           ) : (
             <button
               type="button"
+              style={{ width: 90 }}
               className="btn btn-danger btn-sm text-capitalize"
               onClick={() => changeOpenAppointmentStatus(record, "blocked")}
             >
@@ -574,6 +576,7 @@ function MobileVetList(doctorId) {
           {record?.appointment?.status === "user cancelled" ? (
             <button
               type="button"
+              style={{ width: 90 }}
               className="btn btn-danger btn-sm text-capitalize"
               onClick={() => changeAppointmentStatus(record, "blocked")}
               disabled
@@ -584,6 +587,7 @@ function MobileVetList(doctorId) {
             record?.appointment?.status === "blocked" ? (
             <button
               type="button"
+              style={{ width: 90 }}
               className="btn btn-warning btn-sm text-capitalize"
               onClick={() => changeAppointmentStatus(record, "approved")}
             >
