@@ -9,6 +9,7 @@ import PetLists from "../components/PetLists";
 import { useDispatch, useSelector } from "react-redux";
 import { showLoading, hideLoading } from "../redux/alertsSlice";
 import DoctorsPetlist from "../components/DoctorsPetlist";
+import AppointmentCharts from "./AppointmentCharts";
 function ReceptionHome() {
  
   const [doctorCount, setDoctorCount] = useState('');
@@ -54,6 +55,7 @@ function ReceptionHome() {
   return (
     <>
     <Layout>
+    
     <div className="col-md-12 d-lg-flex justify-content-around align-items-center gap-2 p-3 ">
       <div className="col-md-3 mb-2">
         <div className="card">
@@ -111,6 +113,9 @@ function ReceptionHome() {
           </div>
         </div>
       </div>
+    </div>
+    <div className="col-md-12">
+      <AppointmentCharts />
     </div>
     <div className="col-md-12">
       <DoctorsPetlist/>

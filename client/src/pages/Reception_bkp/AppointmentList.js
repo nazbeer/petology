@@ -44,7 +44,7 @@ function Appointmentlist(doctorId) {
       dispatch(showLoading());
 
       const response = await axios.post(
-        `/api/admin/change-appointment-status/${record._id}`, // Include the appointment ID in the URL
+        `/api/admin/change-appointment-status/${record?.appointment?._id}}`, // Include the appointment ID in the URL
         {
           status: status,
         },
