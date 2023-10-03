@@ -212,7 +212,7 @@ router.post("/reschudle-open-appointment", authMiddleware, async (req, res) => {
     const { appointmentId, doctorId, time, date } = req.body;
 
     // Find the appointment by ID and update the doctorId
-    const updatedAppointment = await openappointmentModel.findByIdAndUpdate(
+    const updatedAppointment = await OpenAppointment.findByIdAndUpdate(
       appointmentId,
       { doctorId, time, date },
       { new: true } // Return the updated appointment
@@ -340,9 +340,12 @@ router.get(
     }
   }
 );
-router.get("/get-all-open-appointments", async (req, res) => {
+router.post("/get-all-open-appointments", async (req, res) => {
+  console.log(req?.body)
   try {
-    const appointmentList = await OpenAppointment.find({})
+    const appointmentList = await OpenAppointment.find({
+      module: req?.body?.module,
+    })
       .populate("doctor", "name specialization") // Assuming 'doctor' field is a reference to User model
       .exec();
     res.status(200).send({

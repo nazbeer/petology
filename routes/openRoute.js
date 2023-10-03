@@ -13,6 +13,13 @@ const Pack = require("../models/packModel");
 const UserappModel = require("../models/userappModel");
 const officetime = require("../models/OfficeTimeModel");
 const packModel = require("../models/packModel");
+const crypto = require("crypto");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const Paymentmodel = require("../models/Paymentmodel");
+const nodemailer = require("nodemailer");
+
+require("dotenv").config();
 router.get("/get-all-appointments", async (req, res) => {
   try {
     const appointmentList = await OpenAppointment.find({})
@@ -90,23 +97,133 @@ router.get("/get-all-approved-doctors", async (req, res) => {
   }
 });
 
+function generateRandomPassword(length) {
+  const charset =
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_-+=<>?";
+  let password = "";
+
+  for (let i = 0; i < length; i++) {
+    const randomIndex = Math.floor(Math.random() * charset.length);
+    password += charset[randomIndex];
+  }
+
+  return password;
+}
+
 router.post("/book-appointment", async (req, res) => {
   try {
-    const appointmentData = req.body;
+    const appointmentData = req?.body;
 
     // Create a new appointment
+
+    let conditions = [];
+
+    if (req?.body?.email) {
+      conditions.push({ email: req?.body?.email });
+    }
+
+    if (req?.body?.mobile) {
+      conditions.push({ mobile: req?.body?.mobile });
+    }
+
+    if (conditions.length === 0) {
+      return res.status(400).send({
+        message: "No valid search parameters provided",
+        success: false,
+      });
+    }
+
+    const userExists = await User.findOne({ $or: conditions });
+
+    if (userExists) {
+      return res.status(400).send({
+        message: "User already exists. Login to Continue",
+        success: false,
+      });
+    }
     const newAppointment = new OpenAppointment(appointmentData);
     const savedAppointment = await newAppointment.save();
-    // Update the user's appointment array
-    await User.findByIdAndUpdate(
-      appointmentData.userId,
-      { $addToSet: { appointments: savedAppointment._id } },
-      { new: true }
-    );
+
+    const password = generateRandomPassword(10);
+
+    console.log(password);
+
+    const activationToken = crypto.randomBytes(32).toString("hex");
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+    req.body.password = hashedPassword;
+
+    const newUser = new User({
+      email: req?.body?.email,
+      mobile: req?.body?.mobile,
+      name: `${req?.body?.firstname}${req?.body?.lastname}`,
+      password: req?.body?.password,
+      username: `${req?.body?.firstname}${req?.body?.lastname}${
+        Math.floor(Math.random() * 900) + 100
+      }`,
+    });
+    newUser.activationToken = activationToken;
+    await newUser.save();
+    const activationLink = `http://localhost:3000/activate/${activationToken}`;
+
+    console.log(activationLink);
+
+    const doctor = await Doctor.findOne({ _id: req?.body?.doctorId });
+    console.log(req?.body?.service);
+    const service = await packModel.findOne({ _id: req?.body?.service });
+    let amount = Number(service.price);
+
+    if (req?.body?.module === "veterinary") {
+      amount = amount + doctor?.feePerCunsultation;
+    }
+
+    const payment = new Paymentmodel({
+      userId: newUser?._id,
+      appointmentId: savedAppointment?._id,
+      amount: amount,
+      status: "success",
+    });
+
+    await payment.save();
+
+    const transporter = nodemailer.createTransport({
+      host: "mailslurp.mx",
+      port: 2587,
+      auth: {
+        user: process.env.USER,
+        pass: process.env.PASS,
+      },
+    });
+    const mailOptions = {
+      from: process.env.EMAIL,
+      to: req.body.email,
+      subject: "Welcome to Petology",
+      html: `
+      <html>
+        <body>
+          <p>Hello ${req.body.name},</p>
+          <p>Thank you for booking appointment on Your App!</p>
+          <p>Please click the following link to activate your account:</p>
+          <a href="${activationLink}">Activate Account</a>
+          <p>Here is you auto-generated password ${password}</p>
+        </body>
+      </html>
+    `,
+    };
+
+    console.log(mailOptions);
+
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.log("Error sending email:", error);
+      } else {
+        console.log("Email sent:", info.response);
+      }
+    });
 
     res.status(200).json({
       success: true,
-      message: "Veterniary Appointment booked successfully",
+      message: "Open Appointment booked successfully",
       data: savedAppointment,
     });
   } catch (error) {

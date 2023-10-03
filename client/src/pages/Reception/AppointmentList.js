@@ -362,11 +362,15 @@ function Appointmentlist(doctorsId) {
 
   const getOpenAppointmentsData = async () => {
     try {
-      const response = await axios.get("/api/admin/get-all-open-appointments", {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
+      const response = await axios.post(
+        "/api/admin/get-all-open-appointments",
+        { module: "Veterinary" },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
 
       if (response.data.success) {
         setOpenAppointments(response.data.data);
@@ -1155,7 +1159,11 @@ function Appointmentlist(doctorsId) {
                     style={{ width: "100%", zIndex: "1000 !important" }}
                     onChange={setDate}
                     disabledDate={(current) => {
-                      return moment().add(-1, "days") >= current;
+                      return (
+                        current &&
+                        (current < moment().startOf("day") ||
+                          current > moment().endOf("day").add(7, "days"))
+                      );
                     }}
                   />
                 </div>
@@ -1274,7 +1282,11 @@ function Appointmentlist(doctorsId) {
                   style={{ width: "100%", zIndex: "1000 !important" }}
                   onChange={setDate}
                   disabledDate={(current) => {
-                    return moment().add(-1, "days") >= current;
+                    return (
+                      current &&
+                      (current < moment().startOf("day") ||
+                        current > moment().endOf("day").add(7, "days"))
+                    );
                   }}
                 />
               </div>

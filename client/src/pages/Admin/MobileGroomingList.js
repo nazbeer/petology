@@ -289,14 +289,16 @@ function MobileGroomingList(doctorId) {
   };
   const fetchData = async () => {
     try {
-      const response = await axios.get(
-        "/api/admin/get-all-mobgroom-appointments",
+      const response = await axios.post(
+        "/api/admin/get-all-open-appointments",
+        { module: "Mobile Grooiming" },
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
         }
       );
+      console.log(response.data.data);
 
       const modifiedData = [];
       for (const item of response.data.data) {
@@ -458,13 +460,7 @@ function MobileGroomingList(doctorId) {
       dataIndex: "actions",
       render: (text, record) => (
         <div className="d-flex justify-content-evenly align-items-center gap-3">
-          <button
-            type="button"
-            className="btn btn-success btn-sm text-capitalize ml-2"
-            onClick={() => handleShowOpenReschudleModal(record)}
-          >
-            Reschedule
-          </button>
+         
           {record?.status === "pending" ||
           record?.status === "Pending" ||
           record?.status === "blocked" ? (
@@ -486,6 +482,13 @@ function MobileGroomingList(doctorId) {
               Cancel
             </button>
           )}
+           <button
+            type="button"
+            className="btn btn-success btn-sm text-capitalize ml-2"
+            onClick={() => handleShowOpenReschudleModal(record)}
+          >
+            Reschedule
+          </button>
           {/* <button
             type="button"
             className="btn btn-success btn-sm text-capitalize ml-2"
@@ -575,6 +578,7 @@ function MobileGroomingList(doctorId) {
       dataIndex: "actions",
       render: (text, record) => (
         <div className="d-flex justify-content-evenly align-items-center gap-3">
+           
           {record?.appointment?.status === "user cancelled" ? (
             <button
               type="button"
@@ -605,6 +609,13 @@ function MobileGroomingList(doctorId) {
               Cancel
             </button>
           )}
+          <button
+            type="button"
+            className="btn btn-success btn-sm text-capitalize ml-2"
+            onClick={() => handleShowReschudleModal(record)}
+          >
+            Reschedule
+          </button>
 
           {/* <button
               type="button"
@@ -940,7 +951,11 @@ function MobileGroomingList(doctorId) {
                   style={{ width: "100%", zIndex: "1000 !important" }}
                   onChange={setDate}
                   disabledDate={(current) => {
-                    return moment().add(-1, "days") >= current;
+                    return (
+                      current &&
+                      (current < moment().startOf("day") ||
+                        current > moment().endOf("day").add(7, "days"))
+                    );
                   }}
                 />
               </div>
@@ -1014,7 +1029,11 @@ function MobileGroomingList(doctorId) {
                   style={{ width: "100%", zIndex: "1000 !important" }}
                   onChange={setDate}
                   disabledDate={(current) => {
-                    return moment().add(-1, "days") >= current;
+                    return (
+                      current &&
+                      (current < moment().startOf("day") ||
+                        current > moment().endOf("day").add(7, "days"))
+                    );
                   }}
                 />
               </div>

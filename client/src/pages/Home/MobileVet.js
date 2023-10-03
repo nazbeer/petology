@@ -20,7 +20,8 @@ const MobileVet = () => {
   const [packs, setPacks] = useState("");
   const [service, setService] = useState({
     doctor: "Any",
-    service: "Mobile Veterinary",
+    service: "",
+    module: "Mobile Veterinary",
     pet: "",
     size: "",
     age: "",
@@ -105,10 +106,7 @@ const MobileVet = () => {
     e.preventDefault();
 
     try {
-      const response = await axios.post(
-        "/api/open/book-mobvet-appointment",
-        service
-      );
+      const response = await axios.post("/api/open/book-appointment", service);
 
       console.log("New appointment successfully saved:", response.data.data);
       if (response.data.success) {
@@ -117,7 +115,7 @@ const MobileVet = () => {
       }
       // Do something with the response, like showing a success message
     } catch (error) {
-      toast.error("Error in adding Mobile Veterinary Appointment.");
+      toast.error(error.response.data.message);
       //dispatch(hideLoading());
     }
   };
@@ -187,17 +185,16 @@ const MobileVet = () => {
                   )}
 
                   <div className="mb-2">
-                    <label htmlFor="Age">Age:</label>
+                    <label htmlFor="age">Age:</label>
                     <input
                       className="form-control"
                       type="text"
-                      id="Age"
-                      name="Age"
+                      id="age"
+                      name="age"
                       value={service.age}
                       onChange={handleChange}
                     />
                   </div>
-
                   <div className="mb-2">
                     <label htmlFor="breed">Breed:</label>
                     <input

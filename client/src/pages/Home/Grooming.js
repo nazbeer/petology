@@ -76,10 +76,7 @@ const Grooming = () => {
     e.preventDefault();
 
     try {
-      const response = await axios.post(
-        "/api/open/grooming-appointment",
-        service
-      );
+      const response = await axios.post("/api/open/book-appointment", service);
 
       //console.log('service saved successfully:', response.data);
       if (response.data.success) {
@@ -88,7 +85,7 @@ const Grooming = () => {
       }
       // Do something with the response, like showing a success message
     } catch (error) {
-      toast.error("Error in adding New Appointment.");
+      toast.error(error.response.data.message); 
       //dispatch(hideLoading());
     }
   };
@@ -157,12 +154,12 @@ const Grooming = () => {
                   )}
 
                   <div className="mb-2">
-                    <label htmlFor="Age">Age:</label>
+                    <label htmlFor="age">Age:</label>
                     <input
                       className="form-control"
                       type="text"
-                      id="Age"
-                      name="Age"
+                      id="age"
+                      name="age"
                       value={service.age}
                       onChange={handleChange}
                     />

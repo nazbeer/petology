@@ -280,8 +280,9 @@ function MobileVetList(doctorId) {
   const [data, setData] = useState([]);
   const fetchData = async () => {
     try {
-      const response = await axios.get(
-        "/api/admin/get-all-mobvet-appointments",
+      const response = await axios.post(
+        "/api/admin/get-all-open-appointments",
+        { module: "Mobile Veterinary" },
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -443,13 +444,7 @@ function MobileVetList(doctorId) {
       dataIndex: "actions",
       render: (text, record) => (
         <div className="d-flex justify-content-evenly align-items-center gap-3">
-          <button
-            type="button"
-            className="btn btn-success btn-sm text-capitalize ml-2"
-            onClick={() => handleShowOpenReschudleModal(record)}
-          >
-            Reschedule
-          </button>
+          
           {record?.status === "pending" ||
           record?.status === "Pending" ||
           record?.status === "blocked" ? (
@@ -471,6 +466,13 @@ function MobileVetList(doctorId) {
               Cancel
             </button>
           )}
+          <button
+            type="button"
+            className="btn btn-success btn-sm text-capitalize ml-2"
+            onClick={() => handleShowOpenReschudleModal(record)}
+          >
+            Reschedule
+          </button>
         </div>
       ),
       responsive: ["xs", "md", "sm", "lg"],
@@ -566,13 +568,6 @@ function MobileVetList(doctorId) {
       dataIndex: "actions",
       render: (text, record) => (
         <div className="d-flex justify-content-evenly align-items-center gap-3">
-          <button
-            type="button"
-            className="btn btn-success btn-sm text-capitalize ml-2"
-            onClick={() => handleShowReschudleModal(record)}
-          >
-            Reschedule
-          </button>
           {record?.appointment?.status === "user cancelled" ? (
             <button
               type="button"
@@ -602,6 +597,13 @@ function MobileVetList(doctorId) {
               Cancel
             </button>
           )}
+          <button
+            type="button"
+            className="btn btn-success btn-sm text-capitalize ml-2"
+            onClick={() => handleShowReschudleModal(record)}
+          >
+            Reschedule
+          </button>
         </div>
       ),
       responsive: ["xs", "md", "sm", "lg"],
@@ -929,7 +931,11 @@ function MobileVetList(doctorId) {
                   style={{ width: "100%", zIndex: "1000 !important" }}
                   onChange={setDate}
                   disabledDate={(current) => {
-                    return moment().add(-1, "days") >= current;
+                    return (
+                      current &&
+                      (current < moment().startOf("day") ||
+                        current > moment().endOf("day").add(7, "days"))
+                    );
                   }}
                 />
               </div>
@@ -1002,7 +1008,11 @@ function MobileVetList(doctorId) {
                   style={{ width: "100%", zIndex: "1000 !important" }}
                   onChange={setDate}
                   disabledDate={(current) => {
-                    return moment().add(-1, "days") >= current;
+                    return (
+                      current &&
+                      (current < moment().startOf("day") ||
+                        current > moment().endOf("day").add(7, "days"))
+                    );
                   }}
                 />
               </div>
