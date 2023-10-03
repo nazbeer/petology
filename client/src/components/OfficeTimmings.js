@@ -12,24 +12,38 @@ function OfficeTimmings() {
   const { RangePicker } = TimePicker;
   const [vetTime, setVetTime] = useState({
     module: "vet",
-    starttime: "",
-    endtime: "",
+    starttime1: "",
+    endtime1: "",
+    starttime2: "",
+    endtime2: "",
     break: "",
   });
 
   const [groomTime, setGroomTime] = useState({
     module: "groom",
-    starttime: "",
-    endtime: "",
+    starttime1: "",
+    endtime1: "",
+    starttime2: "",
+    endtime2: "",
     break: "",
   });
 
   console.log(groomTime);
-  const onChangeVetRange = (value, dateString) => {
+  const onChangeVetRange1 = (value, dateString) => {
     setVetTime((prev) => ({
       ...prev,
-      starttime: dateString[0],
-      endtime: dateString[1],
+      starttime1: dateString[0],
+      endtime1: dateString[1],
+    }));
+    console.log(dateString[0]);
+    console.log(dateString[1]);
+  };
+
+  const onChangeVetRange2 = (value, dateString) => {
+    setVetTime((prev) => ({
+      ...prev,
+      starttime2: dateString[0],
+      endtime2: dateString[1],
     }));
     console.log(dateString[0]);
     console.log(dateString[1]);
@@ -40,11 +54,21 @@ function OfficeTimmings() {
     setholidayDate(moment(dateString).format("YYYY-MM-DDTHH:mm:ss.000+00:00"));
   };
 
-  const onChangeGroomRange = (value, dateString) => {
+  const onChangeGroomRange1 = (value, dateString) => {
     setGroomTime((prev) => ({
       ...prev,
-      starttime: dateString[0],
-      endtime: dateString[1],
+      starttime1: dateString[0],
+      endtime1: dateString[1],
+    }));
+    console.log(dateString[0]);
+    console.log(dateString[1]);
+  };
+
+  const onChangeGroomRange2 = (value, dateString) => {
+    setGroomTime((prev) => ({
+      ...prev,
+      starttime2: dateString[0],
+      endtime2: dateString[1],
     }));
     console.log(dateString[0]);
     console.log(dateString[1]);
@@ -111,15 +135,24 @@ function OfficeTimmings() {
 
     console.log(vetTime);
 
-    const starttime = timeFormat(vetTime.starttime);
-    const endtime = timeFormat(vetTime.endtime);
+    const starttime1 = timeFormat(vetTime.starttime1);
+    const endtime1 = timeFormat(vetTime.endtime1);
+    const starttime2 = timeFormat(vetTime.starttime2);
+    const endtime2 = timeFormat(vetTime.endtime2);
 
-    console.log(starttime, endtime);
+    console.log(starttime1, endtime1, starttime2, endtime2);
 
     try {
       const response = await axios.post(
         "/api/admin/offie-time",
-        { module: vetTime.module, starttime, endtime, break: vetTime.break },
+        {
+          module: vetTime.module,
+          starttime1,
+          endtime1,
+          starttime2,
+          endtime2,
+          break: vetTime.break,
+        },
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -142,18 +175,21 @@ function OfficeTimmings() {
   const handleSubmitGroom = async (e) => {
     e.preventDefault();
 
-    const starttime = timeFormat(groomTime.starttime);
-    const endtime = timeFormat(groomTime.endtime);
-
-    console.log(starttime, endtime);
+    const starttime1 = timeFormat(groomTime.starttime1);
+    const endtime1 = timeFormat(groomTime.endtime1);
+    const starttime2 = timeFormat(groomTime.starttime2);
+    const endtime2 = timeFormat(groomTime.endtime2);
+    console.log(starttime1, endtime1, starttime2, endtime2);
 
     try {
       const response = await axios.post(
         "/api/admin/offie-time",
         {
           module: groomTime.module,
-          starttime,
-          endtime,
+          starttime1,
+          endtime1,
+          starttime2,
+          endtime2,
           break: groomTime.break,
         },
         {
@@ -217,14 +253,24 @@ function OfficeTimmings() {
 
   const columns = [
     {
-      title: "Start Time",
+      title: "Start Time Shift 1",
       dataIndex: "starttime",
-      render: (text, record) => <span>{record?.starttime}</span>,
+      render: (text, record) => <span>{record?.starttime1}</span>,
     },
     {
-      title: "End Time",
+      title: "End Time Shift 1",
       dataIndex: "endtime",
-      render: (text, record) => <span>{record?.endtime}</span>,
+      render: (text, record) => <span>{record?.endtime1}</span>,
+    },
+    {
+      title: "Start Time Shift 2",
+      dataIndex: "starttime",
+      render: (text, record) => <span>{record?.starttime2}</span>,
+    },
+    {
+      title: "End Time Shift 2",
+      dataIndex: "endtime",
+      render: (text, record) => <span>{record?.endtime2}</span>,
     },
     {
       title: "Break Time",
@@ -241,6 +287,18 @@ function OfficeTimmings() {
     },
   ];
 
+  function range(numbers) {
+    const result = [];
+
+    for (let i = 0; i <= 60; i++) {
+      if (!numbers.includes(i)) {
+        result.push(i);
+      }
+    }
+
+    return result;
+  }
+
   return (
     <Layout>
       <div className="row mt-5">
@@ -251,12 +309,29 @@ function OfficeTimmings() {
             </h1>
             <form onSubmit={handleSubmitVet}>
               <div className="row me-3 ms-3">
-                <label htmlFor="break">Office Time </label>
+                <label htmlFor="break">First Shift </label>
                 <div className=" mb-3 ms-2 me-2">
                   <RangePicker
                     style={{ width: "98%" }}
                     format={"HH:mm"}
-                    onChange={onChangeVetRange}
+                    onChange={onChangeVetRange1}
+                    disabledTime={() => ({
+                      disabledHours: () => [0, 1, 2, 3, 4, 5, 6, 7, 8, 23],
+                      disabledMinutes: () => range([0, 15, 30, 45, 60]),
+                    })}
+                  />
+                </div>
+
+                <label htmlFor="break">Second Shift </label>
+                <div className=" mb-3 ms-2 me-2">
+                  <RangePicker
+                    style={{ width: "98%" }}
+                    format={"HH:mm"}
+                    onChange={onChangeVetRange2}
+                    disabledTime={() => ({
+                      disabledHours: () => [0, 1, 2, 3, 4, 5, 6, 7, 8, 23],
+                      disabledMinutes: () => range([0, 15, 30, 45, 60]),
+                    })}
                   />
                 </div>
                 <div className="mb-2 ">
@@ -272,11 +347,11 @@ function OfficeTimmings() {
                     required
                     bordered={false}
                     options={[
-                      { value: "15 Minutes", label: "15 Minutes" },
-                      { value: "30 Minutes", label: "30 Minutes" },
-                      { value: "45 Minutes", label: "45 Minutes" },
-                      { value: "60 Minutes", label: "60 Minutes" },
-                      { value: "90 Minutes", label: "90 Minutes" },
+                      { value: "5", label: "5 Minutes" },
+                      { value: "10", label: "10 Minutes" },
+                      { value: "15", label: "15 Minutes" },
+                      { value: "30", label: "30 Minutes" },
+                      { value: "45", label: "45 Minutes" },
                     ]}
                   ></Select>
                 </div>
@@ -296,12 +371,29 @@ function OfficeTimmings() {
             </h1>
             <form onSubmit={handleSubmitGroom}>
               <div className="row me-3 ms-3">
-                <label htmlFor="break">Office Time </label>
+                <label htmlFor="break">First Shift </label>
                 <div className=" mb-3 ms-2 me-2">
                   <RangePicker
                     style={{ width: "98%" }}
                     format={"HH:mm"}
-                    onChange={onChangeGroomRange}
+                    onChange={onChangeGroomRange1}
+                    disabledTime={() => ({
+                      disabledHours: () => [0, 1, 2, 3, 4, 5, 6, 7, 8, 23],
+                      disabledMinutes: () => range([0, 15, 30, 45, 60]),
+                    })}
+                  />
+                </div>
+
+                <label htmlFor="break">Second Shift </label>
+                <div className=" mb-3 ms-2 me-2">
+                  <RangePicker
+                    style={{ width: "98%" }}
+                    format={"HH:mm"}
+                    onChange={onChangeGroomRange2}
+                    disabledTime={() => ({
+                      disabledHours: () => [0, 1, 2, 3, 4, 5, 6, 7, 8, 23],
+                      disabledMinutes: () => range([0, 15, 30, 45, 60]),
+                    })}
                   />
                 </div>
                 <div className="mb-2 ">
@@ -317,11 +409,11 @@ function OfficeTimmings() {
                     required
                     bordered={false}
                     options={[
-                      { value: "15 Minutes", label: "15 Minutes" },
-                      { value: "30 Minutes", label: "30 Minutes" },
-                      { value: "45 Minutes", label: "45 Minutes" },
-                      { value: "60 Minutes", label: "60 Minutes" },
-                      { value: "90 Minutes", label: "90 Minutes" },
+                      { value: "5", label: "5 Minutes" },
+                      { value: "10", label: "10 Minutes" },
+                      { value: "15", label: "15 Minutes" },
+                      { value: "30", label: "30 Minutes" },
+                      { value: "45", label: "45 Minutes" },
                     ]}
                   ></Select>
                 </div>

@@ -1,5 +1,5 @@
 // src/components/PetForm.js
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 import jwt_decode from "jwt-decode";
@@ -19,17 +19,15 @@ const PetForm = () => {
     counter++; // Increment the counter for the next ID
     return customID;
   };
+  const [users, setUsers] = useState([]);
   const [pet, setPet] = useState({
+    userID: "",
     pet: "",
     size: "",
     breed: "",
     image: null,
-    userId: "",
     custompetId: generateCustomID(),
   });
-  const userToken = localStorage.getItem("token");
-  const decodedToken = jwt_decode(userToken);
-  const userId = decodedToken.id; // Extract the user ID from the decoded token
   const handleChange = (e) => {
     const { name, value } = e.target;
     setPet((prevState) => ({
@@ -53,7 +51,7 @@ const PetForm = () => {
     formData.append("size", pet.size);
     formData.append("breed", pet.breed);
     formData.append("image", pet.image);
-    formData.append("userId", userId);
+    formData.append("userID", pet.userID);
     formData.append("custompetId", pet.custompetId);
 
     try {
@@ -77,22 +75,53 @@ const PetForm = () => {
     }
   };
 
+  const getusersId = async () => {
+    try {
+      //dispatch(showLoading());
+      const response = await axios.get("/api/user/get-all-users", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+
+      if (response.data.success) {
+        toast.success(response.data.message);
+        setUsers(response.data.data);
+        // dispatch(hideLoading());
+      }
+      // Do something with the response, like showing a success message
+    } catch (error) {
+      toast.error("Error in adding New Pet.");
+      dispatch(hideLoading());
+    }
+  };
+  useEffect(() => {
+    getusersId();
+  }, []);
+
   return (
     <>
       <form onSubmit={handleSubmit}>
         <div className="card">
           <div className="card-body mb-3">
-            <div className="mb-2 d-none">
-              <label htmlFor="userId">User ID:</label>
-              <input
-                className="form-control cursor-disabled bg-light"
-                type="text"
-                id="userId"
-                name="userId"
-                value={userId}
+            <div className="mb-2">
+              <label htmlFor="userID">Choose User: </label>
+              <select
+                className="form-control"
+                id="userID"
+                name="userID"
                 onChange={handleChange}
-                readOnly // User ID is read-only
-              />
+              >
+                <option>Select User...</option>
+                {users.length > 0 &&
+                  users.map((data, key) => {
+                    return (
+                      <option key={data.key} value={data._id}>
+                        {data._id}
+                      </option>
+                    );
+                  })}
+              </select>
             </div>
             <div className="mb-2">
               <label htmlFor="pet">

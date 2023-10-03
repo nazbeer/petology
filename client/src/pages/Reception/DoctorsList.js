@@ -285,8 +285,21 @@ function DoctorsList() {
       dataIndex: "feePerCunsultation",
       render: (number, record) => {
         return (
-          <p className="font-weight-600 text-danger">
-            {record.feePerCunsultation} AED
+          <p className="font-weight-600">{record.feePerCunsultation} AED</p>
+        );
+      },
+      responsive: ["xs", "md", "sm", "lg"],
+    },
+
+    {
+      title: "Doctor Time",
+      dataIndex: "doctorTime",
+      render: (number, record) => {
+        console.log(record?.timings);
+        return (
+          <p className="font-weight-600">
+            {record?.timings &&
+              `${record?.timings[0]} to ${record?.timings[1]}`}
           </p>
         );
       },
@@ -448,22 +461,24 @@ function DoctorsList() {
       "Created At",
       "Status",
     ];
-    const datas = filteredData && filteredData.map((item) => [
-      ` Dr. ${item?.firstName} ${item?.lastName}`,
-      item?.phoneNumber,
-      item?.specialization,
-      item?.experience,
-      item?.breakTime,
-      item?.leaves.map(
-        (leave, index) =>
-          `Start Date: ${moment(leave.startDate).format(
-            "LL"
-          )},  End Date: ${moment(leave.endDate).format("LL")}`
-      ),
-      item?.feePerCunsultation,
-      moment(item?.createdAt).format("LL"),
-      item?.status,
-    ]);
+    const datas =
+      filteredData &&
+      filteredData.map((item) => [
+        ` Dr. ${item?.firstName} ${item?.lastName}`,
+        item?.phoneNumber,
+        item?.specialization,
+        item?.experience,
+        item?.breakTime,
+        item?.leaves.map(
+          (leave, index) =>
+            `Start Date: ${moment(leave.startDate).format(
+              "LL"
+            )},  End Date: ${moment(leave.endDate).format("LL")}`
+        ),
+        item?.feePerCunsultation,
+        moment(item?.createdAt).format("LL"),
+        item?.status,
+      ]);
     console.log(datas);
 
     doc.setFontSize(10);
@@ -508,11 +523,11 @@ function DoctorsList() {
     const starttime = timeFormat(time?.starttime);
     const endtime = timeFormat(time?.endtime);
     try {
-      console.log(starttime, endtime)
+      console.log(starttime, endtime);
       dispatch(showLoading());
       const response = await axios.post(
         `/api/admin/update-doctor/${doctorId}`,
-        { starttime:starttime, endtime:endtime },
+        { starttime: starttime, endtime: endtime },
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,

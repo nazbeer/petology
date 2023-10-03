@@ -19,7 +19,8 @@ const Paymentmodel = require("../models/Paymentmodel");
 const officetime = require("../models/OfficeTimeModel");
 const fs = require("fs");
 const path = require("path");
-const openappointmentModel = require("../models/openAppointmentModel");
+const crypto = require("crypto");
+const bcrypt = require("bcryptjs");
 require("dotenv").config();
 
 const storage = multer.diskStorage({
@@ -855,23 +856,94 @@ router.post("/apply-doctor", async (req, res) => {
   }
 });
 
+function generateRandomPassword(length) {
+  const charset =
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_-+=<>?";
+  let password = "";
+
+  for (let i = 0; i < length; i++) {
+    const randomIndex = Math.floor(Math.random() * charset.length);
+    password += charset[randomIndex];
+  }
+
+  return password;
+}
+
 router.post("/apply-doctor-account", authMiddleware, async (req, res) => {
+  console.log(req?.body)
   try {
     //  const { firstName, lastName, email } = req.body;
+    let conditions = [];
 
-    const newdoctor = new Doctor({ ...req.body, status: "pending" });
+    if (req?.body?.email) {
+      conditions.push({ email: req?.body?.email });
+    }
+
+    if (req?.body?.mobile) {
+      conditions.push({ mobile: req?.body?.phoneNumber });
+    }
+
+    if (conditions.length === 0) {
+      return res.status(400).send({
+        message: "No valid search parameters provided",
+        success: false,
+      });
+    }
+
+    const userExists = await User.findOne({ $or: conditions });
+
+    if (userExists) {
+      return res.status(400).send({
+        message: "User already exists. Login to Continue",
+        success: false,
+      });
+    }
+
+    const password = generateRandomPassword(10);
+
+    console.log(password);
+
+    const activationToken = crypto.randomBytes(32).toString("hex");
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+    req.body.password = hashedPassword;
+
     //console.log(newdoctor);
-    await newdoctor.save();
-    const adminUser = await User.findOne({ isAdmin: true });
-    // const user = new User({
-    //   name: `${firstName} ${lastName}`,
-    //   email,
-    //   password:`$2a$10$Et3V2e5GdR3eBOoXwa0suOObPmXjxHPwtvCkRJoxVaZP3hbGK2pUS`, // You need to hash the password before saving (use bcrypt)
-    //   isDoctor: true,
-    // });
 
-    // Save the user to the database
-    //   await user.save();
+    const adminUser = await User.findOne({ isAdmin: true });
+    const newUser = new User({
+      email: req?.body?.email,
+      mobile: req?.body?.phoneNumber,
+      name: `${req?.body?.firstName}${req?.body?.lastName}`,
+      password: req?.body?.password,
+      username: `${req?.body?.firstName}${req?.body?.lastName}${
+        Math.floor(Math.random() * 900) + 100
+      }`,
+      isDoctor: true,
+      isUser: false,
+    });
+
+    newUser.activationToken = activationToken;
+    await newUser.save();
+
+    const newdoctor = new Doctor({
+      firstName: req?.body?.firstName,
+      lastName: req?.body?.lastName,
+      phoneNumber: req?.body?.phoneNumber,
+      website: req?.body?.website,
+      address: req?.body?.address,
+      specialization: req?.body?.specialization,
+      experience: req?.body?.experience,
+      feePerCunsultation: req?.body?.feePerCunsultation,
+      shift: req?.body?.shift,
+      breakTime: req?.body?.breakTime,
+      status: "pending",
+      userId: newUser?._id,
+    });
+    newdoctor.save();
+    const activationLink = `${process.env.APP_URL}activate/${activationToken}`;
+
+    console.log(activationLink);
     const unseenNotifications = adminUser.unseenNotifications;
     unseenNotifications.push({
       type: "new-doctor-request",
@@ -881,6 +953,41 @@ router.post("/apply-doctor-account", authMiddleware, async (req, res) => {
         name: newdoctor.firstName + " " + newdoctor.lastName,
       },
       onClickPath: "/admin/doctorslist",
+    });
+
+    const transporter = nodemailer.createTransport({
+      host: "mailslurp.mx",
+      port: 2587,
+      auth: {
+        user: process.env.USER,
+        pass: process.env.PASS,
+      },
+    });
+    const mailOptions = {
+      from: process.env.EMAIL,
+      to: req.body.email,
+      subject: "Welcome to Petology",
+      html: `
+      <html>
+        <body>
+          <p>Hello ${req.body.name},</p>
+          <p>Thank you for booking appointment on Your App!</p>
+          <p>Please click the following link to activate your account:</p>
+          <a href="${activationLink}">Activate Account</a>
+          <p>Here is you auto-generated password ${password}</p>
+        </body>
+      </html>
+    `,
+    };
+
+    console.log(mailOptions);
+
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.log("Error sending email:", error);
+      } else {
+        console.log("Email sent:", info.response);
+      }
     });
     await User.findByIdAndUpdate(adminUser._id, { unseenNotifications });
     res.status(200).send({
@@ -1419,8 +1526,10 @@ router.post("/offie-time", authMiddleware, async (req, res) => {
     });
     console.log(existingOfficeTime);
     if (existingOfficeTime) {
-      existingOfficeTime.starttime = req.body.starttime;
-      existingOfficeTime.endtime = req.body.endtime;
+      existingOfficeTime.starttime1 = req.body.starttime1;
+      existingOfficeTime.endtime1 = req.body.endtime1;
+      existingOfficeTime.starttime2 = req.body.starttime2;
+      existingOfficeTime.endtime2 = req.body.endtime2;
       existingOfficeTime.break = req.body.break;
 
       await existingOfficeTime.save();
