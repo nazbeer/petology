@@ -210,7 +210,7 @@ const Veterinary = () => {
         // Do something else, like navigating to another page
       }
     } catch (error) {
-      toast.error("Error in booking appointment.");
+      toast.error(error.response.data.message);
     }
   };
   return (
@@ -312,12 +312,12 @@ const Veterinary = () => {
                     </div>
                   )}
                   <div className="mb-2">
-                    <label htmlFor="Age">Age:</label>
+                    <label htmlFor="age">Age:</label>
                     <input
                       className="form-control"
                       type="text"
-                      id="Age"
-                      name="Age"
+                      id="age"
+                      name="age"
                       value={service.age}
                       onChange={handleChange}
                     />

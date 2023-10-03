@@ -38,6 +38,7 @@ const MobileGrooming = () => {
   const [location, setLocation] = useState({ lat: 25.2048, lng: 55.2708 });
   const [service, setService] = useState({
     // doctor:'Any',
+    module: "Mobile Grooiming",
     service: "",
     pet: "",
     size: "",
@@ -109,10 +110,7 @@ const MobileGrooming = () => {
     e.preventDefault();
 
     try {
-      const response = await axios.post(
-        "/api/open/book-mobgroom-appointment",
-        service
-      );
+      const response = await axios.post("/api/open/book-appointment", service);
 
       console.log("New appointment successfully saved:", response.data.data);
       if (response.data.success) {
@@ -121,7 +119,7 @@ const MobileGrooming = () => {
       }
       // Do something with the response, like showing a success message
     } catch (error) {
-      toast.error("Error in adding Mobile Grooming Appointment.");
+      toast.error(error.response.data.message);
       //dispatch(hideLoading());
     }
   };
@@ -148,7 +146,7 @@ const MobileGrooming = () => {
                     >
                       <option value="">Select Service...</option>
                       {servicesList.map((service) => (
-                        <option key={service._id} value={service.subService}>
+                        <option key={service._id} value={service._id}>
                           {service.subService} - Price: {service.price} AED
                         </option>
                       ))}
@@ -202,12 +200,12 @@ const MobileGrooming = () => {
                   )}
 
                   <div className="mb-2">
-                    <label htmlFor="Age">Age:</label>
+                    <label htmlFor="age">Age:</label>
                     <input
                       className="form-control"
                       type="text"
-                      id="Age"
-                      name="Age"
+                      id="age"
+                      name="age"
                       value={service.age}
                       onChange={handleChange}
                     />
@@ -232,8 +230,12 @@ const MobileGrooming = () => {
                       type="date"
                       id="date"
                       name="date"
-                      min={new Date().toISOString().split('T')[0]}
-                      max={(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)).toISOString().split('T')[0]}
+                      min={new Date().toISOString().split("T")[0]}
+                      max={
+                        new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+                          .toISOString()
+                          .split("T")[0]
+                      }
                       value={service.date}
                       onChange={handleChange}
                       required

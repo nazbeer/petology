@@ -229,7 +229,7 @@ function GroomingList(doctorId) {
       );
 
       if (response.data.success) {
-        console.log(response.data.data)
+        console.log(response.data.data);
         setAppointments(response.data.data);
       }
     } catch (error) {
@@ -256,12 +256,13 @@ function GroomingList(doctorId) {
 
   const getOpenAppointmentsData = async () => {
     try {
-      const response = await axios.get(
-        "/api/open/get-all-grooming-appointments",
+      const response = await axios.post(
+        "/api/admin/get-all-open-appointments",
+        { module: "Grooming" },
         {
-          // headers: {
-          //   Authorization: `Bearer ${localStorage.getItem("token")}`,
-          // },
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
         }
       );
       console.log(response.data.data);
@@ -428,7 +429,6 @@ function GroomingList(doctorId) {
           )}
           <button
             type="button"
-
             className="btn btn-success btn-sm text-capitalize"
             onClick={() => handleShowOpenReschudleModal(record)}
           >
@@ -1003,7 +1003,11 @@ function GroomingList(doctorId) {
                   style={{ width: "100%", zIndex: "1000 !important" }}
                   onChange={setDate}
                   disabledDate={(current) => {
-                    return moment().add(-1, "days") >= current;
+                    return (
+                      current &&
+                      (current < moment().startOf("day") ||
+                        current > moment().endOf("day").add(7, "days"))
+                    );
                   }}
                 />
               </div>
@@ -1077,7 +1081,11 @@ function GroomingList(doctorId) {
                   style={{ width: "100%", zIndex: "1000 !important" }}
                   onChange={setDate}
                   disabledDate={(current) => {
-                    return moment().add(-1, "days") >= current;
+                    return (
+                      current &&
+                      (current < moment().startOf("day") ||
+                        current > moment().endOf("day").add(7, "days"))
+                    );
                   }}
                 />
               </div>

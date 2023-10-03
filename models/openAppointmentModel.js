@@ -3,34 +3,33 @@ const openappointmentSchema = new mongoose.Schema(
   {
     userId: {
       type: String,
-    //  required: true,
+      //  required: true,
     },
     doctorId: {
       type: String,
-   //  required: true,
+      //  required: true,
     },
-    doctor:{
-        type:String
+    doctor: {
+      type: String,
     },
     userId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User', // Reference to the User model
+      ref: "User", // Reference to the User model
       required: false,
     },
-    module:{
-      type :String,
-      enum:['Veterinary', 'Grooming', 'Mobile Veterinary', 'Mobile Grooiming']
+    module: {
+      type: String,
+      enum: ["Veterinary", "Grooming", "Mobile Veterinary", "Mobile Grooiming"],
     },
-   
+
     service: {
       type: String,
       required: true,
     },
-    pet:{
+    pet: {
       type: String,
-
     },
-    
+
     doctorInfo: {
       type: Object,
       required: false,
@@ -56,27 +55,34 @@ const openappointmentSchema = new mongoose.Schema(
       type: Object,
       required: false,
     },
-    firstname:{
+    firstname: {
       type: String,
-      
-
     },
-    lastname:{
-      type:String,
-     
+    lastname: {
+      type: String,
     },
-    email:{
-      type:String,
+    email: {
+      type: String,
     },
-    mobile:{
-      type:String,
-    }
-
+    mobile: {
+      type: String,
+    },
+    lat: {
+      type: String,
+      required: true,
+    },
+    lng: {
+      type: String,
+      required: true,
+    },
   },
   {
     timestamps: true,
   }
 );
 
-const openappointmentModel = mongoose.model("openappointments", openappointmentSchema);
+const openappointmentModel = mongoose.model(
+  "openappointments",
+  openappointmentSchema
+);
 module.exports = openappointmentModel;
