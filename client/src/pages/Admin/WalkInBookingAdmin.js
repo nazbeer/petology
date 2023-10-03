@@ -18,7 +18,7 @@ const WalkInBookingAdmin = () => {
   const [doctorList, setDoctorList] = useState([]);
   const [time, setTime] = useState([]);
   const [service, setService] = useState({
-    module: "Veterinary",
+    module: "",
     // doctor:'',
     doctorId: "",
     breed: "",
@@ -298,11 +298,11 @@ const WalkInBookingAdmin = () => {
                 <div className="row">
                   <div className="col-md-12">
                     <div className="mb-2">
-                      <label htmlFor="service">Choose Service: </label>
+                      <label htmlFor="module">Choose Service: </label>
                       <select
                         className="form-control"
-                        id="service"
-                        name="service"
+                        id="module"
+                        name="module"
                         onChange={handleChange}
                         required
                       >
@@ -314,7 +314,7 @@ const WalkInBookingAdmin = () => {
                   </div>
                 </div>
 
-                {service.service === "Veterinary" && (
+                {service.module === "Veterinary" && (
                   <div className="mb-2">
                     <label htmlFor="package">Choose Package: </label>
                     <select
@@ -336,13 +336,13 @@ const WalkInBookingAdmin = () => {
                   </div>
                 )}
 
-                {service.service === "Grooming" && (
+                {service.module === "Grooming" && (
                   <div className="mb-2">
-                    <label htmlFor="package">Choose Package: </label>
+                    <label htmlFor="service">Choose Package: </label>
                     <select
                       className="form-control"
-                      id="package"
-                      name="package"
+                      id="service"
+                      name="service"
                       onChange={handleChange}
                     >
                       <option>Select Package...</option>
@@ -360,7 +360,7 @@ const WalkInBookingAdmin = () => {
 
                 <div className="row">
                   <div className="col-md-6">
-                    {service.service === "Veterinary" && (
+                    {service.module === "Veterinary" && (
                       <div className="mb-2">
                         <label htmlFor="doctor">Choose Doctor: </label>
                         <select
@@ -425,12 +425,12 @@ const WalkInBookingAdmin = () => {
                       </div>
                     )}
                     <div className="mb-2">
-                      <label htmlFor="PetName">Pet Name:</label>
+                      <label htmlFor="petName">Pet Name:</label>
                       <input
                         className="form-control"
                         type="text"
-                        id="PetName"
-                        name="PetName"
+                        id="petName"
+                        name="petName"
                         value={service.petName}
                         onChange={handleChange}
                       />
@@ -538,7 +538,7 @@ const WalkInBookingAdmin = () => {
                         onChange={handleChange}
                       >
                         {service.doctorId === "Any" ||
-                        service.service === "Grooming" ? (
+                        service.module === "Grooming" ? (
                           time.map((option, index) => (
                             <option key={index} value={option}>
                               {option}

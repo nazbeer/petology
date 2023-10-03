@@ -164,7 +164,7 @@ router.post("/book-appointment", async (req, res) => {
     });
     newUser.activationToken = activationToken;
     await newUser.save();
-    const activationLink = `http://localhost:3000/activate/${activationToken}`;
+    const activationLink = `${process.env.APP_URL}activate/${activationToken}`;
 
     console.log(activationLink);
 
@@ -182,6 +182,7 @@ router.post("/book-appointment", async (req, res) => {
       appointmentId: savedAppointment?._id,
       amount: amount,
       status: "success",
+      openAppointment: true,
     });
 
     await payment.save();
