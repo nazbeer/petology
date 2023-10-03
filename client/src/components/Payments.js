@@ -53,7 +53,7 @@ function Payments() {
       if (response.data.success) {
         console.log(response?.data?.data);
 
-        setPayments(response?.data?.data);
+        setPayments(response?.data?.data || []);
         //  setPayments(response.data.data);
       }
     } catch (error) {
@@ -73,7 +73,7 @@ function Payments() {
       if (response.data.success) {
         console.log(response?.data?.data);
 
-        setPayments(response?.data?.data);
+        setPayments(response?.data?.data || []);
         //  setPayments(response.data.data);
       }
     } catch (error) {
@@ -270,9 +270,23 @@ function Payments() {
       title: "Appointment ID",
       dataIndex: "customId",
       render: (text, record) => (
-        <span className="text-capitalize">{record?.appointment?.customId}</span>
+        <span className="text-capitalize">{record?.appointment?.customId || record?.appointmentId}</span>
       ),
     },
+    (user?.isAdmin || user?.isNurse) ? {
+      title: "Appointment Type",
+      dataIndex: "appointmentType",
+
+      render: (text, record) => (
+        <span className="w-100">
+          {record?.appointment?.isWalkin
+            ? "Walkin"
+            : record?.openAppointment
+            ? "Open Appointment"
+            : "User"}
+        </span>
+      ),
+    } : {},
     {
       title: "Date",
       dataIndex: "createdAt",
@@ -288,7 +302,7 @@ function Payments() {
       dataIndex: "status",
 
       render: (text, record) => (
-        <span className="text-capitalize">{record?.payment?.status}</span>
+        <span className="text-capitalize">{record?.status}</span>
       ),
     },
     {
@@ -304,13 +318,13 @@ function Payments() {
       title: "Transaction ID",
       dataIndex: "_id",
 
-      render: (text, record) => <span>{record?.payment?._id}</span>,
+      render: (text, record) => <span>{record?._id}</span>,
     },
     {
       title: "Amount",
       dataIndex: "amount",
       key: "amount",
-      render: (text, record) => <span>{record?.payment?.amount} AED</span>,
+      render: (text, record) => <span>{record?.amount} AED</span>,
     },
     {
       title: "Actions",
@@ -409,17 +423,19 @@ function Payments() {
       "Transaction ID",
       "Amount",
     ];
-    const datas = filteredData && filteredData.map((item) => [
-      item?.appointment?.customId,
+    const datas =
+      filteredData &&
+      filteredData.map((item) => [
+        item?.appointment?.customId,
 
-      moment(item?.payment?.createdAt).format("LL"),
-      item?.payment?.status,
-      item?.user?.name,
-      item?.appointment?.petName,
-      `${item?.doctor?.firstName} ${item?.doctor?.lastName}`,
-      item?.payment?._id,
-      item?.payment?.amount + " AED",
-    ]);
+        moment(item?.payment?.createdAt).format("LL"),
+        item?.payment?.status,
+        item?.user?.name,
+        item?.appointment?.petName,
+        `${item?.doctor?.firstName} ${item?.doctor?.lastName}`,
+        item?.payment?._id,
+        item?.payment?.amount + " AED",
+      ]);
     console.log(datas);
 
     doc.autoTable({

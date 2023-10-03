@@ -243,12 +243,12 @@ const MobGroom = () => {
               </div>
 
               <div className="mb-2">
-                <label htmlFor="PetName">Pet Name:</label>
+                <label htmlFor="petName">Pet Name:</label>
                 <input
                   className="form-control"
                   type="text"
-                  id="PetName"
-                  name="PetName"
+                  id="petName"
+                  name="petName"
                   value={service.petName}
                   onChange={handleChange}
                 />

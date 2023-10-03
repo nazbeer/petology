@@ -57,7 +57,7 @@ router.post("/register", async (req, res) => {
     const newUser = new User(req.body);
     newUser.activationToken = activationToken;
     await newUser.save();
-    const activationLink = `http://localhost:3000/activate/${activationToken}`;
+    const activationLink = `${process.env.APP_URL}activate/${activationToken}`;
 
     console.log(activationLink);
 
@@ -1400,46 +1400,33 @@ router.post("/pay", authMiddleware, async (req, res) => {
 router.get("/get-all-pay-by-userid", authMiddleware, async (req, res) => {
   try {
     const payments = await Paymentmodel.find({ userId: req.body.userId });
-    const userID = payments.map((item) => item.userId);
-    const appointmentId = payments.map((item) => item.appointmentId);
-    const users = await User.find(
-      { _id: { $in: userID } },
-      { name: 1, _id: 1, email: 1, mobile: 1 }
+
+    const populatedAppointments = await Promise.all(
+      payments.map(async (payment) => {
+        //  const doctorId = appointment.doctorId;
+        // Assuming you have a User model for user details
+        const user = await User.findOne({ _id: payment.userId });
+        const appointment = await UserappModel.findOne({
+          _id: payment.appointmentId,
+        });
+
+        //   const doctor = await Doctor.findOne({ _id: doctorId });
+        //  console.log("user:", user);
+        return {
+          ...payment.toObject(),
+          user,
+          appointment,
+          //  doctor
+        };
+      })
     );
-    const appointments = await UserappModel.find(
-      { _id: { $in: appointmentId } },
-      { customId: 1 }
-    );
 
-    // Create an empty result array
-    const combinedList = [];
-
-    // Loop through list1 and add objects from list2 and list3 based on commonField
-    payments.forEach((obj1) => {
-      // Find matching objects in list2 based on commonField
-      const matchingObj2 = users.find(
-        (obj2) => obj2._id.toString() === obj1.userId
-      );
-
-      // Find matching objects in list3 based on commonField
-      const matchingObj3 = appointments.find(
-        (obj3) => obj3._id.toString() === obj1.appointmentId
-      );
-      console.log(matchingObj2);
-      // Combine the objects into a new object and push it to the result array
-      combinedList.push({
-        payment: obj1,
-        user: matchingObj2, // Use {} as a default in case there is no match
-        appointment: matchingObj3, // Use {} as a default in case there is no match
-      });
-    });
-
-    console.log(combinedList);
+    console.log(populatedAppointments);
 
     res.status(200).send({
       message: "Payment Fetched Successfully",
       success: true,
-      data: combinedList,
+      data: populatedAppointments,
     });
   } catch (error) {
     console.log(error);

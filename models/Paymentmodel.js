@@ -7,6 +7,7 @@ const paymentSchema = new mongoose.Schema(
     doctorId: { type: String, required: false },
 
     amount: { type: Number, required: true },
+    openAppointment: { type: Boolean, required: false, default: false },
 
     status: {
       type: String,
