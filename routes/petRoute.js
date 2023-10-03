@@ -72,7 +72,7 @@ router.post(
   authMiddleware,
   async (req, res) => {
     try {
-      const { pet, size, breed, age, userId, custompetId } = req.body;
+      const { pet, size, breed, age, userID, custompetId } = req.body;
       const image = req.file ? req.file.filename : ""; // Store the image filename
 
       const newPet = new Pet({
@@ -81,7 +81,7 @@ router.post(
         image,
         breed,
         age,
-        userId,
+        userId: userID,
         custompetId,
       });
 

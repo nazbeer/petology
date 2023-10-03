@@ -64,6 +64,17 @@ function DoctorForm({ onFinish, initivalValues }) {
         </Col>
         <Col span={8} xs={24} sm={24} lg={8}>
           <Form.Item
+            required
+            label="Email"
+            name="email"
+            type="email"
+            rules={[{ required: false }]}
+          >
+            <Input placeholder="Email" />
+          </Form.Item>
+        </Col>
+        <Col span={8} xs={24} sm={24} lg={8}>
+          <Form.Item
             label="Website"
             name="website"
             rules={[{ required: false }]}

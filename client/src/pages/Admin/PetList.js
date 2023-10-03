@@ -176,6 +176,12 @@ function Petlist() {
       responsive: ["xs", "md", "sm", "lg"],
     },
     {
+      title: "User Name",
+      dataIndex: "userName",
+      render: (text, record) => <span>{record?.user?.name}</span>,
+      responsive: ["xs", "md", "sm", "lg"],
+    },
+    {
       title: "Pet",
       dataIndex: "pet",
       responsive: ["xs", "md", "sm", "lg"],

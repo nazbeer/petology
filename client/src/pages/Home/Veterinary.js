@@ -43,13 +43,13 @@ const Veterinary = () => {
       .post("/api/open/get-office-time", { module: "vet" })
       .then((response) => {
         console.log(
-          response?.data?.data?.starttime,
-          response?.data?.data?.endtime,
+          response?.data?.data?.starttime1,
+          response?.data?.data?.endtime2,
           response?.data?.data?.break
         );
         const data = OfficeTimeCalculate(
-          response?.data?.data?.starttime,
-          response?.data?.data?.endtime,
+          response?.data?.data?.starttime1,
+          response?.data?.data?.endtime2,
           response?.data?.data?.break,
           30
         );

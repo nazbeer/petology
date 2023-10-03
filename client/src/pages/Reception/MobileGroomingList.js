@@ -84,13 +84,13 @@ function MobileGroomingList(doctorId) {
       )
       .then((response) => {
         console.log(
-          response?.data?.data?.starttime,
-          response?.data?.data?.endtime,
+          response?.data?.data?.starttime1,
+          response?.data?.data?.endtime2,
           response?.data?.data?.break
         );
         const data = OfficeTimeCalculate(
-          response?.data?.data?.starttime,
-          response?.data?.data?.endtime,
+          response?.data?.data?.starttime1,
+          response?.data?.data?.endtime2,
           response?.data?.data?.break,
           30
         );
@@ -460,7 +460,6 @@ function MobileGroomingList(doctorId) {
       dataIndex: "actions",
       render: (text, record) => (
         <div className="d-flex justify-content-evenly align-items-center gap-3">
-         
           {record?.status === "pending" ||
           record?.status === "Pending" ||
           record?.status === "blocked" ? (
@@ -482,7 +481,7 @@ function MobileGroomingList(doctorId) {
               Cancel
             </button>
           )}
-           <button
+          <button
             type="button"
             className="btn btn-success btn-sm text-capitalize ml-2"
             onClick={() => handleShowOpenReschudleModal(record)}
@@ -578,7 +577,6 @@ function MobileGroomingList(doctorId) {
       dataIndex: "actions",
       render: (text, record) => (
         <div className="d-flex justify-content-evenly align-items-center gap-3">
-           
           {record?.appointment?.status === "user cancelled" ? (
             <button
               type="button"
