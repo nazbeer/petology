@@ -410,7 +410,7 @@ router.post(
       const appointmentList = await UserappModel.find({
         module: req?.body?.module,
       });
-      // console.log(appointmentList);
+      const appointmentId = appointmentList.map((item) => item._id);
       const userId = appointmentList.map((item) => item.userId);
       const doctorId = appointmentList.map((item) => item.doctorId);
       const users = await User.find(
@@ -421,7 +421,9 @@ router.post(
         { _id: { $in: doctorId } },
         { firstName: 1, lastName: 1, _id: 1, specialization: 1, status: 1 }
       );
-
+      const payments = await Paymentmodel.find({
+        appointmentId: { $in: appointmentId },
+      });
       const combinedList = [];
 
       // Loop through list1 and add objects from list2 and list3 based on commonField
@@ -435,12 +437,16 @@ router.post(
         const matchingObj3 = doctors.find(
           (obj3) => obj3._id.toString() === obj1.doctorId
         );
+        const matchingObj4 = payments.find(
+          (obj4) => obj4.appointmentId === obj1._id.toString()
+        );
         console.log(matchingObj2);
         // Combine the objects into a new object and push it to the result array
         combinedList.push({
           appointment: obj1,
-          user: matchingObj2, // Use {} as a default in case there is no match
-          doctor: matchingObj3, // Use {} as a default in case there is no match
+          user: matchingObj2,
+          doctor: matchingObj3,
+          payment: matchingObj4,
         });
       });
 
@@ -1361,7 +1367,7 @@ router.get("/get-all-groom-packs", authMiddleware, async (req, res) => {
 
 router.get("/get-all-pay", authMiddleware, async (req, res) => {
   try {
-    const payments = await Paymentmodel.find();    
+    const payments = await Paymentmodel.find();
 
     const populatedAppointments = await Promise.all(
       payments.map(async (payment) => {
@@ -1369,7 +1375,7 @@ router.get("/get-all-pay", authMiddleware, async (req, res) => {
         // Assuming you have a User model for user details
         const user = await User.findOne({ _id: payment.userId });
         let appointment;
-        console.log(payment.openAppointment)
+        console.log(payment.openAppointment);
         if (payment.openAppointment) {
           appointment = await OpenAppointment.findOne({
             _id: payment.appointmentId,
