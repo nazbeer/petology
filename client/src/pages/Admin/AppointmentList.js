@@ -328,11 +328,15 @@ function Appointmentlist(doctorsId) {
 
   const getAppointmentsData = async () => {
     try {
-      const response = await axios.get("/api/user/get-all-appointments", {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
+      const response = await axios.post(
+        "/api/admin/get-all-module-appointments",
+        { module: "veterinary" },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
 
       if (response.data.success) {
         console.log(response.data.data);

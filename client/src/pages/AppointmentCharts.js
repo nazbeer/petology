@@ -51,7 +51,7 @@ const AppointmentCharts = () => {
     ];
 
     data.forEach((item) => {
-      const date = new Date(item?.payment?.createdAt);
+      const date = new Date(item?.createdAt);
       // const yearMonth = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
       const monthName = monthNames[date.getMonth()];
 
@@ -59,7 +59,7 @@ const AppointmentCharts = () => {
         monthlySum[monthName] = 0;
       }
 
-      monthlySum[monthName] += item?.payment?.amount;
+      monthlySum[monthName] += item?.amount;
     });
 
     let result = Object.keys(monthlySum).map((monthName) => ({
@@ -72,7 +72,6 @@ const AppointmentCharts = () => {
     };
 
     return result.sort((a, b) => getMonthNumber(a.x) - getMonthNumber(b.x));
-
   }
 
   const getPayments = async () => {
@@ -89,44 +88,6 @@ const AppointmentCharts = () => {
         console.log(response?.data?.data);
         console.log(sumValuesByMonth(data));
         setPayments(sumValuesByMonth(data));
-        const monthlySum = {};
-
-        const monthNames = [
-          "January",
-          "February",
-          "March",
-          "April",
-          "May",
-          "June",
-          "July",
-          "August",
-          "September",
-          "October",
-          "November",
-          "December",
-        ];
-
-        data.forEach((item) => {
-          const date = new Date(item?.payment?.createdAt);
-          // const yearMonth = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
-          console.log(`   ${date.getFullYear()}`);
-          const monthName = monthNames[date.getMonth()];
-
-          if (!monthlySum[monthName]) {
-            monthlySum[monthName] = 0;
-          }
-
-          monthlySum[monthName] += item?.payment?.amount;
-        });
-
-        console.log(monthlySum);
-
-        const result = Object.keys(monthlySum).map((monthName) => ({
-          x: monthName,
-          y: monthlySum[monthName],
-        }));
-
-        setPayments(result);
       }
     } catch (error) {
       dispatch(hideLoading());
@@ -187,11 +148,11 @@ const AppointmentCharts = () => {
     },
     axisX: {
       interval: 1,
-      title: 'Months',
+      title: "Months",
       labels: payments.map((item) => item.x), // Month names
     },
     axisY: {
-      title: 'Amount'
+      title: "Amount",
     },
 
     data: [
