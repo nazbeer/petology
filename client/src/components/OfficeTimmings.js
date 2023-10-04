@@ -125,7 +125,7 @@ function OfficeTimmings() {
         }
       } catch (error) {
         console.log(error);
-        toast.error("Error in cancelling appointment.");
+        toast.error(error.response.data.message);
       }
     }
   };
@@ -168,7 +168,7 @@ function OfficeTimmings() {
       }
     } catch (error) {
       console.log(error);
-      toast.error("Error in booking appointment.");
+      toast.error(error.response.data.message);
     }
   };
 
@@ -207,7 +207,7 @@ function OfficeTimmings() {
       }
     } catch (error) {
       console.log(error);
-      toast.error("Error in booking appointment.");
+      toast.error(error.response.data.message);
     }
   };
 
@@ -275,7 +275,7 @@ function OfficeTimmings() {
     {
       title: "Break Time",
       dataIndex: "break",
-      render: (text, record) => <span>{record?.break}</span>,
+      render: (text, record) => <span>{record?.break} Minutes</span>,
     },
 
     {
@@ -315,6 +315,7 @@ function OfficeTimmings() {
                     style={{ width: "98%" }}
                     format={"HH:mm"}
                     onChange={onChangeVetRange1}
+                    showTime={{ format: 'hh:mm A', use12Hours:true }}
                     disabledTime={() => ({
                       disabledHours: () => [0, 1, 2, 3, 4, 5, 6, 7, 8, 23],
                       disabledMinutes: () => range([0, 15, 30, 45, 60]),
@@ -328,6 +329,7 @@ function OfficeTimmings() {
                     style={{ width: "98%" }}
                     format={"HH:mm"}
                     onChange={onChangeVetRange2}
+                    showTime={{ format: 'hh:mm A', use12Hours:true }}
                     disabledTime={() => ({
                       disabledHours: () => [0, 1, 2, 3, 4, 5, 6, 7, 8, 23],
                       disabledMinutes: () => range([0, 15, 30, 45, 60]),
@@ -377,6 +379,7 @@ function OfficeTimmings() {
                     style={{ width: "98%" }}
                     format={"HH:mm"}
                     onChange={onChangeGroomRange1}
+                    showTime={{ format: 'hh:mm A', use12Hours:true }}
                     disabledTime={() => ({
                       disabledHours: () => [0, 1, 2, 3, 4, 5, 6, 7, 8, 23],
                       disabledMinutes: () => range([0, 15, 30, 45, 60]),
@@ -390,6 +393,7 @@ function OfficeTimmings() {
                     style={{ width: "98%" }}
                     format={"HH:mm"}
                     onChange={onChangeGroomRange2}
+                    showTime={{ format: 'hh:mm A', use12Hours:true }}
                     disabledTime={() => ({
                       disabledHours: () => [0, 1, 2, 3, 4, 5, 6, 7, 8, 23],
                       disabledMinutes: () => range([0, 15, 30, 45, 60]),

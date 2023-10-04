@@ -532,6 +532,7 @@ const Vet = () => {
                   name="time"
                   onChange={handleChange}
                 >
+                  <option>Select Time...</option>
                   {service.doctorId === "Any" ? (
                     time.map((option, index) => (
                       <option key={index} value={option}>

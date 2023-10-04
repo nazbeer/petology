@@ -297,10 +297,14 @@ function DoctorsList() {
       render: (number, record) => {
         console.log(record?.timings);
         return (
-          <p className="font-weight-600">
-            {record?.timings &&
-              `${record?.timings[0]} to ${record?.timings[1]}`}
-          </p>
+          record?.starttime &&
+          record?.endtime && (
+            <p className="font-weight-600">
+              <span>Start Time: {record?.starttime}</span>
+              <br />
+              <span>End Time: {record?.endtime}</span>
+            </p>
+          )
         );
       },
       responsive: ["xs", "md", "sm", "lg"],
@@ -640,6 +644,7 @@ function DoctorsList() {
           className="mt-3 w-100"
           format={"HH:mm"}
           onChange={onChange}
+          showTime={{ format: 'hh:mm A', use12Hours:true }}
           required
         />
         <div className="d-flex justify-content-end  mb-3 mt-3">

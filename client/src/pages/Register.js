@@ -28,7 +28,7 @@ function Register() {
       }
     } catch (error) {
       dispatch(hideLoading());
-      toast.error("Something went wrong");
+      toast.error(error.response.data.message);
     }
   };
 

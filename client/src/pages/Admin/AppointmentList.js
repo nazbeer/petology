@@ -1181,6 +1181,7 @@ function Appointmentlist(doctorsId) {
                     name="time"
                     onChange={handleChange}
                   >
+                    <option>Select Time...</option>
                     {doctorTime.length > 0 ? (
                       doctorTime.map((option, index) => (
                         <option key={index} value={option}>
@@ -1305,6 +1306,7 @@ function Appointmentlist(doctorsId) {
                   name="time"
                   onChange={handleChange}
                 >
+                  <option>Select Time...</option>
                   {doctorTime.length > 0 ? (
                     doctorTime.map((option, index) => (
                       <option key={index} value={option}>

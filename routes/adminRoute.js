@@ -1122,6 +1122,7 @@ router.post("/update-groomer/:userId", authMiddleware, async (req, res) => {
   try {
     console.log(req.params);
     const { userId } = req.params;
+    req.body.username = req?.body?.name
     const updatedFields = req.body;
 
     const groomer = await User.findById(userId);
@@ -1154,6 +1155,7 @@ router.post("/update-reception/:userId", authMiddleware, async (req, res) => {
   try {
     console.log(req.params);
     const { userId } = req.params;
+    req.body.username = req?.body?.name
     const updatedFields = req.body;
 
     const reception = await User.findById(userId);

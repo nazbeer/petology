@@ -51,7 +51,6 @@ function ScheduleForm({ onFinish, initivalValues }) {
         </Col>
         <Col span={8} xs={24} sm={24} lg={8}>
           <Form.Item
-            
             label="Website"
             name="website"
             rules={[{ required: false }]}
@@ -120,7 +119,10 @@ function ScheduleForm({ onFinish, initivalValues }) {
             name="timings"
             rules={[{ required: true }]}
           >
-            <TimePicker.RangePicker format="HH:mm" />
+            <TimePicker.RangePicker
+              format="HH:mm"
+              showTime={{ format: "hh:mm A", use12Hours: true }}
+            />
           </Form.Item>
         </Col>
       </Row>

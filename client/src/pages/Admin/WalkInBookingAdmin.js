@@ -537,6 +537,7 @@ const WalkInBookingAdmin = () => {
                         name="time"
                         onChange={handleChange}
                       >
+                        <option>Select Time...</option>
                         {service.doctorId === "Any" ||
                         service.module === "Grooming" ? (
                           time.map((option, index) => (
