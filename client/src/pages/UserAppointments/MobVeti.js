@@ -583,14 +583,14 @@ function MobVeti() {
                   />
                 </Form.Item>
                 <Form.Item>
-                  <Button type="primary" htmlType="submit">
+                  <Button className="btn btn-success btn-sm" htmlType="submit">
                     Add Appointment
                   </Button>
                 </Form.Item>
               </div>
             ) : (
               <Form.Item>
-                <Button type="primary" htmlType="submit">
+                <Button className="btn btn-success btn-sm" htmlType="submit">
                   Book Now
                 </Button>
               </Form.Item>

@@ -26,11 +26,14 @@ function DoctorAppointments() {
   const getAppointmentsData = async () => {
     try {
       dispatch(showLoading());
-      const response = await axios.get("/api/doctor/appointments-by-doctor-id", {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
+      const response = await axios.get(
+        "/api/doctor/appointments-by-doctor-id",
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
       dispatch(hideLoading());
       if (response.data.success) {
         console.log(response.data.data);
@@ -136,6 +139,7 @@ function DoctorAppointments() {
       render: (text, record) => (
         <div className="d-flex justify-content-evently gap-2 align-items-center">
           <Button
+            className="btn btn-success btn-sm"
             type="primary"
             onClick={() => showAddHistoryModal(record?.userId)}
           >
@@ -165,6 +169,7 @@ function DoctorAppointments() {
               </div>
             ))}
           <Button
+            className="btn btn-success btn-sm"
             type="primary"
             onClick={() => showAddPrescriptionModal(record?._id)}
           >
@@ -276,7 +281,11 @@ function DoctorAppointments() {
                 </Button>
               </div>
             ))}
-          <Button type="primary" onClick={showAddPrescriptionModal}>
+          <Button
+            className="btn btn-success btn-sm"
+            type="primary"
+            onClick={showAddPrescriptionModal}
+          >
             Add Prescription
           </Button>
         </div>

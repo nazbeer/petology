@@ -364,7 +364,7 @@ function DoctorsList() {
           )}
           <button
             type="button"
-            className="btn btn-primary btn-sm text-capitalize"
+            className="btn btn-success btn-sm text-capitalize"
             onClick={() => openEditModal(record)}
           >
             edit
@@ -644,7 +644,7 @@ function DoctorsList() {
           className="mt-3 w-100"
           format={"HH:mm"}
           onChange={onChange}
-          showTime={{ format: 'hh:mm A', use12Hours:true }}
+          showTime={{ format: "hh:mm A", use12Hours: true }}
           required
         />
         <div className="d-flex justify-content-end  mb-3 mt-3">
@@ -724,7 +724,7 @@ function DoctorsList() {
             <div className="text-center mt-2">
               <button
                 type="submit"
-                className="btn btn-primary text-right btn-sm"
+                className="btn btn-success text-right btn-sm"
               >
                 Update Doctor Details
               </button>
@@ -742,10 +742,15 @@ function DoctorsList() {
         width={800}
         className="d-flex justify-content-center align-items-center"
         footer={[
-          <Button key="back" onClick={closeLeaveModal}>
+          <Button
+            className="btn btn-success btn-sm"
+            key="back"
+            onClick={closeLeaveModal}
+          >
             Cancel
           </Button>,
           <Button
+            className="btn btn-success btn-sm"
             key="submit"
             type="primary"
             loading={leaveLoading}

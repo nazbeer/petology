@@ -1095,10 +1095,16 @@ function Appointmentlist(doctorsId) {
               </div>
             </Modal.Body>
             <Modal.Footer>
-              <Button variant="secondary" onClick={handleCloseModal}>
+              <Button
+                className="btn btn-success btn-sm"
+                onClick={handleCloseModal}
+              >
                 Close
               </Button>
-              <Button variant="primary" onClick={assignDoctorToAppointment}>
+              <Button
+                className="btn btn-success btn-sm"
+                onClick={assignDoctorToAppointment}
+              >
                 Save Changes
               </Button>
             </Modal.Footer>
@@ -1192,10 +1198,16 @@ function Appointmentlist(doctorsId) {
               </div>
             </Modal.Body>
             <Modal.Footer>
-              <Button variant="secondary" onClick={handleCloseReschudleModal}>
+              <Button
+                className="btn btn-success btn-sm"
+                onClick={handleCloseReschudleModal}
+              >
                 Close
               </Button>
-              <Button variant="primary" onClick={reschudleAppointment}>
+              <Button
+                className="btn btn-success btn-sm"
+                onClick={reschudleAppointment}
+              >
                 Save Changes
               </Button>
             </Modal.Footer>
@@ -1317,10 +1329,16 @@ function Appointmentlist(doctorsId) {
             </div>
           </Modal.Body>
           <Modal.Footer>
-            <Button variant="secondary" onClick={handleCloseOenReschudleModal}>
+            <Button
+              className="btn btn-success btn-sm"
+              onClick={handleCloseOenReschudleModal}
+            >
               Close
             </Button>
-            <Button variant="primary" onClick={reschudleOpenAppointment}>
+            <Button
+              className="btn btn-success btn-sm"
+              onClick={reschudleOpenAppointment}
+            >
               Save Changes
             </Button>
           </Modal.Footer>

@@ -32,7 +32,7 @@ const UploadHistory = () => {
     try {
       const response = await axios.get(`/api/admin/history/${userId}`);
       if (response.data.success) {
-        console.log(response.data.data)
+        console.log(response.data.data);
         setHistoryRecords(response.data.data);
       }
     } catch (error) {
@@ -208,10 +208,18 @@ const UploadHistory = () => {
             visible={uploadModalVisible}
             onCancel={() => setUploadModalVisible(false)}
             footer={[
-              <Button key="cancel" onClick={() => setUploadModalVisible(false)}>
+              <Button
+                className="btn btn-success btn-sm"
+                key="cancel"
+                onClick={() => setUploadModalVisible(false)}
+              >
                 Cancel
               </Button>,
-              <Button key="upload" type="primary" onClick={handleUpload}>
+              <Button
+                key="upload"
+                className="btn btn-success btn-sm"
+                onClick={handleUpload}
+              >
                 Upload
               </Button>,
             ]}

@@ -460,7 +460,6 @@ function MobileGroomingList(doctorId) {
       dataIndex: "actions",
       render: (text, record) => (
         <div className="d-flex justify-content-evenly align-items-center gap-3">
-         
           {record?.status === "pending" ||
           record?.status === "Pending" ||
           record?.status === "blocked" ? (
@@ -482,7 +481,7 @@ function MobileGroomingList(doctorId) {
               Cancel
             </button>
           )}
-           <button
+          <button
             type="button"
             className="btn btn-success btn-sm text-capitalize ml-2"
             onClick={() => handleShowOpenReschudleModal(record)}
@@ -578,7 +577,6 @@ function MobileGroomingList(doctorId) {
       dataIndex: "actions",
       render: (text, record) => (
         <div className="d-flex justify-content-evenly align-items-center gap-3">
-           
           {record?.appointment?.status === "user cancelled" ? (
             <button
               type="button"
@@ -981,10 +979,16 @@ function MobileGroomingList(doctorId) {
             </div>
           </Modal.Body>
           <Modal.Footer>
-            <Button variant="secondary" onClick={handleCloseReschudleModal}>
+            <Button
+              className="btn btn-success btn-sm"
+              onClick={handleCloseReschudleModal}
+            >
               Close
             </Button>
-            <Button variant="primary" onClick={reschudleAppointment}>
+            <Button
+              className="btn btn-success btn-sm"
+              onClick={reschudleAppointment}
+            >
               Save Changes
             </Button>
           </Modal.Footer>
@@ -1059,10 +1063,16 @@ function MobileGroomingList(doctorId) {
             </div>
           </Modal.Body>
           <Modal.Footer>
-            <Button variant="secondary" onClick={handleCloseOenReschudleModal}>
+            <Button
+              className="btn btn-success btn-sm"
+              onClick={handleCloseOenReschudleModal}
+            >
               Close
             </Button>
-            <Button variant="primary" onClick={reschudleOpenAppointment}>
+            <Button
+              className="btn btn-success btn-sm"
+              onClick={reschudleOpenAppointment}
+            >
               Save Changes
             </Button>
           </Modal.Footer>

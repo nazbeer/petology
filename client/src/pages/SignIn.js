@@ -3,27 +3,29 @@ import React, { useState, useEffect } from "react";
 import { Form, Button } from "react-bootstrap";
 import { initializeApp } from "firebase/app";
 
-import { getAuth, signInWithCredential, PhoneAuthProvider } from "firebase/auth";
+import {
+  getAuth,
+  signInWithCredential,
+  PhoneAuthProvider,
+} from "firebase/auth";
 
 // Initialize Firebase
 const firebaseConfig = {
-    apiKey: "AIzaSyDhFsZtrsRSgLM4GF1LduR1Yfs1hXlPukQ",
+  apiKey: "AIzaSyDhFsZtrsRSgLM4GF1LduR1Yfs1hXlPukQ",
 
-    authDomain: "petologynz-25790.firebaseapp.com",
-  
-    projectId: "petologynz-25790",
-  
-    storageBucket: "petologynz-25790.appspot.com",
-  
-    messagingSenderId: "152277664095",
-  
-    appId: "1:152277664095:web:582c1724f211d3a03cb6ea",
-  
-    measurementId: "G-44RPHTQTGZ"
-  
+  authDomain: "petologynz-25790.firebaseapp.com",
+
+  projectId: "petologynz-25790",
+
+  storageBucket: "petologynz-25790.appspot.com",
+
+  messagingSenderId: "152277664095",
+
+  appId: "1:152277664095:web:582c1724f211d3a03cb6ea",
+
+  measurementId: "G-44RPHTQTGZ",
 };
 const app = initializeApp(firebaseConfig);
-
 
 // Create the form component
 const SignIn = () => {
@@ -32,14 +34,11 @@ const SignIn = () => {
   const [otp, setOtp] = useState("");
   const [error, setError] = useState("");
 
-
-
-
   // Effect to verify the OTP
   useEffect(() => {
     if (otp && phoneNumber) {
-        const auth = getAuth(app);
-        signInWithCredential(auth, PhoneAuthProvider.credential(phoneNumber, otp))        
+      const auth = getAuth(app);
+      signInWithCredential(auth, PhoneAuthProvider.credential(phoneNumber, otp))
         .then(() => {
           setError("");
         })
@@ -84,13 +83,19 @@ const SignIn = () => {
     <Form onSubmit={handleSubmit}>
       <Form.Group controlId="phoneNumber">
         <Form.Label>Phone Number</Form.Label>
-        <Form.Control type="tel" value={phoneNumber} onChange={handlePhoneNumberChange} />
+        <Form.Control
+          type="tel"
+          value={phoneNumber}
+          onChange={handlePhoneNumberChange}
+        />
       </Form.Group>
       <Form.Group controlId="otp">
         <Form.Label>OTP</Form.Label>
         <Form.Control type="text" value={otp} onChange={handleOtpChange} />
       </Form.Group>
-      <Button type="submit">Login</Button>
+      <Button className="btn btn-success btn-sm" type="submit">
+        Login
+      </Button>
     </Form>
   );
 };

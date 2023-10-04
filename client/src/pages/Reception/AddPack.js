@@ -2,31 +2,44 @@ import React, { useState, useEffect } from "react";
 import Layout from "../../components/Layout";
 import axios from "axios";
 import { toast } from "react-hot-toast";
-import {Modal, Button } from 'antd';
+import { Modal, Button } from "antd";
 
 //import { use } from "../../../../routes/openRoute";
 
 const AddPack = () => {
-    const serviceTypes = ["Veterinary", "Grooming", "Mobile Grooming", "Mobile Veterinary"];
-    const [serviceType, setServiceType] = useState("");
-    const [serviceName, setServiceName] = useState("");
-    const [subServiceName, setSubServiceName] = useState("");
-    const [price, setPrice] = useState("");
-    const [size, setSize] = useState("");
-    const [pet, setPet]= useState("");
-    const [subServices, setSubServices] = useState([]);
-    const [selectedService, setSelectedService] = useState("");
-    const [editModalVisible, setEditModalVisible] = useState(false);
-    const [editSubServiceId, setEditSubServiceId] = useState("");
-    const [editPrice, setEditPrice] = useState("");
-    const [editPet, setEditPet] = useState("");
-    const [editSize, setEditSize]= useState("");
-    const [editSubService, seteditSubService] = useState("");
-    const [editServiceType, setEditServiceType]= useState("");
-    const [editServiceName, setEditServiceName] = useState("");
-    const [editStatus, setEditStatus] = useState();
+  const serviceTypes = [
+    "Veterinary",
+    "Grooming",
+    "Mobile Grooming",
+    "Mobile Veterinary",
+  ];
+  const [serviceType, setServiceType] = useState("");
+  const [serviceName, setServiceName] = useState("");
+  const [subServiceName, setSubServiceName] = useState("");
+  const [price, setPrice] = useState("");
+  const [size, setSize] = useState("");
+  const [pet, setPet] = useState("");
+  const [subServices, setSubServices] = useState([]);
+  const [selectedService, setSelectedService] = useState("");
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [editSubServiceId, setEditSubServiceId] = useState("");
+  const [editPrice, setEditPrice] = useState("");
+  const [editPet, setEditPet] = useState("");
+  const [editSize, setEditSize] = useState("");
+  const [editSubService, seteditSubService] = useState("");
+  const [editServiceType, setEditServiceType] = useState("");
+  const [editServiceName, setEditServiceName] = useState("");
+  const [editStatus, setEditStatus] = useState();
 
-  const showEditModal = (subServiceId, serviceType , name , subService, price, pet, size) => {
+  const showEditModal = (
+    subServiceId,
+    serviceType,
+    name,
+    subService,
+    price,
+    pet,
+    size
+  ) => {
     setEditModalVisible(true);
     setEditSubServiceId(subServiceId);
     setEditServiceType(serviceType);
@@ -35,8 +48,6 @@ const AddPack = () => {
     setEditPrice(price);
     setEditPet(pet);
     setEditSize(size);
-    
-
   };
 
   const closeEditModal = () => {
@@ -52,11 +63,10 @@ const AddPack = () => {
           serviceType: editServiceType,
           name: editServiceName,
           subService: editSubService,
-          price:editPrice,
-          pet:editPet,
-          size:editSize,
+          price: editPrice,
+          pet: editPet,
+          size: editSize,
           status: editStatus,
-
         },
         {
           headers: {
@@ -64,7 +74,7 @@ const AddPack = () => {
           },
         }
       );
-       // console.log(response.data);
+      // console.log(response.data);
       if (response.data.success) {
         toast.success("Sub-service updated successfully");
         closeEditModal();
@@ -77,11 +87,14 @@ const AddPack = () => {
 
   const handleDeleteSubService = async (subServiceId) => {
     try {
-      const response = await axios.delete(`/api/admin/delete-subservice/${subServiceId}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
+      const response = await axios.delete(
+        `/api/admin/delete-subservice/${subServiceId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
 
       if (response.data.success) {
         toast.success("Sub-service deleted successfully");
@@ -115,33 +128,40 @@ const AddPack = () => {
     fetchSubServices();
   }, []);
 
-
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
-        const response = await axios.post("/api/admin/create-service", {
-            serviceType,
-            serviceName,
-            subServiceName,
-            price,
-            pet,
-            size,
-          }, {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          });
+      const response = await axios.post(
+        "/api/admin/create-service",
+        {
+          serviceType,
+          serviceName,
+          subServiceName,
+          price,
+          pet,
+          size,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
 
       if (response.data.success) {
         toast.success(response.data.message);
         fetchSubServices();
-
       }
     } catch (error) {
-      if (error.response && error.response.data && error.response.data.code === 11000) {
-        toast.error("Service name already exists. Please choose a different name.");
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.code === 11000
+      ) {
+        toast.error(
+          "Service name already exists. Please choose a different name."
+        );
       } else {
         toast.error(error.message);
       }
@@ -156,7 +176,7 @@ const AddPack = () => {
         </div>
         <div className="card-body">
           <form onSubmit={handleSubmit}>
-          <div className="mb-3">
+            <div className="mb-3">
               <label htmlFor="serviceType">Service Type:</label>
               <select
                 id="serviceType"
@@ -217,7 +237,7 @@ const AddPack = () => {
                 required
               />
             </div>
-            
+
             <div className="mb-3">
               <label htmlFor="price">Price:</label>
               <input
@@ -229,7 +249,7 @@ const AddPack = () => {
                 required
               />
             </div>
-            
+
             <button type="submit" className="btn btn-success">
               Add Service
             </button>
@@ -244,57 +264,45 @@ const AddPack = () => {
         <div className="card-body">
           <div className="table-responsive-sm">
             <table className="table table-responsive">
-                <thead>
-                  <th>Pet</th>
-                  <th>Size</th>
-                    <th>Service Name</th>
-                    <th>Package Name</th>
-                    <th>All Services</th>
-                    <th>Price</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                </thead>
-                <tbody>
+              <thead>
+                <th>Pet</th>
+                <th>Size</th>
+                <th>Service Name</th>
+                <th>Package Name</th>
+                <th>All Services</th>
+                <th>Price</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </thead>
+              <tbody>
                 {subServices.map((subService) => (
-                    <tr key={subService._id}>
-                      <td>
-                            <span>
-                                {subService.pet}
-                            </span>
-                        </td>
-                        <td>
-                            <span>
-                                {subService.size}
-                            </span>
-                        </td>
-                        <td>
-                            <span>
-                                {subService.serviceType}
-                            </span>
-                        </td>
-                        <td>
-                            <span>
-                                {subService.name}
-                            </span>
-                        </td>
+                  <tr key={subService._id}>
+                    <td>
+                      <span>{subService.pet}</span>
+                    </td>
+                    <td>
+                      <span>{subService.size}</span>
+                    </td>
+                    <td>
+                      <span>{subService.serviceType}</span>
+                    </td>
+                    <td>
+                      <span>{subService.name}</span>
+                    </td>
 
-                        <td>            
-                            <span>
-                                {subService.subService}
-                            </span>
-                        </td>
-                        <td>            
-                            <span>
-                                {subService.price}
-                            </span>
-                        </td>
-                        <td>
-                            <span className="text-capitalize">
-                                {subService.status}
-                            </span>
-                        </td>
-                        <td>
-                        <div className="d-flex justify-content-evenly">
+                    <td>
+                      <span>{subService.subService}</span>
+                    </td>
+                    <td>
+                      <span>{subService.price}</span>
+                    </td>
+                    <td>
+                      <span className="text-capitalize">
+                        {subService.status}
+                      </span>
+                    </td>
+                    <td>
+                      <div className="d-flex justify-content-evenly">
                         <button
                           type="button"
                           className="btn btn-warning btn-sm cusrsor-pointer"
@@ -321,17 +329,11 @@ const AddPack = () => {
                           <i className="ri-delete-bin-line"></i>
                         </button>
                       </div>
-                        </td>
-                    </tr>
-                          ))}
-                </tbody>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
             </table>
-            
-
-
-              
-      
-
           </div>
         </div>
       </div>
@@ -340,15 +342,24 @@ const AddPack = () => {
         visible={editModalVisible}
         onCancel={closeEditModal}
         footer={[
-          <Button key="cancel" onClick={closeEditModal}>
+          <Button
+            className="btn btn-success btn-sm"
+            key="cancel"
+            onClick={closeEditModal}
+          >
             Cancel
           </Button>,
-          <Button key="submit" type="primary" onClick={handleEditSubService}>
+          <Button
+            className="btn btn-success btn-sm"
+            key="submit"
+            type="primary"
+            onClick={handleEditSubService}
+          >
             Update
           </Button>,
         ]}
       >
-         <div className="mb-3">
+        <div className="mb-3">
           <label htmlFor="editPet">Edit Pet:</label>
           <input
             type="text"
