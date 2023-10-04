@@ -968,6 +968,7 @@ function MobileGroomingList(doctorId) {
                   name="time"
                   onChange={handleChange}
                 >
+                  <option>Select Time...</option>
                   {time.map((option, index) => (
                     <option key={index} value={option}>
                       {option}
@@ -1045,6 +1046,7 @@ function MobileGroomingList(doctorId) {
                   name="time"
                   onChange={handleChange}
                 >
+                  <option>Select Time...</option>
                   {time.map((option, index) => (
                     <option key={index} value={option}>
                       {option}

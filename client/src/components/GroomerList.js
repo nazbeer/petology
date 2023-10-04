@@ -193,7 +193,7 @@ const GroomerList = () => {
         getGroomersData();
       }
     } catch (error) {
-      toast.error("Error changing groomer account status");
+      toast.error(error.response.data.message);
       dispatch(hideLoading());
     }
   };
@@ -217,7 +217,7 @@ const GroomerList = () => {
         closeEditModal();
       }
     } catch (error) {
-      toast.error("Error updating groomer information");
+      toast.error(error.response.data.message);
       dispatch(hideLoading());
     }
   };

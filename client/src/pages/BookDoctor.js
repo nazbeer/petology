@@ -215,6 +215,7 @@ function BookDoctor() {
                 <TimePicker
                   format="HH:mm"
                   className="mt-3"
+                  showTime={{ format: 'hh:mm A', use12Hours:true }}
                   onChange={(value) => {
                     setIsAvailable(false);
                     setTime(moment(value).format("HH:mm"));
