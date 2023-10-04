@@ -15,16 +15,18 @@ const App = () => {
 
   return (
     <Layout>
-    <div>
-       <h1>Prescription Form </h1>
-      <Button type="primary" onClick={showModal}>
-        Add Prescription
-      </Button>
-      <PrescriptionForm  onCancel={closeModal} />
-    </div>
+      <div>
+        <h1>Prescription Form </h1>
+        <Button
+          className="btn btn-success btn-sm"
+          type="primary"
+          onClick={showModal}
+        >
+          Add Prescription
+        </Button>
+        <PrescriptionForm onCancel={closeModal} />
+      </div>
     </Layout>
-    
-
   );
 };
 

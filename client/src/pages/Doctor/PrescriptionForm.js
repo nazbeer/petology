@@ -121,7 +121,11 @@ const PrescriptionForm = ({
       </Form.Item>
 
       <Form.Item>
-        <Button type="primary" htmlType="submit">
+        <Button
+          className="btn btn-success btn-sm"
+          type="primary"
+          htmlType="submit"
+        >
           Add Prescription
         </Button>
       </Form.Item>

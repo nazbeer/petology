@@ -9,7 +9,7 @@ import { Form, Input, Button } from "antd";
 function AdminProfile() {
   const userId = useSelector((state) => state.auth.user);
   const [profileData, setProfileData] = useState({});
- const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     fetchProfileData();
@@ -18,11 +18,14 @@ function AdminProfile() {
   const fetchProfileData = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`/api/admin/get-admin-profile/${userId}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
+      const response = await axios.get(
+        `/api/admin/get-admin-profile/${userId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
       console.log(response);
       setLoading(false);
       if (response.data.success) {
@@ -68,11 +71,12 @@ function AdminProfile() {
     <Layout>
       <div className="col-md-8 mx-auto">
         <h4 className="mb-4">Admin Profile</h4>
-        <Form name="profile"  labelCol={{ span: 4 }} // Adjust the span value as needed
+        <Form
+          name="profile"
+          labelCol={{ span: 4 }} // Adjust the span value as needed
           wrapperCol={{ span: 12 }}
-        // initialValues={profileData} onFinish={onFinish}
+          // initialValues={profileData} onFinish={onFinish}
         >
-           
           <Form.Item label="First Name" name="firstName">
             <Input disabled />
           </Form.Item>
@@ -82,14 +86,22 @@ function AdminProfile() {
           <Form.Item label="Email" name="email">
             <Input disabled />
           </Form.Item>
-          <Form.Item label="New Password" name="newPassword" style={{border:'0px'}}>
+          <Form.Item
+            label="New Password"
+            name="newPassword"
+            style={{ border: "0px" }}
+          >
             <Input.Password />
           </Form.Item>
           <Form.Item label="Confirm Password" name="confirmPassword">
             <Input.Password />
           </Form.Item>
           <Form.Item>
-            <Button type="primary" htmlType="submit" >
+            <Button
+              className="btn btn-success btn-sm"
+              type="primary"
+              htmlType="submit"
+            >
               Reset Password
             </Button>
           </Form.Item>

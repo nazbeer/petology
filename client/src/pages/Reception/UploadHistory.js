@@ -44,60 +44,73 @@ const UploadHistory = () => {
     fetchHistoryRecords(userId);
   };
   const renderFile = (path) => {
-    const ext = path.split('.').pop().toLowerCase();
+    const ext = path.split(".").pop().toLowerCase();
     console.log(path);
     // If it's an image
-    if (['jpg', 'jpeg', 'png', 'gif'].includes(ext)) {
-      return <img src={path} alt="Uploaded" style={{ width: '100px', height: 'auto' }} />;
+    if (["jpg", "jpeg", "png", "gif"].includes(ext)) {
+      return (
+        <img
+          src={path}
+          alt="Uploaded"
+          style={{ width: "100px", height: "auto" }}
+        />
+      );
     }
     // If it's a PDF
-    if (ext === 'pdf') {
+    if (ext === "pdf") {
       return <iframe src={path} width="100px" height="100px"></iframe>;
     }
     // For .doc or .docx
-    if (['doc', 'docx'].includes(ext)) {
+    if (["doc", "docx"].includes(ext)) {
       return (
-        <iframe 
-          src={`https://docs.google.com/viewer?url=${path}&embedded=true`} 
-          width="100px" 
-          height="100px" 
+        <iframe
+          src={`https://docs.google.com/viewer?url=${path}&embedded=true`}
+          width="100px"
+          height="100px"
           frameBorder="0"
         ></iframe>
       );
     }
     // Add other file types if needed
-  //  console.log(path);
-    return <a href={path} target="_blank" rel="noreferrer">Open File</a>;
-  }
-  
+    //  console.log(path);
+    return (
+      <a href={path} target="_blank" rel="noreferrer">
+        Open File
+      </a>
+    );
+  };
+
   const handleUpload = async () => {
     try {
-        const formData = new FormData();
-        fileList.forEach((file) => {
-            formData.append("files", file.originFileObj);
-        });
+      const formData = new FormData();
+      fileList.forEach((file) => {
+        formData.append("files", file.originFileObj);
+      });
 
-        const response = await axios.post(`/api/admin/upload-history/${selecteduser}`, formData, {
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem("token")}`,
-                "Content-Type": "multipart/form-data",
-            },
-        });
-        console.log('react:', response);
-     
-        if (response.data.success) {
-            message.success("Upload successful");
-            setUploadModalVisible(false);
-            fetchHistoryRecords(selecteduser);
-        } else {
-            message.error("Upload failed");
+      const response = await axios.post(
+        `/api/admin/upload-history/${selecteduser}`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            "Content-Type": "multipart/form-data",
+          },
         }
-    } catch (error) {
-        console.error("Error uploading files:", error);
-        message.error("Error uploading files");
-    }
-};
+      );
+      console.log("react:", response);
 
+      if (response.data.success) {
+        message.success("Upload successful");
+        setUploadModalVisible(false);
+        fetchHistoryRecords(selecteduser);
+      } else {
+        message.error("Upload failed");
+      }
+    } catch (error) {
+      console.error("Error uploading files:", error);
+      message.error("Error uploading files");
+    }
+  };
 
   const handleDelete = async (recordId) => {
     // Implement the logic to delete a user history record
@@ -113,90 +126,95 @@ const UploadHistory = () => {
       console.error("Error deleting record:", error);
     }
   };
- 
+
   const columns = [
     // Define columns for the history records table
     // You can have columns like "Date", "Description", "Actions", etc.
     {
-        title: "ID",
-        dataIndex: "_id",
+      title: "ID",
+      dataIndex: "_id",
     },
     {
       title: "Patient History",
       dataIndex: "documentPath",
-     render: (path) => renderFile(path),
-    }
+      render: (path) => renderFile(path),
+    },
   ];
 
   return (
     <Layout>
-    <div className="card mb-4">
+      <div className="card mb-4">
         <div className="card-header">
-      <h5  className="mb-0">Select User and Upload History</h5>
-      </div>
-      <div className="card-body">
-        <div className="col-md-4 d-lg-flex justify-content-evenly gap-3 align-items-center">
-      <select className="form-control"
-        onChange={(e) => handleViewHistory(e.target.value)}
-        value={selecteduser}
-      >
-        <option value="">Select a user</option>
-        {users.map((user) => (
-          <option key={user._id} value={user._id}>
-            {user.name} ({user._id})
-          </option>
-        ))}
-      </select>
+          <h5 className="mb-0">Select User and Upload History</h5>
+        </div>
+        <div className="card-body">
+          <div className="col-md-4 d-lg-flex justify-content-evenly gap-3 align-items-center">
+            <select
+              className="form-control"
+              onChange={(e) => handleViewHistory(e.target.value)}
+              value={selecteduser}
+            >
+              <option value="">Select a user</option>
+              {users.map((user) => (
+                <option key={user._id} value={user._id}>
+                  {user.name} ({user._id})
+                </option>
+              ))}
+            </select>
 
-      <Button
-        type="primary"
-        onClick={() => setUploadModalVisible(true)}
-        disabled={!selecteduser}
-      >
-        <UploadOutlined /> Upload History
-      </Button>
+            <Button
+              className="btn btn-success btn-sm"
+              type="primary"
+              onClick={() => setUploadModalVisible(true)}
+              disabled={!selecteduser}
+            >
+              <UploadOutlined /> Upload History
+            </Button>
+          </div>
+        </div>
       </div>
-      </div>
-      
-    </div>
-    <div className="card ">
+      <div className="card ">
         <div className="card-header">
-            <h5 className="mb-0">Uploaded Records</h5>
+          <h5 className="mb-0">Uploaded Records</h5>
         </div>
         <div className="card-body p-2">
-    <Table
-        columns={columns}
-        dataSource={historyRecords}
-        rowKey="_id"
-        pagination={false}
-        style={{padding:'0px'}}
-      />
-     
+          <Table
+            columns={columns}
+            dataSource={historyRecords}
+            rowKey="_id"
+            pagination={false}
+            style={{ padding: "0px" }}
+          />
 
-      <Modal
-        title="Upload user History"
-        visible={uploadModalVisible}
-        onCancel={() => setUploadModalVisible(false)}
-        footer={[
-          <Button key="cancel" onClick={() => setUploadModalVisible(false)}>
-            Cancel
-          </Button>,
-          <Button key="upload" type="primary" onClick={handleUpload}>
-            Upload
-          </Button>,
-        ]}
-      >
-       <Upload.Dragger onChange={(info) => setFileList(info.fileList)}>
-          <p className="ant-upload-drag-icon">
-            <UploadOutlined />
-          </p>
-          <p className="ant-upload-text">
-            Click or drag files to this area to upload
-          </p>
-        </Upload.Dragger>
-      </Modal>
+          <Modal
+            title="Upload user History"
+            visible={uploadModalVisible}
+            onCancel={() => setUploadModalVisible(false)}
+            footer={[
+              <Button key="cancel" onClick={() => setUploadModalVisible(false)}>
+                Cancel
+              </Button>,
+              <Button
+                className="btn btn-success btn-sm"
+                key="upload"
+                type="primary"
+                onClick={handleUpload}
+              >
+                Upload
+              </Button>,
+            ]}
+          >
+            <Upload.Dragger onChange={(info) => setFileList(info.fileList)}>
+              <p className="ant-upload-drag-icon">
+                <UploadOutlined />
+              </p>
+              <p className="ant-upload-text">
+                Click or drag files to this area to upload
+              </p>
+            </Upload.Dragger>
+          </Modal>
+        </div>
       </div>
-    </div>
     </Layout>
   );
 };

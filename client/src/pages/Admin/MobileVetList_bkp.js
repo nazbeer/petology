@@ -6,13 +6,12 @@ import axios from "axios";
 import { Table } from "antd";
 import { Button, Modal } from "react-bootstrap";
 import moment from "moment";
-import {toast} from 'react-hot-toast';
-import { Link } from 'react-router-dom';
+import { toast } from "react-hot-toast";
+import { Link } from "react-router-dom";
 import Geocode from "react-geocode"; // Import the Geocode library
 
 // Set your Google Maps API key here
-Geocode.setApiKey('AIzaSyAxdklbUsegbWsasCJpvfmin95xzIxiY3Y');
-
+Geocode.setApiKey("AIzaSyAxdklbUsegbWsasCJpvfmin95xzIxiY3Y");
 
 function MobileVetList(doctorId) {
   const [appointments, setAppointments] = useState([]);
@@ -25,25 +24,27 @@ function MobileVetList(doctorId) {
   //const [getAddress, getAddressFromCoordinates] = useState([]);
   const dispatch = useDispatch();
 
-  const changeOpenAppointmentStatus = async (record, status) =>{
-    try{
+  const changeOpenAppointmentStatus = async (record, status) => {
+    try {
       dispatch(showLoading());
-      const response = await axios.post(`/api/admin/change-open-appointment-status/${record._id}`,
-      {
-        status: status,
-      },
-      {
-        headers:{
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+      const response = await axios.post(
+        `/api/admin/change-open-appointment-status/${record._id}`,
+        {
+          status: status,
         },
-      });
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
       dispatch(hideLoading());
-      if(response.data.success){
+      if (response.data.success) {
         toast.success(response.data.message);
         getOpenAppointmentsData();
       }
-    } catch (error){
-     // toast.error("Error changing appointment status");
+    } catch (error) {
+      // toast.error("Error changing appointment status");
       dispatch(hideLoading());
     }
   };
@@ -68,11 +69,11 @@ function MobileVetList(doctorId) {
         getAppointmentsData();
       }
     } catch (error) {
-     // toast.error("Error changing appointment status");
+      // toast.error("Error changing appointment status");
       dispatch(hideLoading());
     }
   };
-  
+
   const handleShowModal = (record) => {
     setSelectedAppointment(record);
     setShowModal(true);
@@ -133,9 +134,8 @@ function MobileVetList(doctorId) {
           },
         }
       );
-        console.log(response);
+      console.log(response);
       if (response.data.success) {
-
         toast.success(response.data.message);
         getAppointmentsData();
         handleCloseModal();
@@ -144,7 +144,7 @@ function MobileVetList(doctorId) {
       toast.error("Error assigning doctor to appointment");
     }
   };
-  
+
   const getAppointmentsData = async () => {
     try {
       const response = await axios.get("/api/user/get-all-appointments", {
@@ -166,9 +166,9 @@ function MobileVetList(doctorId) {
     try {
       const response = await Geocode.fromLatLng(lat, lng);
       const address = response.results[0]?.formatted_address;
-     // console.log(address);
-     // return address;
-      if(response.results){
+      // console.log(address);
+      // return address;
+      if (response.results) {
         setAddress(response.results.formatted_address);
       }
     } catch (error) {
@@ -178,14 +178,15 @@ function MobileVetList(doctorId) {
   };
   const getOpenAppointmentsData = async (lat, lng) => {
     try {
-      const response = await axios.get("/api/admin/get-all-mobvet-appointments", 
-      {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      }
+      const response = await axios.get(
+        "/api/admin/get-all-mobvet-appointments",
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
       );
- 
+
       if (response.data.success) {
         setOpenAppointments(response.data.data);
       }
@@ -193,7 +194,7 @@ function MobileVetList(doctorId) {
       console.error(error);
     }
   };
-  
+
   useEffect(() => {
     // Fetch doctor details based on selected appointment
     const fetchDoctorDetails = async () => {
@@ -211,13 +212,11 @@ function MobileVetList(doctorId) {
         console.error(error);
       }
     };
-   
+
     fetchDoctorDetails();
-   
   }, [selectedAppointment]);
- 
+
   useEffect(() => {
-  
     getDoctorsData();
     getAppointmentsData();
     changeAppointmentStatus();
@@ -226,74 +225,56 @@ function MobileVetList(doctorId) {
     getOpenAppointmentsData();
   }, []);
 
-
-  
-
   const opencolumns = [
     {
-        title :"Appointment Date",
-        dataIndex  :'date',
-        render:(text, record)=>(
-          <span>
-            {moment(record.date).format('LL')}
-          </span>
-        )
-      },
-      {
-        title:"Appointment Time",
-        dataIndex:"time",
-        render:(text, record)=> (
-          <span>
-            {record.time}
-          </span>
-        )
-      },
-    {
-      title:"Doctor",
-      dataIndex:"doctor",
-      render:(text, record)=>(
-        <span className="text-capitalize">
-            {record.doctor}
-        </span>
-      )
+      title: "Appointment Date",
+      dataIndex: "date",
+      render: (text, record) => <span>{moment(record.date).format("LL")}</span>,
     },
     {
-        title:"Services Requested",
-        dataIndex: "service",
+      title: "Appointment Time",
+      dataIndex: "time",
+      render: (text, record) => <span>{record.time}</span>,
     },
     {
-      title:'Pet Details',
-      dataIndex : 'petdetails',
-      render:(text, record)=>(
+      title: "Doctor",
+      dataIndex: "doctor",
+      render: (text, record) => (
+        <span className="text-capitalize">{record.doctor}</span>
+      ),
+    },
+    {
+      title: "Services Requested",
+      dataIndex: "service",
+    },
+    {
+      title: "Pet Details",
+      dataIndex: "petdetails",
+      render: (text, record) => (
         <span>
-            {record.pet} - {record.breed} ({record.size})
+          {record.pet} - {record.breed} ({record.size})
         </span>
-      )
+      ),
     },
     {
-        title:"Parent Name",
-        dataIndex:"parentName",
-        render :(text, record)=>(
-          <span className="text-capitalize">{record.firstname} {record.lastname}</span>
-        ),
-       
-      },
+      title: "Parent Name",
+      dataIndex: "parentName",
+      render: (text, record) => (
+        <span className="text-capitalize">
+          {record.firstname} {record.lastname}
+        </span>
+      ),
+    },
 
-    
-   
     {
-      title:'Mobile',
-      dataIndex:'mobile',
-      render:(text,record)=>(
-        <span>{record.mobile}</span>
-      )
+      title: "Mobile",
+      dataIndex: "mobile",
+      render: (text, record) => <span>{record.mobile}</span>,
     },
     {
-      title:'Email Address',
-      dataIndex: 'email',
-      render:(text, record)=>(
-        <span>{record.email}</span>
-      )
+      title: "Email Address",
+      dataIndex: "email",
+      render: (text, record) => <span>{record.email}</span>,
     },
 
     {
@@ -302,9 +283,9 @@ function MobileVetList(doctorId) {
       // render:(text, record)=>(
       //   <span>{record.lng} {record.lat}</span>
       // )
-    
+
       render: async (text, record) => {
-       <span> {record.lat}</span>
+        <span> {record.lat}</span>;
         if (record.lat && record.lng) {
           const address = await getAddressFromCoordinates(
             record.latitude,
@@ -317,18 +298,20 @@ function MobileVetList(doctorId) {
       },
     },
     {
-      title:'Status',
-      dataIndex:"status",
-      render:(text, record)=>(
+      title: "Status",
+      dataIndex: "status",
+      render: (text, record) => (
         <span className="text-capitalize">{record.status}</span>
-      )
+      ),
     },
     {
       title: "Actions",
       dataIndex: "actions",
       render: (text, record) => (
         <div className="d-flex justify-content-evenly align-items-center gap-3">
-          {record.status === "pending" || record.status === "Pending" || record.status === "blocked" ? (
+          {record.status === "pending" ||
+          record.status === "Pending" ||
+          record.status === "blocked" ? (
             <button
               type="button"
               className="btn btn-warning btn-sm text-capitalize"
@@ -345,49 +328,36 @@ function MobileVetList(doctorId) {
               Cancel
             </button>
           )}
-    
         </div>
       ),
     },
-    
-
-  ]
+  ];
   const usercolumns = [
-
     {
       title: "Parent Name",
       dataIndex: "parentname",
-      render: (text, record) => (
-        <span>
-          {record.userInfo.name}
-        </span>
-      ),
+      render: (text, record) => <span>{record.userInfo.name}</span>,
     },
     {
       title: "Doctor",
       dataIndex: "name",
       render: (text, record) => (
         <span>
-          {record.doctorInfo.name || record.doctorInfo.firstName + " " + record.doctorInfo.lastName}
+          {record.doctorInfo.name ||
+            record.doctorInfo.firstName + " " + record.doctorInfo.lastName}
         </span>
       ),
     },
- 
+
     {
       title: "Specialization",
       dataIndex: "specialization",
-      render: (text, record) => (
-        <span>
-          {record.doctorInfo.specialization}
-        </span>
-      ),
+      render: (text, record) => <span>{record.doctorInfo.specialization}</span>,
     },
     {
-      title:"Booking Location",
-      dataIndex:"location",
-      render:(text, record)=>(
-        <span>{record.lat}</span>
-      )
+      title: "Booking Location",
+      dataIndex: "location",
+      render: (text, record) => <span>{record.lat}</span>,
     },
     // {
     //   title: "Appointment Location",
@@ -407,130 +377,154 @@ function MobileVetList(doctorId) {
     {
       title: "Date",
       dataIndex: "date",
-      render:(text, record)=>(
-        <span>
-          {moment(record.date).format('LL')}
-        </span>
-      )
+      render: (text, record) => <span>{moment(record.date).format("LL")}</span>,
     },
     {
       title: "Time",
       dataIndex: "time",
-      render:(text, record)=>(
-        <span>
-          {moment(record.time).format('LTS')}
-        </span>
-      )
+      render: (text, record) => (
+        <span>{moment(record.time).format("LTS")}</span>
+      ),
     },
-   {
-    title: "Status",
-    dataIndex: "status",
-    render:(text, record) =>(
-      <span className="text-capitalize">{record.status}</span>
-    )
-   },
+    {
+      title: "Status",
+      dataIndex: "status",
+      render: (text, record) => (
+        <span className="text-capitalize">{record.status}</span>
+      ),
+    },
 
-      {
-        title: "Actions",
-        dataIndex: "actions",
-        render: (text, record) => (
-          <div className="d-flex justify-content-evenly align-items-center gap-3">
-            {record.status === "pending" || record.status === "Pending" || record.status === "blocked" ? (
-              <button
-                type="button"
-                className="btn btn-warning btn-sm text-capitalize"
-                onClick={() => changeAppointmentStatus(record, "approved")}
-              >
-                Approve
-              </button>
-            ) : (
-              <button
-                type="button"
-                className="btn btn-danger btn-sm text-capitalize"
-                onClick={() => changeAppointmentStatus(record, "blocked")}
-              >
-                Cancelled
-              </button>
-            )}
-          
-          </div>
-        ),
-      },
-    
-    
+    {
+      title: "Actions",
+      dataIndex: "actions",
+      render: (text, record) => (
+        <div className="d-flex justify-content-evenly align-items-center gap-3">
+          {record.status === "pending" ||
+          record.status === "Pending" ||
+          record.status === "blocked" ? (
+            <button
+              type="button"
+              className="btn btn-warning btn-sm text-capitalize"
+              onClick={() => changeAppointmentStatus(record, "approved")}
+            >
+              Approve
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="btn btn-danger btn-sm text-capitalize"
+              onClick={() => changeAppointmentStatus(record, "blocked")}
+            >
+              Cancelled
+            </button>
+          )}
+        </div>
+      ),
+    },
   ];
 
   return (
     <Layout>
       <div className="col-md-12">
         <div className="row d-fixed d-lg-flex justify-content-between align-items-center">
-        <div className="col-md-6  d-lg-flex gap-3 justify-content-right align-items-center">
-      <h6 className="page-header mb-0">Appointments List</h6>
-      </div>
-      <div className="col-md-6 d-lg-flex gap-3 justify-content-end align-items-center">
-       <Link to="/admin/appointmentlist"><button className="btn btn-warning btn-sm" type="button">Veterinary</button></Link>
-        <Link to="/admin/groominglist"><button className="btn btn-warning btn-sm" type="button">Grooming</button></Link>
-        <Link to="/admin/mobilevetlist"><button className="btn btn-success btn-sm" type="button">Mobile Vet</button></Link>
-        <Link to="/admin/mobilegroominglist"><button className="btn btn-warning btn-sm" type="button">Mobile Grooming</button></Link>
-      </div>
-      </div>
-      <hr />
-      <Table columns={usercolumns} dataSource={appointments}/>
-      <div>
-      <Modal show={showModal} onHide={handleCloseModal} size="lg">
-      <Modal.Header closeButton>
-            <Modal.Title>
-              <div className="d-lg-flex justify-content-between align-items-center">
-                <span>Appointment Details</span>
-                {/* {selectedAppointment && selectedAppointment._id} */}
+          <div className="col-md-6  d-lg-flex gap-3 justify-content-right align-items-center">
+            <h6 className="page-header mb-0">Appointments List</h6>
+          </div>
+          <div className="col-md-6 d-lg-flex gap-3 justify-content-end align-items-center">
+            <Link to="/admin/appointmentlist">
+              <button className="btn btn-warning btn-sm" type="button">
+                Veterinary
+              </button>
+            </Link>
+            <Link to="/admin/groominglist">
+              <button className="btn btn-warning btn-sm" type="button">
+                Grooming
+              </button>
+            </Link>
+            <Link to="/admin/mobilevetlist">
+              <button className="btn btn-success btn-sm" type="button">
+                Mobile Vet
+              </button>
+            </Link>
+            <Link to="/admin/mobilegroominglist">
+              <button className="btn btn-warning btn-sm" type="button">
+                Mobile Grooming
+              </button>
+            </Link>
+          </div>
+        </div>
+        <hr />
+        <Table columns={usercolumns} dataSource={appointments} />
+        <div>
+          <Modal show={showModal} onHide={handleCloseModal} size="lg">
+            <Modal.Header closeButton>
+              <Modal.Title>
+                <div className="d-lg-flex justify-content-between align-items-center">
+                  <span>Appointment Details</span>
+                  {/* {selectedAppointment && selectedAppointment._id} */}
+                </div>
+              </Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              <div className="col-md-12 ">
+                <div className="d-lg-flex justify-content-between align-items-center gap-4 mb-3">
+                  <label className="text-left">Parent Name: </label>
+                  <span className="text-right">
+                    {selectedAppointment &&
+                      selectedAppointment.userInfo.firstName}
+                  </span>
+                </div>
+                <div className="d-lg-flex justify-content-between align-items-center gap-4 mb-3">
+                  <label className="text-left">Assign Doctor: </label>
+                  <span className="text-right">
+                    {" "}
+                    <select className="form-control">
+                      <option>--Select Doctor--</option>
+                      {selectedAppointment &&
+                        Array.from(
+                          new Set(doctors.map((doctor) => doctor._id))
+                        ).map((doctorId) => {
+                          const doctor = doctors.find(
+                            (doc) => doc._id === doctorId
+                          );
+                          return (
+                            <option key={doctor._id} value={doctor._id}>
+                              Dr. {doctor.firstName} {doctor.lastName}
+                            </option>
+                          );
+                        })}
+                    </select>
+                  </span>
+                </div>
+                <div className="d-lg-flex justify-content-between align-items-center gap-4  ">
+                  <label className="text-left">Doctor Specialization: </label>
+                  <span className="text-right">
+                    {selectedAppointment &&
+                      selectedAppointment.doctorInfo.specialization}
+                  </span>
+                </div>
               </div>
-            </Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            <div className="col-md-12 ">
-           <div className="d-lg-flex justify-content-between align-items-center gap-4 mb-3" >
-            <label className="text-left">Parent Name: </label> 
-            <span className="text-right">{selectedAppointment && selectedAppointment.userInfo.firstName}</span>
-            </div> 
-            <div className="d-lg-flex justify-content-between align-items-center gap-4 mb-3" >
-            <label className="text-left">Assign Doctor: </label> 
-            <span className="text-right"> <select className="form-control">
-              <option>--Select Doctor--</option>
-              {
-                selectedAppointment &&
-                Array.from(new Set(doctors.map((doctor) => doctor._id))).map((doctorId) => {
-                    const doctor = doctors.find((doc) => doc._id === doctorId);
-                    return (
-                    <option key={doctor._id} value={doctor._id}>
-                        Dr. {doctor.firstName} {doctor.lastName}
-                    </option>
-                    );
-                })
-                }
-              
-            </select></span>
-            </div> 
-            <div className="d-lg-flex justify-content-between align-items-center gap-4  " >
-            <label className="text-left">Doctor Specialization: </label> 
-            <span className="text-right">{selectedAppointment && selectedAppointment.doctorInfo.specialization}</span>
-            </div> 
-           </div>
-          
-          </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={handleCloseModal}>
-            Close
-          </Button>
-          <Button variant="primary" onClick={assignDoctorToAppointment}>
-            Save Changes
-          </Button>
-        </Modal.Footer>
-      </Modal>
-      </div>
+            </Modal.Body>
+            <Modal.Footer>
+              <Button
+                className="btn btn-success btn-sm"
+                onClick={handleCloseModal}
+              >
+                Close
+              </Button>
+              <Button
+                className="btn btn-success btn-sm"
+                onClick={assignDoctorToAppointment}
+              >
+                Save Changes
+              </Button>
+            </Modal.Footer>
+          </Modal>
+        </div>
       </div>
       <div className="col-md-12">
         <h6>Open Appointment Lists</h6>
-        <Table columns={opencolumns} dataSource={openappointments}/>
+        <Table columns={opencolumns} dataSource={openappointments} />
       </div>
     </Layout>
   );

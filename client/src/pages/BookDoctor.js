@@ -230,7 +230,7 @@ function BookDoctor() {
 
                 {/* {isAvailable && ( */}
                   <Button
-                    className="primary-button mt-3 full-width-button"
+                    className="btn btn-success btn-sm mt-3 full-width-button"
                     onClick={bookNow}
                   >
                     Book Now

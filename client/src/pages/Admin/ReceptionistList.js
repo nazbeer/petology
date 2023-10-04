@@ -289,7 +289,8 @@ const ReceptionistList = () => {
           )}
           <button
             type="button"
-            className="btn btn-primary btn-sm text-capitalize"
+            className="btn btn-success btn-sm"
+
             onClick={() => openEditModal(record)}
           >
             edit
@@ -429,7 +430,7 @@ const ReceptionistList = () => {
             <div className="text-center mt-2">
               <button
                 type="submit"
-                className="btn btn-primary text-right btn-sm"
+                className="btn btn-success text-right btn-sm"
               >
                 Update reception Details
               </button>

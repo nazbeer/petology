@@ -432,7 +432,7 @@ function OfficeTimmings() {
         </div>
       </div>
       <div className="card mt-3">
-        <h4 className="m-3">Veterinary Office Timmings</h4>
+        <h4 className="m-3">Veterinary Office Timings</h4>
         <Table
           className="m-3"
           columns={columns}
@@ -441,7 +441,7 @@ function OfficeTimmings() {
           scroll={{ x: true }}
         />
 
-        <h4 className="m-3">Grooming Office Timmings</h4>
+        <h4 className="m-3">Grooming Office Timings</h4>
         <Table
           className="m-3"
           columns={columns}

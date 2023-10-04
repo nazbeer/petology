@@ -74,7 +74,7 @@ function Login() {
                 </Form.Item>
 
                 <Button
-                  className="primary-button my-2 full-width-button"
+                  className="btn btn-success btn-sm my-2 full-width-button"
                   htmlType="submit"
                 >
                   LOGIN
