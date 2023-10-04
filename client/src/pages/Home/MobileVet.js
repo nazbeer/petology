@@ -2,6 +2,8 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { toast } from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
+
 import Header from "../../frontend_components/Header";
 import Footer from "../../frontend_components/Footer";
 import {
@@ -14,6 +16,7 @@ import OfficeTimeCalculate from "../../components/OfficeTimeCalculate";
 
 const MobileVet = () => {
   // const [doctorList, setDoctorList] = useState([]);
+  const navigate = useNavigate();
   const [time, setTime] = useState([]);
   const [autocomplete, setAutocomplete] = useState(null);
   const [location, setLocation] = useState({ lat: 25.2048, lng: 55.2708 });
@@ -111,9 +114,16 @@ const MobileVet = () => {
       console.log("New appointment successfully saved:", response.data.data);
       if (response.data.success) {
         toast.success(response.data.message);
-        //navigate('/appointments');
+        const appointments = response.data.data;
+        if (appointments?.paytab?.redirect_url) {
+          localStorage.setItem("transId", appointments?.paytab?.tran_ref);
+          window.location.href = appointments?.paytab?.redirect_url;
+        } else {
+          navigate("/payment-decline", {
+            state: { service, appointments },
+          });
+        }
       }
-      // Do something with the response, like showing a success message
     } catch (error) {
       toast.error(error.response.data.message);
       //dispatch(hideLoading());

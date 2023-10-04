@@ -315,6 +315,7 @@ function Layout({ children }) {
               onClick={() => {
                 localStorage.clear('token');
                 localStorage.clear('userId');
+                localStorage.clear('transId');
                 navigate("/login");
                 window.location.reload()
               }}

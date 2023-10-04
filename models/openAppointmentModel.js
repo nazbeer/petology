@@ -69,11 +69,9 @@ const openappointmentSchema = new mongoose.Schema(
     },
     lat: {
       type: String,
-      required: true,
     },
     lng: {
       type: String,
-      required: true,
     },
   },
   {
