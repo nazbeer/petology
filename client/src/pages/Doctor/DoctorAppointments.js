@@ -299,6 +299,7 @@ function DoctorAppointments() {
     try {
       const response = await axios.get(`/api/admin/history/${userId}`);
       if (response.data.success) {
+        console.log(response.data.data);
         setHistoryRecords(response.data.data);
       }
     } catch (error) {
@@ -351,6 +352,16 @@ function DoctorAppointments() {
     {
       title: "ID",
       dataIndex: "_id",
+    },
+    {
+      title: "User Name",
+      dataIndex: "username",
+      render: (text, record) => <p>{record?.user.name}</p>,
+    },
+    {
+      title: "Pet Name",
+      dataIndex: "petName",
+      render: (text, record) => <p>{record?.pet.petName}</p>,
     },
     {
       title: "Patient History",

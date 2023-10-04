@@ -8,7 +8,7 @@ const paymentSchema = new mongoose.Schema(
 
     amount: { type: Number, required: true },
     openAppointment: { type: Boolean, required: false, default: false },
-
+    transactionId: { type: String, required: true },
     status: {
       type: String,
       enum: ["success", "declined", "UNPAID"],

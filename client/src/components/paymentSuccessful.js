@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Layout from "./Layout";
 import { useLocation } from "react-router-dom";
+import axios from "axios";
 
 import success from "../images/success.png";
 import logo from "../images/logo-petology.png";
@@ -8,54 +9,42 @@ import logo from "../images/logo-petology.png";
 import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
 import { Document, Page, pdfjs } from "react-pdf";
 import opentype from "opentype.js";
-import * as fontkit from 'fontkit';
+import * as fontkit from "fontkit";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
 
 function PaymentSuccessful() {
   const { state } = useLocation();
-  const [font, setFonts] = useState('');
+  const [font, setFonts] = useState("");
   const [watermarkImage, setWatermarkImage] = useState(null);
   const [successImage, setSuccessImage] = useState(null);
 
-  const [textFields, setTextFields] = useState([
-    { label: "Payment Type", value: "Visa/Mastercard", fontSize: 14 },
-    { label: "Mobile", value: state?.service?.mobile, fontSize: 14 },
-    {
-      label: "Email",
-      value: state?.service?.email,
-      fontSize: 14,
-    },
-    {
-      label: "Appointment ID",
-      value: state?.appointments?.savedAppointment?._id,
-      fontSize: 14,
-      
-    },
-    {
-      label: "Amount Paid",
-      value: state?.appointments?.doctor?.feePerCunsultation || 80+ ' AED',
-      fontSize: 19,
-      fontStyle: "bold",
-      margin: 15,
-    },
-    {
-      label: "Transaction ID",
-      value: "249782984529865",
-      fontSize: 14,
-      margin: 20,
-      
-    },
-  ]);
+  const [data, setData] = useState({});
+
   //   const canvasRef = useRef(null);
   console.log(state);
   const img = new Image();
   img.src = logo;
   console.log(img.height);
 
-  
-
   useEffect(() => {
+    axios
+      .post(
+        `/api/user/get-payment`,
+        { id: "TST2327701764064" },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      )
+      .then((response) => {
+        console.log(response?.data?.data);
+        const userData = response?.data?.data;
+
+        setData(userData);
+      })
+      .catch((error) => console.error(error));
     const loadImage = async () => {
       try {
         const response = await fetch("../logo-petology.png");
@@ -89,8 +78,38 @@ function PaymentSuccessful() {
   }, []);
 
   const createPDF = async () => {
-
     try {
+      const textFields = [
+        {
+          label: "Payment Type",
+          value: `${data?.payment_info?.payment_method}/${data?.payment_info?.card_type}`,
+          fontSize: 14,
+        },
+        { label: "Mobile", value: data?.customer_details?.phone, fontSize: 14 },
+        {
+          label: "Email",
+          value: data?.customer_details?.email,
+          fontSize: 14,
+        },
+        {
+          label: "Appointment ID",
+          value: data?.cart_id,
+          fontSize: 14,
+        },
+        {
+          label: "Amount Paid",
+          value: `${data?.cart_amount} ${data?.cart_currency}`,
+          fontSize: 19,
+          fontStyle: "bold",
+          margin: 15,
+        },
+        {
+          label: "Transaction ID",
+          value: data?.tran_ref,
+          fontSize: 14,
+          margin: 20,
+        },
+      ];
       const pdfDoc = await PDFDocument.create();
       pdfDoc.registerFontkit(fontkit);
       const customFont = await pdfDoc.embedFont(font.toArrayBuffer());
@@ -120,7 +139,7 @@ function PaymentSuccessful() {
       page.drawImage(image, watermarkOptions);
 
       page.drawText("Payment Successful", {
-        x: centerX + 70 , // Adjust the X position as needed
+        x: centerX + 70, // Adjust the X position as needed
         y: pageHeight - 100, // Adjust the Y position as needed
         size: 30,
         color: rgb(0, 0.5, 0),
@@ -145,12 +164,12 @@ function PaymentSuccessful() {
           color: rgb(0.5, 0.5, 0.5),
         });
 
-        page.drawText(text?.value?.toString(), {
-          x: 400, // Adjust the X position as needed
+        page.drawText(text?.value ? text?.value?.toString() : "", {
+          x: 360, // Adjust the X position as needed
           y: textY - (text?.margin ? text?.margin : 0),
           size: text.fontSize,
           color: rgb(0, 0, 0),
-          right: 1
+          right: 1,
         });
       });
 
@@ -162,7 +181,7 @@ function PaymentSuccessful() {
       // Create a temporary link element to trigger the download
       const a = document.createElement("a");
       a.href = url;
-      a.download = `${state?.appointments?.savedAppointment?._id}.pdf`;
+      a.download = `${data?.cart_id}.pdf`;
       a.click();
 
       // Clean up
@@ -199,7 +218,10 @@ function PaymentSuccessful() {
                 </p>
               </div>
               <div className="col">
-                <p className="text-end mb-2">Visa/Mastercard</p>
+                <p className="text-end mb-2">
+                  {data?.payment_info?.payment_method}/
+                  {data?.payment_info?.card_type}
+                </p>
               </div>
             </div>
 
@@ -208,7 +230,7 @@ function PaymentSuccessful() {
                 <p className="text-start mb-2 text-black-50">Mobile</p>
               </div>
               <div className="col">
-                <p className="text-end mb-2">{state?.service?.mobile}</p>
+                <p className="text-end mb-2">{data?.customer_details?.phone}</p>
               </div>
             </div>
 
@@ -217,7 +239,7 @@ function PaymentSuccessful() {
                 <p className="text-start mb-2 text-black-50">Email</p>
               </div>
               <div className="col">
-                <p className="text-end mb-2">{state?.service?.email}</p>
+                <p className="text-end mb-2">{data?.customer_details?.email}</p>
               </div>
             </div>
 
@@ -226,9 +248,7 @@ function PaymentSuccessful() {
                 <p className="text-start mb-4 text-black-50">Appointment ID</p>
               </div>
               <div className="col">
-                <p className="text-end mb-4">
-                  {state?.appointments?.savedAppointment?._id}
-                </p>
+                <p className="text-end mb-4">{data?.cart_id}</p>
               </div>
             </div>
 
@@ -238,7 +258,7 @@ function PaymentSuccessful() {
               </div>
               <div className="col">
                 <p className="text-end mb-4 fw-bold">
-                  {state?.appointments?.payment?.amount} AED
+                  {data?.cart_amount} {data?.cart_currency}
                 </p>
               </div>
             </div>
@@ -248,16 +268,13 @@ function PaymentSuccessful() {
                 <p className="text-start text-black-50">Transaction ID</p>
               </div>
               <div className="col">
-                <p className="text-end">249782984529865</p>
+                <p className="text-end">{data?.tran_ref}</p>
               </div>
             </div>
             <div className="d-flex justify-content-center align-items-center  mt-4">
               <div className="row ">
                 <div className="col">
-                  <button
-                    onClick={createPDF}
-                    className="btn btn-success"
-                  >
+                  <button onClick={createPDF} className="btn btn-success">
                     Print
                   </button>
                 </div>

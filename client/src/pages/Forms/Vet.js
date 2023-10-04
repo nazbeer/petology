@@ -327,11 +327,14 @@ const Vet = () => {
         console.log(response?.data?.data);
         const appointments = response?.data?.data;
 
-        navigate("/user/payment-successful", {
-          state: { service, appointments },
-        });
-
-        // Do something else, like navigating to another page
+        if (appointments?.paytab?.redirect_url) {
+          localStorage.setItem("transId", appointments?.paytab?.tran_ref);
+          window.location.href = appointments?.paytab?.redirect_url;
+        } else {
+          navigate("/user/payment-decline", {
+            state: { service, appointments },
+          });
+        }
       }
     } catch (error) {
       console.log(error);

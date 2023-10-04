@@ -23,7 +23,6 @@ const WalkInBookingAdmin = () => {
     doctorId: "",
     breed: "",
     service: "",
-    package: "",
     age: "",
     petName: "",
     pet: "",
@@ -274,10 +273,14 @@ const WalkInBookingAdmin = () => {
         toast.success(response.data.message);
         const appointments = response?.data?.data;
 
-        navigate("/user/payment-successful", {
-          state: { service, appointments },
-        });
-        // Do something else, like navigating to another page
+        if (appointments?.paytab?.redirect_url) {
+          localStorage.setItem("transId", appointments?.paytab?.tran_ref);
+          window.location.href = appointments?.paytab?.redirect_url;
+        } else {
+          navigate("/user/payment-decline", {
+            state: { service, appointments },
+          });
+        }
       }
     } catch (error) {
       console.log(error);
@@ -316,11 +319,11 @@ const WalkInBookingAdmin = () => {
 
                 {service.module === "Veterinary" && (
                   <div className="mb-2">
-                    <label htmlFor="package">Choose Package: </label>
+                    <label htmlFor="service">Choose Package: </label>
                     <select
                       className="form-control"
-                      id="package"
-                      name="package"
+                      id="service"
+                      name="service"
                       onChange={handleChange}
                     >
                       <option>Select Package...</option>
@@ -436,12 +439,12 @@ const WalkInBookingAdmin = () => {
                       />
                     </div>
                     <div className="mb-2">
-                      <label htmlFor="Age">Age:</label>
+                      <label htmlFor="age">Age:</label>
                       <input
                         className="form-control"
                         type="text"
-                        id="Age"
-                        name="Age"
+                        id="age"
+                        name="age"
                         value={service.age}
                         onChange={handleChange}
                       />
