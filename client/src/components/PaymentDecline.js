@@ -238,14 +238,6 @@ function PaymentDecline() {
               </div>
             </div>
 
-            <div className="row">
-              <div className="col">
-                <p className="text-start text-black-50">Transaction ID</p>
-              </div>
-              <div className="col">
-                <p className="text-end">249782984529865</p>
-              </div>
-            </div>
             <div className="d-flex justify-content-center align-items-center  mt-4">
               <div className="row ">
                 <div className="col">

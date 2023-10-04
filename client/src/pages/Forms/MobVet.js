@@ -136,7 +136,7 @@ const MobVet = () => {
       })
       .catch((error) => console.error(error));
 
-      getOfficeTime()
+    getOfficeTime();
   }, []);
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -157,12 +157,15 @@ const MobVet = () => {
       if (response.data.success) {
         toast.success(response.data.message);
         const appointments = response?.data?.data;
-        navigate("/user/payment-successful", {
-          state: { service, appointments },
-        });
-        //navigate('/appointments');
+        if (appointments?.paytab?.redirect_url) {
+          localStorage.setItem("transId", appointments?.paytab?.tran_ref);
+          window.location.href = appointments?.paytab?.redirect_url;
+        } else {
+          navigate("/user/payment-decline", {
+            state: { service, appointments },
+          });
+        }
       }
-      // Do something with the response, like showing a success message
     } catch (error) {
       console.log(error);
       toast.error("Error in adding Mobile Veterinary Appointment.");
@@ -290,9 +293,12 @@ const MobVet = () => {
                   type="date"
                   id="date"
                   name="date"
-                  min={new Date().toISOString().split('T')[0]}
-                  max={(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)).toISOString().split('T')[0]}
-
+                  min={new Date().toISOString().split("T")[0]}
+                  max={
+                    new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+                      .toISOString()
+                      .split("T")[0]
+                  }
                   value={service.date}
                   onChange={handleChange}
                   required

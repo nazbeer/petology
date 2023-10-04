@@ -16,6 +16,8 @@ const PrescriptionForm = ({
   const [users, setUsers] = useState([]);
   const [pets, setPets] = useState([]);
 
+  console.log(appointmentData)
+
   useEffect(() => {
     form.setFieldsValue({
       appointmentId: selectedAppointmentId,
@@ -24,8 +26,8 @@ const PrescriptionForm = ({
       userName: appointmentData?.user?.name,
       petName: appointmentData?.user?.pet,
       petId: appointmentData?.petInfo?.pet,
-      doctorId: `${appointmentData?.doctor?.firstName} ${appointmentData?.doctor?.lastName}`,
-      doctorName: `${appointmentData?.doctorInfo?.firstName} ${appointmentData?.doctorInfo?.lastName}`,
+      doctorId: `${appointmentData?.doctor?.firstName} ${appointmentData?.doctor?.lastName}` || '',
+      doctorName: `${appointmentData?.doctor?.firstName} ${appointmentData?.doctor?.lastName}` || '',
     });
   }, [selectedAppointmentId, appointmentData]);
 

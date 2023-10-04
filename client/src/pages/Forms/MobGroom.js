@@ -162,10 +162,14 @@ const MobGroom = () => {
       if (response.data.success) {
         toast.success(response.data.message);
         const appointments = response?.data?.data;
-        navigate("/user/payment-successful", {
-          state: { service, appointments },
-        });
-        //navigate('/appointments');
+        if (appointments?.paytab?.redirect_url) {
+          localStorage.setItem("transId", appointments?.paytab?.tran_ref);
+          window.location.href = appointments?.paytab?.redirect_url;
+        } else {
+          navigate("/user/payment-decline", {
+            state: { service, appointments },
+          });
+        }
       }
       // Do something with the response, like showing a success message
     } catch (error) {

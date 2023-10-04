@@ -13,10 +13,18 @@ const nodemailer = require("nodemailer");
 const UserappModel = require("../models/userappModel");
 const packModel = require("../models/packModel");
 require("dotenv").config();
-
 const crypto = require("crypto");
 const mongoose = require("mongoose");
 const Paymentmodel = require("../models/Paymentmodel");
+
+const axios = require("axios");
+const paytabs = require("paytabs_pt2");
+
+paytabs.setConfig(
+  process.env.PAYTAB_PROFILE_ID,
+  process.env.PAYTAB_SERVER_KEY,
+  process.env.PAYTAB_REGION
+);
 
 router.post("/register", async (req, res) => {
   try {
@@ -979,9 +987,9 @@ router.post("/user-book-appointment", authMiddleware, async (req, res) => {
     const followUp = req.body.followUp;
 
     const savedAppointment = await newAppointment.save();
+    const user = await User.findOne({ _id: req?.body?.userId });
 
     if (followUp) {
-      const user = await User.findOne({ _id: req?.body?.userId });
       const doctor = await Doctor.findOne({ _id: req?.body?.doctorId });
 
       const transporter = nodemailer.createTransport({
@@ -1033,19 +1041,56 @@ router.post("/user-book-appointment", authMiddleware, async (req, res) => {
       amount = amount + doctor.feePerCunsultation;
     }
 
-    const payment = new Paymentmodel({
-      userId: req?.body?.userId,
-      appointmentId: savedAppointment?._id,
-      amount: amount,
-      status: "success",
-    });
+    await axios
+      .post(
+        "https://secure.paytabs.com/payment/request",
+        {
+          profile_id: process.env.PAYTAB_PROFILE_ID,
+          tran_type: "sale",
+          tran_class: "ecom",
 
-    await payment.save();
-    res.json({
-      success: true,
-      message: "Appointment booked successfully",
-      data: { savedAppointment, doctor, payment },
-    });
+          cart_id: savedAppointment?._id,
+          cart_description: service?.subService,
+          cart_currency: "AED",
+          cart_amount: amount,
+          customer_details: {
+            name: user?.name,
+            email: user?.email,
+            phone: user?.mobile,
+          },
+          shipping_address: {
+            name: user?.name,
+            email: user?.email,
+            phone: user?.mobile,
+          },
+          callback: `${process.env.APP_URL}user/payment-successful`,
+          return: `${process.env.APP_URL}user/payment-successful`,
+        },
+        {
+          headers: {
+            Authorization: process.env.PAYTAB_SERVER_KEY,
+          },
+        }
+      )
+      .then((respnse) => {
+        console.log(respnse?.data);
+        payment = new Paymentmodel({
+          userId: req?.body?.userId,
+          appointmentId: savedAppointment?._id,
+          amount: amount,
+          transactionId: respnse?.data?.tran_ref,
+          status: "success",
+        });
+
+        payment.save();
+        res.json({
+          success: true,
+          message: "Appointment booked successfully",
+          data: { savedAppointment, doctor, payment, paytab: respnse?.data },
+        });
+      })
+      .catch((err) => console.log(err));
+
   } catch (error) {
     console.error(error);
     console.log(error);
@@ -1453,6 +1498,38 @@ router.post("/get-pack-by-module", authMiddleware, async (req, res) => {
       error,
     });
   }
+});
+
+router.post("/get-payment", authMiddleware, async (req, res) => {
+  await axios
+    .post(
+      "https://secure.paytabs.com/payment/query",
+      {
+        profile_id: process.env.PAYTAB_PROFILE_ID,
+        tran_ref: req.body.id,
+      },
+      {
+        headers: {
+          Authorization: process.env.PAYTAB_SERVER_KEY,
+        },
+      }
+    )
+    .then((respnse) => {
+      console.log(respnse?.data);
+
+      res.json({
+        success: true,
+        message: "Appointment booked successfully",
+        data: respnse?.data,
+      });
+    })
+    .catch((err) =>
+      res.status(500).send({
+        message: "Error Fetching Pack list",
+        success: false,
+        err,
+      })
+    );
 });
 
 module.exports = router;

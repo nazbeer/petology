@@ -11,6 +11,17 @@ const UserappModel = require("../models/userappModel");
 //const { default: Appointments } = require("../client/src/pages/Appointments");
 //const { default: Appointments } = require("../client/src/pages/Appointments");
 
+const axios = require("axios");
+const paytabs = require("paytabs_pt2");
+const packModel = require("../models/packModel");
+const Paymentmodel = require("../models/Paymentmodel");
+
+paytabs.setConfig(
+  process.env.PAYTAB_PROFILE_ID,
+  process.env.PAYTAB_SERVER_KEY,
+  process.env.PAYTAB_REGION
+);
+
 router.get("/profile/:userId", authMiddleware, async (req, res) => {
   try {
     const { userId } = req.params;
@@ -343,7 +354,14 @@ router.post("/user-book-appointment", authMiddleware, async (req, res) => {
     const savedAppointment = await newAppointment.save();
 
     const user = await User.findOne({ _id: req?.body?.userId });
-    const doctor = await Doctor.findOne({ _id: req?.body?.doctorId });
+
+    const service = await packModel.findOne({ _id: req.body.service });
+    let amount = Number(service.price);
+    let doctor;
+    if (req.body.module === "veterinary") {
+      amount = amount + doctor.feePerCunsultation;
+      doctor = await Doctor.findOne({ _id: req?.body?.doctorId });
+    }
 
     const transporter = nodemailer.createTransport({
       host: "mailslurp.mx",
@@ -376,13 +394,63 @@ router.post("/user-book-appointment", authMiddleware, async (req, res) => {
       `,
     };
 
-    transporter.sendMail(mailOptions, (error, info) => {
-      if (error) {
-        console.log("Error sending email:", error);
-      } else {
-        console.log("Email sent:", info.response);
-      }
-    });
+    // transporter.sendMail(mailOptions, (error, info) => {
+    //   if (error) {
+    //     console.log("Error sending email:", error);
+    //   } else {
+    //     console.log("Email sent:", info.response);
+    //   }
+    // });
+
+    await axios
+      .post(
+        "https://secure.paytabs.com/payment/request",
+        {
+          profile_id: process.env.PAYTAB_PROFILE_ID,
+          tran_type: "sale",
+          tran_class: "ecom",
+
+          cart_id: savedAppointment?._id,
+          cart_description: service?.subService,
+          cart_currency: "AED",
+          cart_amount: amount,
+          customer_details: {
+            name: user?.name,
+            email: user?.email,
+            phone: user?.mobile,
+          },
+          shipping_address: {
+            name: user?.name,
+            email: user?.email,
+            phone: user?.mobile,
+          },
+          callback: `${process.env.APP_URL}user/payment-successful`,
+          return: `${process.env.APP_URL}user/payment-successful`,
+        },
+        {
+          headers: {
+            Authorization: process.env.PAYTAB_SERVER_KEY,
+          },
+        }
+      )
+      .then((respnse) => {
+        console.log(respnse?.data);
+        payment = new Paymentmodel({
+          userId: req?.body?.userId,
+          appointmentId: savedAppointment?._id,
+          amount: amount,
+          transactionId: respnse?.data?.tran_ref,
+          status: "success",
+        });
+
+        payment.save();
+        res.json({
+          success: true,
+          message: "Appointment booked successfully",
+          data: { savedAppointment, doctor, payment, paytab: respnse?.data },
+        });
+      })
+      .catch((err) => console.log(err));
 
     res.json({
       success: true,

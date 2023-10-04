@@ -497,24 +497,24 @@ router.get("/appointments-by-doctor-id", authMiddleware, async (req, res) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 });
-router.get("/get-appointment-by-id/:id", authMiddleware, async (req, res) => {
-  try {
-    const appointmentId = req.params.id;
+// router.get("/get-appointment-by-id/:id", authMiddleware, async (req, res) => {
+//   try {
+//     const appointmentId = req.params.id;
 
-    // Fetch the appointment by ID from the database
-    const appointment = await UserappModel.findById(appointmentId);
-    // console.log(appointment);
-    if (!appointment) {
-      return res
-        .status(404)
-        .json({ success: false, error: "Appointment not found" });
-    }
+//     // Fetch the appointment by ID from the database
+//     const appointment = await UserappModel.findById(appointmentId);
+//     // console.log(appointment);
+//     if (!appointment) {
+//       return res
+//         .status(404)
+//         .json({ success: false, error: "Appointment not found" });
+//     }
 
-    res.json({ success: true, data: appointment });
-  } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
-  }
-});
+//     res.json({ success: true, data: appointment });
+//   } catch (error) {
+//     res.status(500).json({ success: false, error: error.message });
+//   }
+// });
 
 router.post("/get-prescription-by-id", authMiddleware, async (req, res) => {
   try {

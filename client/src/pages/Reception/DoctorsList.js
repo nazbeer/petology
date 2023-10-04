@@ -550,6 +550,18 @@ function DoctorsList() {
     }
   };
 
+  function range(numbers) {
+    const result = [];
+
+    for (let i = 0; i <= 60; i++) {
+      if (!numbers.includes(i)) {
+        result.push(i);
+      }
+    }
+
+    return result;
+  }
+
   return (
     <Layout>
       <div className="d-flex justify-content-between align-items-center">
@@ -644,7 +656,11 @@ function DoctorsList() {
           className="mt-3 w-100"
           format={"HH:mm"}
           onChange={onChange}
-          showTime={{ format: "hh:mm A", use12Hours: true }}
+          showTime={{ format: 'hh:mm A', use12Hours:true }}
+          disabledTime={() => ({
+            disabledHours: () => [0, 1, 2, 3, 4, 5, 6, 7, 8, 23],
+            disabledMinutes: () => range([0, 15, 30, 45, 60]),
+          })}
           required
         />
         <div className="d-flex justify-content-end  mb-3 mt-3">
@@ -742,15 +758,10 @@ function DoctorsList() {
         width={800}
         className="d-flex justify-content-center align-items-center"
         footer={[
-          <Button
-            className="btn btn-success btn-sm"
-            key="back"
-            onClick={closeLeaveModal}
-          >
+          <Button key="back" onClick={closeLeaveModal}>
             Cancel
           </Button>,
           <Button
-            className="btn btn-success btn-sm"
             key="submit"
             type="primary"
             loading={leaveLoading}

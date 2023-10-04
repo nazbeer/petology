@@ -19,7 +19,7 @@
   "author": "Nasbeer",
   "license": "ISC",
   "dependencies": {
-    "axios": "^1.4.0",
+    "axios": "^1.5.1",
     "bcrypt": "^5.0.1",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.20.2",
@@ -33,6 +33,7 @@
     "mongoose-auto-increment": "^5.0.1",
     "multer": "^1.4.5-lts.1",
     "nodemailer": "^6.9.4",
-    "nodemon": "^2.0.16"
+    "nodemon": "^2.0.16",
+    "paytabs_pt2": "^2.0.8"
   }
 }
