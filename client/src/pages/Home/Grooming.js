@@ -2,6 +2,8 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { toast } from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
+
 import Header from "../../frontend_components/Header";
 import Footer from "../../frontend_components/Footer";
 import OfficeTimeCalculate from "../../components/OfficeTimeCalculate";
@@ -9,7 +11,7 @@ import OfficeTimeCalculate from "../../components/OfficeTimeCalculate";
 const Grooming = () => {
   const [time, setTime] = useState([]);
   const [packs, setPacks] = useState("");
-
+  const navigate = useNavigate();
   const [service, setService] = useState({
     module: "Grooming",
     service: "",
@@ -81,9 +83,16 @@ const Grooming = () => {
       //console.log('service saved successfully:', response.data);
       if (response.data.success) {
         toast.success(response.data.message);
-        //navigate('/appointments');
+        const appointments = response.data.data;
+        if (appointments?.paytab?.redirect_url) {
+          localStorage.setItem("transId", appointments?.paytab?.tran_ref);
+          window.location.href = appointments?.paytab?.redirect_url;
+        } else {
+          navigate("/payment-decline", {
+            state: { service, appointments },
+          });
+        }
       }
-      // Do something with the response, like showing a success message
     } catch (error) {
       toast.error(error.response.data.message);
       //dispatch(hideLoading());

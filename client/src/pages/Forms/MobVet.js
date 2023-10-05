@@ -11,6 +11,7 @@ import {
   Autocomplete,
 } from "@react-google-maps/api";
 import OfficeTimmings from "../../components/OfficeTimmings";
+import OfficeTimeCalculate from "../../components/OfficeTimeCalculate";
 const MobVet = () => {
   const [time, setTime] = useState([]);
   const [autocomplete, setAutocomplete] = useState(null);
@@ -67,7 +68,7 @@ const MobVet = () => {
     axios
       .post(
         "/api/admin/get-office-time",
-        { module: "vet" },
+        { module: "groom" },
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -80,18 +81,17 @@ const MobVet = () => {
           response?.data?.data?.endtime2,
           response?.data?.data?.break
         );
-        const data = OfficeTimmings(
+        const data = OfficeTimeCalculate(
           response?.data?.data?.starttime1,
           response?.data?.data?.endtime2,
           response?.data?.data?.break,
-          30
+          60
         );
 
         setTime(data);
       })
       .catch((error) => console.error(error));
   };
-
   useEffect(() => {
     // Fetch sub-services from your Express.js API
 

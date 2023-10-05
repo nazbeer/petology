@@ -18,6 +18,14 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const Paymentmodel = require("../models/Paymentmodel");
 const nodemailer = require("nodemailer");
+const axios = require("axios");
+const paytabs = require("paytabs_pt2");
+
+paytabs.setConfig(
+  process.env.PAYTAB_PROFILE_ID,
+  process.env.PAYTAB_SERVER_KEY,
+  process.env.PAYTAB_REGION
+);
 
 require("dotenv").config();
 router.get("/get-all-appointments", async (req, res) => {
@@ -177,15 +185,55 @@ router.post("/book-appointment", async (req, res) => {
       amount = amount + doctor?.feePerCunsultation;
     }
 
-    const payment = new Paymentmodel({
-      userId: newUser?._id,
-      appointmentId: savedAppointment?._id,
-      amount: amount,
-      status: "success",
-      openAppointment: true,
-    });
+    await axios
+      .post(
+        "https://secure.paytabs.com/payment/request",
+        {
+          profile_id: process.env.PAYTAB_PROFILE_ID,
+          tran_type: "sale",
+          tran_class: "ecom",
 
-    await payment.save();
+          cart_id: savedAppointment?._id,
+          cart_description: service?.subService,
+          cart_currency: "AED",
+          cart_amount: amount,
+          customer_details: {
+            name: newUser?.name,
+            email: newUser?.email,
+            phone: newUser?.mobile,
+          },
+          shipping_address: {
+            name: newUser?.name,
+            email: newUser?.email,
+            phone: newUser?.mobile,
+          },
+          callback: `${process.env.APP_URL}/payment-successful`,
+          return: `${process.env.APP_URL}/payment-successful`,
+        },
+        {
+          headers: {
+            Authorization: process.env.PAYTAB_SERVER_KEY,
+          },
+        }
+      )
+      .then((respnse) => {
+        console.log(respnse?.data);
+        payment = new Paymentmodel({
+          userId: req?.body?.userId,
+          appointmentId: savedAppointment?._id,
+          amount: amount,
+          transactionId: respnse?.data?.tran_ref,
+          status: "success",
+        });
+
+        payment.save();
+        res.json({
+          success: true,
+          message: "Appointment booked successfully",
+          data: { savedAppointment, payment, paytab: respnse?.data },
+        });
+      })
+      .catch((err) => console.log(err));
 
     const transporter = nodemailer.createTransport({
       host: "mailslurp.mx",

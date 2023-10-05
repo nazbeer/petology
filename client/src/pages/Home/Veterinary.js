@@ -4,6 +4,7 @@ import axios from "axios";
 import { toast } from "react-hot-toast";
 import Header from "../../frontend_components/Header";
 import Footer from "../../frontend_components/Footer";
+import { useNavigate } from "react-router-dom";
 
 import { showLoading, hideLoading } from "../../redux/alertsSlice";
 import { useDispatch } from "react-redux";
@@ -13,6 +14,7 @@ const Veterinary = () => {
   const [doctorList, setDoctorList] = useState([]);
   const [time, setTime] = useState([]);
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const [service, setService] = useState({
     module: "Veterinary",
@@ -207,7 +209,15 @@ const Veterinary = () => {
 
       if (response.data.success) {
         toast.success(response.data.message);
-        // Do something else, like navigating to another page
+        const appointments = response.data.data;
+        if (appointments?.paytab?.redirect_url) {
+          localStorage.setItem("transId", appointments?.paytab?.tran_ref);
+          window.location.href = appointments?.paytab?.redirect_url;
+        } else {
+          navigate("/payment-decline", {
+            state: { service, appointments },
+          });
+        }
       }
     } catch (error) {
       toast.error(error.response.data.message);

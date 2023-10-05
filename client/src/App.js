@@ -331,7 +331,7 @@ function App() {
             </ProtectedRoute>
           }
         />
-         <Route
+        <Route
           path="/admin/receptionistlist"
           element={
             <ProtectedRoute>
@@ -382,6 +382,8 @@ function App() {
           }
         />
 
+        <Route path="/payment-successful" element={<PaymentSuccessful />} />
+
         <Route
           path="/user/payment-decline"
           element={
@@ -407,6 +409,7 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route path="/payment-decline" element={<PaymentDecline />} />
 
         <Route
           path="/doctor/payment-successful"
